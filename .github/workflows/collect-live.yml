@@ -1,0 +1,32 @@
+name: 실시간 수급현황 저장
+
+on:
+  schedule:
+    - cron: "10 0,3,6,9,12 * * *"   # 한국시간 09·12·15·18·21시
+    - cron: "35 14 * * *"           # 한국시간 23:35 (하루 마감)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: commit-data
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/collect_kpx_live.py
+      - name: 저장소에 저장
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "실시간 수급현황 $(date -u +%F)" || exit 0
+          git pull --rebase
+          git push
