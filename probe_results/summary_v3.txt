@@ -1,0 +1,5 @@
+key_present: True  key_length: 64
+
+gen_20250115: status=400 length=190 preview='{\n  "OpenAPI_ServiceResponse": {\n    "cmmMsgHeader": {\n      "errMsg": "NO_OPENAPI_SERVICE_ERROR",\n      "returnAuthMsg": "해당 오픈API 서비스가 없거나 폐기됨",\n   '
+gen_20251015: status=400 length=190 preview='{\n  "OpenAPI_ServiceResponse": {\n    "cmmMsgHeader": {\n      "errMsg": "NO_OPENAPI_SERVICE_ERROR",\n      "returnAuthMsg": "해당 오픈API 서비스가 없거나 폐기됨",\n   '
+fuel_1000rows: status=200 length=143773 preview='{  "response" : {    "header" : {      "resultCode" : "00",      "resultMsg" : "OK"    },    "body" : {      "dataType" : "JSON",      "totalCount" : '

@@ -1,0 +1,9 @@
+{
+  "OpenAPI_ServiceResponse": {
+    "cmmMsgHeader": {
+      "errMsg": "NO_OPENAPI_SERVICE_ERROR",
+      "returnAuthMsg": "해당 오픈API 서비스가 없거나 폐기됨",
+      "returnReasonCode": "12"
+    }
+  }
+}
