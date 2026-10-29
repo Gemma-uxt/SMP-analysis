@@ -1,0 +1,19 @@
+2026-10-29 15:21 KST
+[fuel] 호출 29회, 총 28934줄 저장
+[smp] 빠진 날짜 666일, 이번 한도 700회
+[smp] 20260729 실패, 이번 실행 중단: HTTP 429: {
+  "OpenAPI_ServiceResponse": {
+    "cmmMsgHeader": {
+      "errMsg": "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
+      "returnAuthMsg": "일일 서비스 요청제한 횟수 초과 에러",
+      "returnReasonCode": "22"
+[smp] 저장 91일, 호출 91회, 남은 날짜 575일
+[gen] 빠진 날짜 666일, 이번 한도 90회
+[gen] 경고: 20261028 요청 결과에 해당 날짜가 안 보임. 샘플: [{"fuelPwr7": 0.021972, "fuelPwr8": 3285.32, "fuelPwr5": -425.014, "fuelPwr6": 20428.2, "fuelPwrTot": 70463.1, "baseDatetime": "20261029145000", "fuelPwr9": 1418.58, "rn": 1, "fuelPwr3": 26072.3, "fuelPwr4": 19343.4, "fuelPwr1": 153.758, "fuelPwr2": 186.21}, {"fuelPwr7": 0.021972, "fuelPwr8": 3276.6
+[gen] 20261027 실패, 이번 실행 중단: HTTP 429: {
+  "OpenAPI_ServiceResponse": {
+    "cmmMsgHeader": {
+      "errMsg": "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
+      "returnAuthMsg": "일일 서비스 요청제한 횟수 초과 에러",
+      "returnReasonCode": "22"
+[gen] 저장 1일, 호출 60회, 남은 날짜 665일
