@@ -1,18 +1,21 @@
-# API 연결 테스트용 스크립트 (키는 출력하지 않음)
-import datetime, os, pathlib, urllib.error, urllib.parse, urllib.request
+# API 연결 테스트 v2 (키는 출력하지 않음)
+import os, pathlib, urllib.error, urllib.parse, urllib.request
 
 KEY = os.environ.get("DATA_GO_KR_KEY", "").strip()
 OUT = pathlib.Path("probe_results")
 OUT.mkdir(exist_ok=True)
 BASE = "https://apis.data.go.kr/B552115"
 
-yesterday = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y%m%d")
-
 TESTS = [
-    ("smp_yesterday", "SmpWithForecastDemand/getSmpWithForecastDemand", {"date": yesterday}),
-    ("smp_20250115", "SmpWithForecastDemand/getSmpWithForecastDemand", {"date": "20250115"}),
+    # 발전원별 발전량 (재시도)
     ("gen_nodate", "PvAmountByPwrGen/getPvAmountByPwrGen", {}),
     ("gen_20250115", "PvAmountByPwrGen/getPvAmountByPwrGen", {"baseDate": "20250115"}),
+    # 연료원별 SMP 결정 - 기능 이름 후보 시도
+    ("fuel_a", "SmpDecByFuel2/getSmpDecByFuel2", {}),
+    ("fuel_b", "SmpDecByFuel2/getSmpDecByFuel", {}),
+    ("fuel_c", "SmpDecByFuel2/getSmpDecByFuel2List", {}),
+    ("fuel_d", "SmpDecByFuel2/getSmpDecByFuel2", {"date": "20250115"}),
+    ("fuel_e", "SmpDecByFuel2/getSmpDecByFuel2", {"baseDate": "20250115"}),
 ]
 
 def mask(text):
