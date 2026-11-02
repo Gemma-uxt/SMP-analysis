@@ -496,4 +496,126 @@ function r1(){const P=py(M),cS=cutOf(D.smp,M),cG=cutOf(D.gen,M),mo=moN(M);
     mkc(id+'c',{type:'bar',data:{labels:[lab(P),lab(M)],datasets:[{data:[b,a],backgroundColor:[C.slate,col],barPercentage:.6}]},
       options:{layout:{padding:{top:22}},plugins:{legend:{display:false},vLabel:{on:true,fmt:v=>f1(v)}},scales:{x:{grid:noGrid,border:{display:false}},y:{display:false,beginAtZero:true}}}})});
   const ms=monthsTo(M),rat=ms.map(m=>ratio(m,m===M?cS:null)),ok=rat.filter(x=>x!=null),isMin=q1!=null&&ok.length>1&&q1<=Math.min(...ok);
-  $('h1').textContent=`${mo}월 LNG 단가 ${sg(pc(g1,g0))}%에도 평일
+  $('h1').textContent=`${mo}월 LNG 단가 ${sg(pc(g1,g0))}%에도 평일SMP ${sg(pc(s1.v,s0.v))}% → SMP/LNG 비율 ${f1(q1)}${isMin?' (올해 최저)':''}`;
+  $('l1a').innerHTML=`평일 SMP <b>${f1(s0.v)}→${f1(s1.v)}원/kWh</b>, LNG <b>${f1(g0)}→${f1(g1)}원/㎥</b> · 비율 <b>${f1(q0)}→${f1(q1)}</b>`;
+  $('l1b').innerHTML=`평일 최대 계통수요 <b>${f1(p0)}→${f1(p1)}GW</b> · 평일 수 ${calWd(P,cS)}→${calWd(M,cS)}일`;
+  $('n1').textContent=`※ 평일 = 주말·공휴일 제외 · SMP: KPX 육지 시간별 · LNG: 한국가스공사 발전용(일반발전) · 계통수요: KPX 실시간 수급현황 · 갱신 ${D.updated}`;
+  const ms0=ms.map(py);
+  mkc('ov1c',{type:'line',data:{labels:ms.map(m=>moN(m)+'월'),datasets:[
+    {label:P.slice(0,4)+'년',data:ms0.map((m,i)=>ratio(m,ms[i]===M?cS:null)),borderColor:C.slate,backgroundColor:C.slate,borderWidth:3},
+    {label:M.slice(0,4)+'년',data:rat,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3}]},
+    options:{plugins:{vLabel:{on:true,fmt:v=>f1(v),size:13}},scales:{x:{grid:noGrid},y:{grid}}}})}
+
+/* --- 1-1 --- */
+function r11(){const cS=cutOf(D.smp,M),ms=monthsTo(M);
+  const lg=ms.map(m=>pc(D.gas[m],D.gas[py(m)])),sp=ms.map(m=>{const c=m===M?cS:null;return pc(smpWd(m,c).v,smpWd(py(m),c).v)}),rt=ms.map(m=>ratio(m,m===M?cS:null));
+  mkc('c11',{type:'bar',data:{labels:ms.map(m=>moN(m)+'월'+(m===M&&cS?'*':'')),datasets:[
+    {label:'LNG 단가 증감률(%)',data:lg,backgroundColor:C.amber,order:2},
+    {label:'평일 SMP 증감률(%)',data:sp,backgroundColor:C.navy,order:2},
+    {type:'line',label:M.slice(0,4)+'년 SMP/LNG 비율',data:rt,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,yAxisID:'y1',order:1}]},
+    options:{plugins:{hlBand:{idx:ms.length-1},vLabel:{on:true,only:[0,1],size:12,fmt:v=>f1(v)}},
+      scales:{x:{grid:noGrid},y:{grid,title:{display:true,text:'%'}},y1:{position:'right',grid:noGrid,title:{display:true,text:'비율'}}}}});
+  const i=ms.length-1;
+  $('h11').textContent=`${moN(M)}월 LNG 단가 전년 대비 ${sg(lg[i])}%, 평일 SMP ${sg(sp[i])}% → 차이 ${f1((lg[i]??0)-(sp[i]??0))}%p`;
+  $('b11').innerHTML=`<li>SMP/LNG 비율: 1월 <b>${f1(rt[0])}</b> → ${moN(M)}월 <b>${f1(rt[i])}</b></li>`;
+  $('n11').textContent=cS?`* ${moN(M)}월은 1~${cS}일 잠정, 전년도 같은 날짜까지 비교`:'※ 증감률 = 전년 같은 달 대비';
+  mkc('ov11c',{type:'bar',data:{labels:ms.map(m=>moN(m)+'월'),datasets:[
+    {label:'가스요금(원/㎥)',data:ms.map(m=>D.gas[m]),backgroundColor:C.slate,order:2},
+    {type:'line',label:'평일 평균 SMP(원/kWh)',data:ms.map(m=>smpWd(m,m===M?cS:null).v),borderColor:C.navy,backgroundColor:C.navy,borderWidth:3,yAxisID:'y1',order:1}]},
+    options:{plugins:{vLabel:{on:true,size:12,fmt:v=>f1(v)}},scales:{x:{grid:noGrid},y:{grid},y1:{position:'right',grid:noGrid}}}})}
+
+/* --- 2-1 --- */
+function r21(){const P=py(M),cG=cutOf(D.gen,M),ms=monthsTo(M);
+  const a=ms.map(m=>E(py(m),m===M?cG:null,MK)),b=ms.map(m=>E(m,m===M?cG:null,MK));
+  mkc('c21a',{type:'bar',data:{labels:ms.map(m=>moN(m)+'월'+(m===M&&cG?'*':'')),datasets:[
+    {label:P.slice(0,4)+'년',data:a,backgroundColor:C.slate},{label:M.slice(0,4)+'년',data:b,backgroundColor:ms.map(m=>m===M?C.ci:C.navy)}]},
+    options:{plugins:{hlBand:{idx:ms.length-1}},scales:{x:{grid:noGrid},y:{grid}}}});
+  const hr=m=>{const ds=days(D.dem,m,cG).filter(isWd);return [...Array(24)].map((_,h)=>{const v=avg(ds.map(d=>D.dem[d][h]));return v==null?null:v/1000})};
+  const h0=hr(P),h1=hr(M);
+  mkc('c21b',{type:'line',data:{labels:H24(),datasets:[
+    {label:P.slice(0,4)+'년 '+moN(M)+'월',data:h0,borderColor:C.slate,borderWidth:3,pointRadius:0},
+    {label:M.slice(0,4)+'년 '+moN(M)+'월',data:h1,borderColor:C.ci,borderWidth:3,pointRadius:0}]},
+    options:{scales:{x:{grid:noGrid},y:{grid}}}});
+  const i=ms.length-1,t0=avg(days(D.wx,P,cG).map(d=>D.wx[d].tmp)),t1=avg(days(D.wx,M,cG).map(d=>D.wx[d].tmp));
+  $('h21').textContent=`${moN(M)}월 계통수요 ${f1(a[i])}→${f1(b[i])}TWh(${sg(pc(b[i],a[i]))}%) · 평일 평균 ${f1(avg(h0))}→${f1(avg(h1))}GW`;
+  $('b21').innerHTML=`<li>평일 수 ${calWd(P,cG)}→${calWd(M,cG)}일 (주말·연휴 배치 차이)</li><li>서울 평균기온 ${f1(t0)}→${f1(t1)}℃ (냉난방 수요 영향)</li><li>평일 시간대별 수요 차이 최대 ${f1(Math.max(...h1.map((v,k)=>v!=null&&h0[k]!=null?Math.abs(v-h0[k]):0)))}GW</li>`}
+function H24(){return [...Array(24)].map((_,i)=>(i+1)+'시')}
+
+/* --- 2-2 --- */
+const SRC=[['원자력',['nuc']],['석탄',['coal']],['LNG',['lng']],['신재생(기타)',['renew','wind']],['태양광 계',SOL],['계통수요',MK]];
+function cell(a,b){const p=pc(b,a);return `<td class="r"><span class="${p>0?'up':'dn'}">${sg(p)}%</span><br><small style="color:var(--ink3)">${sg(b-a,2)}</small></td>`}
+function r22(){const cG=cutOf(D.gen,M),ms=monthsTo(M);
+  let h='<table class="t"><tr><th>월</th>'+SRC.map(s=>`<th class="r">${s[0]}</th>`).join('')+'</tr>';
+  ms.forEach(m=>{const c=m===M?cG:null;h+=`<tr class="${m===M?'hl':''}"><td class="rh">${moN(m)}월${c?'*':''}</td>`+SRC.map(s=>{const a=E(py(m),c,s[1]),b=E(m,c,s[1]);return a&&b?cell(a,b):'<td class="r">-</td>'}).join('')+'</tr>'});
+  $('t22w').innerHTML=h.replace('<table class="t">','<table class="t" style="font-size:14px">')+'</table>';
+  const so=[E(py(M),cG,SOL),E(M,cG,SOL)],lgE=[E(py(M),cG,['lng']),E(M,cG,['lng'])];
+  $('h22').textContent=`${moN(M)}월 태양광 ${sg(pc(so[1],so[0]))}%, LNG 발전 ${sg(pc(lgE[1],lgE[0]))}%`;
+  $('b22').innerHTML=`<li>태양광 계 ${f2(so[0])}→${f2(so[1])}TWh · LNG ${f2(lgE[0])}→${f2(lgE[1])}TWh</li>`;
+  const W=(m,k)=>avg(days(D.wx,m,cG).map(d=>D.wx[d][k])),R=[['일사량(MJ/㎡)','rad'],['운량(%)','cloud'],['강수량(mm/일)','prcp'],['일조(시간)','sun']];
+  $('w22').innerHTML='<table class="t" style="font-size:14px"><tr><th></th><th class="r">전년</th><th class="r">올해</th></tr>'+R.map(([n,k])=>`<tr><td class="rh">${n}</td><td class="r">${f1(W(py(M),k))}</td><td class="r">${f1(W(M,k))}</td></tr>`).join('')+'</table>';
+  const dr=pc(W(M,'rad'),W(py(M),'rad')),dp=W(M,'prcp')-W(py(M),'prcp');
+  $('x22').innerHTML=`일사량 <b>${sg(dr)}%</b>, 강수 ${sg(dp)}mm/일. ${dr>3?'맑은 날이 늘어 설비 증가분에 날씨 효과가 더해짐':'날씨 효과는 크지 않아 증가분은 주로 설비 확대(PPA·BTM 포함)로 추정'}`;
+  let c='<table class="t"><tr><th>구분</th><th class="r">전년(TWh)</th><th class="r">올해(TWh)</th><th class="r">증감</th></tr>';
+  SRC.forEach(([n,k])=>{const a=sum(ms.map(m=>E(py(m),m===M?cG:null,k))),b=sum(ms.map(m=>E(m,m===M?cG:null,k)));c+=`<tr><td class="rh">${n}</td><td class="r">${f1(a)}</td><td class="r">${f1(b)}</td>${cell(a,b)}</tr>`});
+  $('t22c').innerHTML=c+'</table>'}
+
+/* --- 2-3 --- */
+function r23(){const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.querySelectorAll('.cmT').forEach(e=>e.textContent=moN(m1));
+  const side=(m,L,cvs,strip,tt,st)=>{const ds=days(D.smp,m,cS).filter(isWd),labs=[],vals=[],fu=[];
+    ds.forEach(d=>D.smp[d].forEach((v,h)=>{labs.push(`${+d.slice(8)}일 ${h+1}시`);vals.push(v);fu.push(est(m,v))}));
+    $(tt).textContent=`${m.slice(0,4)}년 ${moN(m)}월 (평일 ${ds.length}일)`;
+    const cnt={};fu.forEach(e=>{const k=!e?'미추정':e.d>TOL?'불확실':e.f;cnt[k]=(cnt[k]||0)+1});
+    $(st).textContent=Object.entries(cnt).map(([k,n])=>`${k} ${Math.round(n/fu.length*100)}%`).join(' · ');
+    mkc(cvs,{type:'line',data:{labels:labs,datasets:[{data:vals,borderColor:L?C.slateD:C.ci,borderWidth:1.5,pointRadius:0}]},
+      options:{plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:c=>{const e=fu[c.dataIndex];return e?`${e.f} · ${e.n} ${e.p}원${e.d>TOL?' (추정 불확실)':''}`:''}}}},
+        scales:{x:{grid:noGrid,ticks:{maxTicksLimit:8}},y:{grid,min:yMin,max:yMax}}}});
+    mkc(strip,{type:'bar',data:{labels:labs,datasets:[{data:fu.map(()=>1),backgroundColor:fu.map(e=>!e?'#EEF1F5':e.d>TOL?'#D9DFE7':FUELC[e.f]),barPercentage:1,categoryPercentage:1}]},
+      options:{animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}})};
+  const all=[m0,m1].flatMap(m=>days(D.smp,m,cS).filter(isWd).flatMap(d=>D.smp[d])),yMin=Math.floor(Math.min(...all)/10)*10,yMax=Math.ceil(Math.max(...all)/10)*10;
+  side(m0,true,'c23L','c23sL','t23L','s23L');side(m1,false,'c23R','c23sR','t23R','s23R');
+  $('h23').textContent=`${moN(m1)}월 평일 SMP ${f1(smpWd(m0,cS).v)}→${f1(smpWd(m1,cS).v)}원/kWh · 아래 띠 = 추정 결정 연료(원전 navy·석탄 회색·LNG 파랑·유류 노랑)`;
+  $('n23').textContent=`※ ${meritNote()} · SMP와 가장 가까운 발전가격 발전기로 추정, 차이 ${TOL}원 초과 시 '불확실'`;
+  let t='<table class="t"><tr><th>월</th><th class="r">LNG</th><th class="r">석탄</th><th class="r">유류</th><th class="r">기타</th></tr>';
+  [m0,m1].forEach(m=>{const f=D.fuel[m]||{},s=sum(Object.values(f))||1;t+=`<tr><td class="rh">${lab(m)}</td>`+['LNG','석탄','유류','기타'].map(k=>`<td class="r">${f1((f[k]||0)/s*100)}%</td>`).join('')+'</tr>'});
+  $('t23').innerHTML=t+'</table>'}
+
+/* --- 3 기타 특이사항 --- */
+function r3(){const d=EVT;if(!d||!D.smp[d]){$('h3').textContent='대상일 자료 없음';return}
+  const m=d.slice(0,7),wd=days(D.smp,m).filter(x=>isWd(x)&&x!==d),i=wd.findIndex(x=>x>d),near=[wd[i-1],wd[i]].filter(Boolean);
+  const avH=(src,k)=>[...Array(24)].map((_,h)=>avg(near.map(x=>src[x]&&src[x][h])));
+  const sB=avH(D.smp),dm=D.dem[d]||[],dB=avH(D.dem),hd=D.hid[d]||[],hB=avH(D.hid);
+  mkc('c3a',{type:'line',data:{labels:H24(),datasets:[{label:d.slice(5),data:D.smp[d],borderColor:C.red,borderWidth:3,pointRadius:0},{label:'전후 평일 평균',data:sB,borderColor:C.slate,borderWidth:3,borderDash:[6,4],pointRadius:0}]},options:{scales:{x:{grid:noGrid},y:{grid}}}});
+  const g=a=>a.map(v=>v==null?null:v/1000);
+  mkc('c3b',{type:'line',data:{labels:H24(),datasets:[
+    {label:'계통수요',data:g(dm),borderColor:C.navy,borderWidth:3,pointRadius:0},{label:'계통수요(비교)',data:g(dB),borderColor:C.navy,borderDash:[6,4],pointRadius:0},
+    {label:'시장 외 태양광',data:g(hd),borderColor:C.amber,borderWidth:3,pointRadius:0},{label:'시장 외 태양광(비교)',data:g(hB),borderColor:C.amber,borderDash:[6,4],pointRadius:0}]},
+    options:{plugins:{legend:{labels:{font:{size:12}}}},scales:{x:{grid:noGrid},y:{grid}}}});
+  const day=a=>avg((a||[]).slice(10,17)),gn=D.gen[d]||{},nb=k=>avg(near.map(x=>D.gen[x]&&D.gen[x][k]));
+  const R=[['SMP(원/kWh)',day(D.smp[d]),day(sB),1],['계통수요(GW)',day(dm),day(dB),1e3],['시장 외 태양광(GW)',day(hd),day(hB),1e3],['원자력 평균(GW)',gn.nuc,nb('nuc'),1e3],['LNG 평균(GW)',gn.lng,nb('lng'),1e3]];
+  $('t3').innerHTML='<table class="t" style="font-size:14.5px"><tr><th></th><th class="r">당일</th><th class="r">비교</th></tr>'+R.map(([n,a,b,u])=>`<tr><td class="rh">${n}</td><td class="r">${f1(a/u)}</td><td class="r">${f1(b/u)}</td></tr>`).join('')+'</table>';
+  const ds=day(D.smp[d])-day(sB),dh=(day(hd)-day(hB))/1e3,dd=(day(dm)-day(dB))/1e3,dn=((gn.nuc||0)-(nb('nuc')||0))/1e3,w=D.wx[d];
+  $('h3').textContent=`${+m.slice(5)}월 ${+d.slice(8)}일 낮 SMP 전후 평일 대비 ${sg(ds)}원/kWh`;
+  $('x3').innerHTML=`<b>원인 분석:</b> 시장 외 태양광 ${sg(dh)}GW → 계통수요 ${sg(dd)}GW${w?` (일사량 ${f1(w.rad)}MJ/㎡, 강수 ${f1(w.prcp)}mm)`:''} · 원자력 ${sg(dn)}GW. `+
+    (dh<-2?'흐림·비로 시장 밖 태양광이 줄어 그만큼 시장 수요가 늘었고, 비싼 LNG가 가격을 결정한 것으로 판단':'뚜렷한 수요 요인이 없어 공급 측(발전기 정지 등) 요인 확인 필요')+
+    (d==='2026-10-13'?' · 같은 날 한울 5·6호기 원자로 정지 보도 있음':'');}
+
+/* --- 시작 --- */
+function safe(f){try{f()}catch(e){console.error(f.name,e)}}
+function renderAll(){document.querySelectorAll('.moT').forEach(e=>e.textContent=moN(M));document.querySelectorAll('.msT').forEach(e=>e.textContent=moN(M));
+  document.querySelectorAll('.per').forEach(e=>e.textContent=per(M,cutOf(D.smp,M)));[r0,r1,r11,r21,r22,r23,r3].forEach(safe)}
+fetch('data/summary.json?'+Date.now()).then(r=>r.json()).then(j=>{D=j;
+  const ms=[...new Set(Object.keys(D.smp).map(d=>d.slice(0,7)))].sort().filter(m=>D.smp[py(m)+'-01']||Object.keys(D.smp).some(d=>d.startsWith(py(m))));
+  if(!ms.length){$('h1').textContent='전년 비교 가능한 SMP 자료가 아직 없음';return}
+  M=ms[ms.length-1];CMP=M;
+  document.querySelectorAll('.sM').forEach(s=>{ms.forEach(m=>s.add(new Option(lab(m),m)));s.value=M;
+    s.onchange=()=>{M=s.value;CMP=M;$('sC').value=M;document.querySelectorAll('.sM').forEach(x=>x.value=M);fillE();renderAll()}});
+  ms.filter(m=>m.slice(0,4)===M.slice(0,4)).forEach(m=>$('sC').add(new Option(moN(m)+'월',m)));$('sC').value=M;
+  $('sC').onchange=()=>{CMP=$('sC').value;safe(r23)};
+  function fillE(){const s=$('sE');s.innerHTML='';const ds=days(D.smp,M).filter(isWd);ds.forEach(d=>s.add(new Option(d,d)));
+    EVT=ds.includes('2026-10-13')?'2026-10-13':ds.reduce((a,d)=>avg(D.smp[d])>avg(D.smp[a]||[0])?d:a,ds[0]);s.value=EVT}
+  fillE();$('sE').onchange=()=>{EVT=$('sE').value;safe(r3)};
+  renderAll()}).catch(e=>{$('h1').textContent='데이터 불러오기 실패: '+e.message});
+</script>
+</body>
+</html>
+
