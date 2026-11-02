@@ -238,7 +238,7 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
         <div class="sh"><span>평일 시간대별 <span id="t21b">계통수요</span> <small>GW · 평일 평균</small></span>
           <select id="dSel" style="font:inherit;font-size:14px;font-weight:500;padding:3px 6px;border:1.5px solid var(--navy);color:var(--navy)">
             <option value="tot">총수요</option><option value="sys" selected>계통수요</option>
-            <option value="xm">총수요 − 시장 태양광</option><option value="xa">총수요 − 모든 태양광(순부하)</option></select></div>
+            <option value="xa">총수요 − 모든 태양광</option></select></div>
         <div class="cv"><canvas id="c21b"></canvas></div>
         <div class="note" id="n21b">-</div>
       </div></div>
@@ -315,22 +315,15 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
   <div class="hd"><span class="pno">3</span><span class="pt">기타 특이사항</span>
     <span class="mo">대상일 <select id="sE"></select></span></div>
   <div class="msg" id="h3">-</div>
-  <div class="bd" style="padding-top:14px">
-    <div class="row f1">
-      <div class="card f1"><div class="cb">
-        <div class="sh"><span>시간대별 SMP</span><small>원/kWh · 전후 평일 비교</small></div>
-        <div class="cv"><canvas id="c3a"></canvas></div>
-      </div></div>
-      <div class="card f1"><div class="cb">
-        <div class="sh"><span>계통수요 · 시장 외 태양광</span><small>GW · 실선 당일 / 점선 전후 평일 평균</small></div>
-        <div class="cv"><canvas id="c3b"></canvas></div>
-      </div></div>
-      <div class="card" style="width:330px"><div class="cb">
-        <div class="sh"><span>낮(11~17시) 비교</span></div>
-        <div id="t3"></div>
-      </div></div>
+  <div class="bd" style="padding-top:12px;gap:10px">
+    <div class="card" style="flex:1;min-height:0"><div class="cb" style="padding:8px 16px;gap:4px">
+      <div class="sh"><span><span class="moT">-</span>월 평일 시간대별 SMP · 순부하</span><small>왼쪽 축 SMP(원/kWh) · 오른쪽 축 순부하(GW) · 붉은 음영 = 대상일</small></div>
+      <div class="cv"><canvas id="c3"></canvas></div>
+    </div></div>
+    <div class="row" style="height:200px">
+      <div class="bx f1" id="x3" style="font-size:15px;overflow:hidden">-</div>
+      <div class="card" style="width:400px"><div class="cb" style="padding:6px 12px"><div id="t3"></div></div></div>
     </div>
-    <div class="bx" id="x3">-</div>
   </div>
   <div class="ft"><span class="pg"></span></div>
 </section>
@@ -342,6 +335,7 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
   <select id="sel" aria-label="슬라이드 선택"></select>
   <button id="next" type="button">다음 ▶</button>
   <button id="print" type="button">PDF 만들기</button>
+  <button id="saveH" type="button">HTML 저장</button>
 </nav>
 
 <script>
@@ -477,18 +471,18 @@ async function readBook(file){const F=await unzip(await file.arrayBuffer());
     out.push({name:sh.getAttribute('name'),grid:g})}
   return out}
 function fuelOf(f,n){f=String(f||'').replace(/\s/g,'');n=String(n||'');
-  if(/원자력|원전/.test(f)||(!f&&/한빛|한울|고리|월성|새울|신한울|신고리|신월성/.test(n)))return '원전';
+  if(/원자력|원전|핵연료/.test(f)||(!f&&/한빛|한울|고리|월성|새울|신한울|신고리|신월성/.test(n)))return '원전';
   if(/도시가스/.test(f))return '도시가스';
   if(/부생|혼소/.test(f))return '기타';
   if(/탄/.test(f))return '석탄';
   if(/직도입|개별/.test(f))return 'LNG 개별·직도입';
-  if(/LNG|가스|평균|천연/i.test(f))return 'LNG 평균';
-  if(/유/.test(f))return '유류';
+  if(/LNG|가스|평균|집단|천연|KOGAS/i.test(f))return 'LNG 평균';
+  if(/유|LPG/i.test(f))return '유류';
   if(!f&&/복합|CC|GT|열병합/.test(n))return 'LNG 평균';
   return '기타'}
 const RX_NM=/발전기\s*명|^발전기$/,RX_PR=/발전\s*가격|변동비|발전\s*단가/,RX_FU=/연료|발전원|원별/,RX_MO=/^\s*(?:(20\d{2}|\d{2})\s*년\s*)?(\d{1,2})\s*월/;
-function parseMerit(book){const res={},T=v=>v==null?'':String(v).trim();
-  for(const sh of book){const g=sh.grid,sy=(sh.name.match(/(20\d{2}|\d{2})\s*년/)||[])[1],sm=(sh.name.match(/(\d{1,2})\s*월/)||[])[1];
+function parseMerit(book){const res={},pri={},src={},T=v=>v==null?'':String(v).trim();
+  for(const sh of book){const g=sh.grid,sy=(sh.name.match(/(20\d{2}|\d{2})\s*년/)||[])[1],sm=(sh.name.match(/(\d{1,2})\s*월/)||[])[1],part={};
     for(let r=0;r<g.length;r++){const row=g[r];if(!row)continue;
       for(let c=0;c<row.length;c++){if(!RX_NM.test(T(row[c])))continue;
         let pi=null,fc=null,fd=99;
@@ -501,25 +495,31 @@ function parseMerit(book){const res={},T=v=>v==null?'':String(v).trim();
             if(mm&&+mm[2]>=1&&+mm[2]<=12){const d=Math.abs(k-c);if(!best||d<best.d)best={d,mo:+mm[2],yr:mm[1]}}}
           if(best){mo=best.mo;yr=best.yr}}
         if(mo==null&&sm)mo=+sm;yr=yr||sy;if(mo==null||!yr)continue;
-        const key=`${yr.length===2?2000+ +yr:+yr}-${dd2(mo)}`,list=res[key]||(res[key]=[]),seen=new Set(list.map(x=>x[0]));let blank=0;
-        for(let rr=r+1;rr<g.length&&blank<3;rr++){const rw=g[rr]||[],nm=T(rw[c]);
+        const key=`${yr.length===2?2000+ +yr:+yr}-${dd2(mo)}`,list=part[key]||(part[key]=[]),seen=new Set(list.map(x=>x[0]));let blank=0;
+        for(let rr=r+1;rr<g.length&&blank<5;rr++){const rw=g[rr]||[],nm=T(rw[c]);
           if(RX_NM.test(nm)||RX_MO.test(nm))break;
+          if(!nm){blank++;continue}blank=0;
           const pr=parseFloat(T(rw[pi]).replace(/,/g,''));
-          if(!nm||isNaN(pr)){blank++;continue}blank=0;
-          if(pr<=0||/합계|소계|누계/.test(nm))continue;
-          if(!seen.has(nm)){seen.add(nm);const raw=fc!=null?T(rw[fc]):'';list.push([nm,fuelOf(raw,nm),Math.round(pr*100)/100,raw])}}}}}
-  Object.keys(res).forEach(k=>{if(res[k].length<5)delete res[k];else res[k].sort((a,b)=>a[2]-b[2])});
-  return res}
-function est(m,v){const L=MERIT&&MERIT.months&&MERIT.months[m];if(!L||v==null)return null;let b=null;
+          if(isNaN(pr)||pr<=0||/합계|소계|누계/.test(nm))continue;
+          if(!seen.has(nm)){seen.add(nm);const raw=fc!=null?T(rw[fc]):'';list.push([nm,fuelOf(raw,nm),Math.round(pr*100)/100,raw])}}}}
+    const p=sm?2:1;
+    Object.entries(part).forEach(([k,L])=>{if(L.length<5)return;if(!res[k]||p>pri[k]){res[k]=L.sort((a,b)=>a[2]-b[2]);pri[k]=p;src[k]=sh.name}})}
+  return {months:res,src}}
+const hasM=m=>!!(MERIT&&((MERIT.months&&MERIT.months[m])||(MERIT.simple&&MERIT.simple[m])));
+function est(m,v){if(!MERIT||v==null)return null;
+  if(MERIT.simple){const t=MERIT.simple[m],r=t&&t[v];return r?{n:'',f:r[0],p:null,d:r[1],raw:''}:null}
+  const L=MERIT.months&&MERIT.months[m];if(!L)return null;let b=null;
   for(const u of L){if(u[1]==='원전')continue;const d=Math.abs(u[2]-v);if(!b||d<b.d)b={n:u[0],f:u[1],p:u[2],d,raw:u[3]}}return b}
 let HATCH=null;
 function hatch(){if(HATCH)return HATCH;const c=document.createElement('canvas');c.width=c.height=6;const x=c.getContext('2d');x.fillStyle='#EEF1F5';x.fillRect(0,0,6,6);x.strokeStyle='#8A96A8';x.beginPath();x.moveTo(0,6);x.lineTo(6,0);x.stroke();return HATCH=x.createPattern(c,'repeat')}
 const colOf=e=>!e?'#F1F5F9':e.d>TOL?hatch():(FC[e.f]||FC['기타']);
 function meritNote(){if(!MERIT)return '급전순위 파일을 선택하면 시간대별 결정 연료를 추정해 표시(이 PC 브라우저에만 저장, 외부 전송 없음)';
-  const ks=Object.keys(MERIT.months).sort();return `급전순위: ${MERIT.file} · 읽은 월 ${ks.length}개(${ks.map(lab).join(', ')})`}
+  if(MERIT.simple)return `급전순위: ${MERIT.file} 기준 추정 결과(간략본 · 발전기명·발전가격 제외)`;
+  const ks=Object.keys(MERIT.months).sort(),by={};ks.forEach(k=>{const s=(MERIT.src&&MERIT.src[k])||'?';(by[s]=by[s]||[]).push(k)});
+  return `급전순위: ${MERIT.file} · 읽은 월 ${ks.length}개 (`+Object.entries(by).map(([s,a])=>`${s}: ${lab(a[0])}~${lab(a[a.length-1])} ${a.length}개`).join(' / ')+')'}
 $('moFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('n23').textContent='급전순위 파일 읽는 중…';
-  try{const months=parseMerit(await readBook(f));if(!Object.keys(months).length)throw new Error('발전기명·발전가격(변동비) 제목 줄을 찾지 못함');
-    MERIT={file:f.name,months};try{localStorage.setItem('meritV3',JSON.stringify(MERIT))}catch(_){}
+  try{const r=parseMerit(await readBook(f));if(!Object.keys(r.months).length)throw new Error('발전기명·발전가격(변동비) 제목 줄을 찾지 못함');
+    MERIT={file:f.name,months:r.months,src:r.src};try{localStorage.setItem('meritV3',JSON.stringify(MERIT))}catch(_){}
     safe(r23);safe(r3)}catch(err){$('n23').textContent='급전순위 파일 읽기 실패: '+err.message}};
 
 /* --- 예방정비 --- */
@@ -575,9 +575,8 @@ function r11(){const cS=cutOf(D.smp,M),ms=monthsTo(M);
 const gv=(o,d,h)=>o&&o[d]&&o[d][h]!=null?o[d][h]:null;
 const DM={
   tot:{t:'총수요',hid:1,f:(d,h)=>{const a=gv(D.dem,d,h),b=gv(D.hid,d,h);return a==null||b==null?null:a+b},n:'총수요 = 계통수요 + 시장 외 태양광(한전 PPA·BTM, KPX 추정)'},
-  sys:{t:'계통수요',f:(d,h)=>gv(D.dem,d,h),n:'계통수요 = 전력시장 발전량 합계(KPX 실시간 수급현황 5분 자료) = 총수요 − 시장 외 태양광'},
-  xm:{t:'총수요 − 시장 태양광',hid:1,sun:1,f:(d,h)=>{const a=gv(D.dem,d,h),b=gv(D.hid,d,h),s=gv(D.sun,d,h);return a==null||b==null||s==null?null:a+b-s},n:'= 총수요 − 전력시장 태양광 (PPA·BTM 태양광은 포함)'},
-  xa:{t:'총수요 − 모든 태양광',sun:1,f:(d,h)=>{const a=gv(D.dem,d,h),s=gv(D.sun,d,h);return a==null||s==null?null:a-s},n:'= 총수요 − 태양광 전체(시장+PPA+BTM) = 순부하'}};
+  sys:{t:'계통수요',f:(d,h)=>gv(D.dem,d,h),n:'계통수요 = 전력시장 발전량 합계(KPX 실시간 수급현황) = 총수요 − 시장 외 태양광(PPA·BTM)'},
+  xa:{t:'총수요 − 모든 태양광',sun:1,f:(d,h)=>{const a=gv(D.dem,d,h),s=gv(D.sun,d,h);return a==null||s==null?null:a-s},n:'순부하 = 총수요 − 태양광 전체(시장+PPA+BTM)'}};
 const hasHid=(m,cut)=>days(D.dem,m,cut).some(d=>(D.hid&&D.hid[d]||[]).some(v=>v>0));
 const hasSun=(m,cut)=>!!D.sun&&days(D.sun,m,cut).length>0;
 function hrSeries(m,cut,o){if(o.hid&&!hasHid(m,cut))return null;if(o.sun&&!hasSun(m,cut))return null;const ds=days(D.dem,m,cut).filter(isWd);if(!ds.length)return null;
@@ -587,33 +586,38 @@ function r21(){const P=py(M),cG=cutOf(D.gen,M),ms=monthsTo(M),mo=moN(M);
   mkc('c21a',{type:'bar',data:{labels:ms.map(m=>moN(m)+'월'+(m===M&&cG?'*':'')),datasets:[
     {label:P.slice(0,4)+'년',data:a,backgroundColor:C.slate},{label:M.slice(0,4)+'년',data:b,backgroundColor:ms.map(m=>m===M?C.ci:C.navy)}]},
     options:{layout:{padding:{top:18}},plugins:{hlBand:{idx:ms.length-1},lbl:{on:true,size:11,inside:[0],fmt:v=>f1(v),color:(v,di)=>di===0?C.ink2:C.ink}},scales:{x:{grid:noGrid},y:{grid}}}});
-  const o=DM[DMODE],h0=hrSeries(P,cG,o),h1=hrSeries(M,cG,o);$('t21b').textContent=o.t;
+  const s0=hrSeries(P,cG,DM.sys),s1=hrSeries(M,cG,DM.sys),i=ms.length-1;
+  $('h21').textContent=`${mo}월 계통수요 ${f1(a[i])}→${f1(b[i])}TWh(${sg(pc(b[i],a[i]))}%) · 평일 평균 ${f1(s0&&avg(s0))}→${f1(s1&&avg(s1))}GW`;
+  r21b()}
+function r21b(){const P=py(M),cG=cutOf(D.gen,M),mo=moN(M),o=DM[DMODE];
+  const S={};Object.keys(DM).forEach(k=>S[k]=[hrSeries(P,cG,DM[k]),hrSeries(M,cG,DM[k])]);
+  const all=Object.values(S).flat().filter(Boolean).flat().filter(v=>v!=null);
+  const yMin=all.length?Math.floor(Math.min(...all)/5)*5:0,yMax=all.length?Math.ceil(Math.max(...all)/5)*5:100;
+  const h0=S[DMODE][0],h1=S[DMODE][1];$('t21b').textContent=o.t;
   const miss=[];
   if(o.sun&&!D.sun)miss.push('시간별 시장 태양광 자료 없음 → build 워크플로 재실행 필요');
   else{if(!h0)miss.push(`${P.slice(0,4)}년 자료 없음${o.hid?'(PPA·BTM 구분 이전)':''}`);if(!h1)miss.push(`${M.slice(0,4)}년 자료 없음`)}
   mkc('c21b',{type:'line',data:{labels:H24(),datasets:[
     {label:`${P.slice(0,4)}년 ${mo}월`,data:h0||[],borderColor:C.slate,backgroundColor:C.slate,borderWidth:3,pointRadius:0},
     {label:`${M.slice(0,4)}년 ${mo}월`,data:h1||[],borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0}]},
-    options:{interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{label:c=>`${c.dataset.label} ${f1(c.parsed.y)}GW`}}},scales:{x:{grid:noGrid},y:{grid,grace:'8%'}}}});
+    options:{animation:false,interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{label:c=>`${c.dataset.label} ${f1(c.parsed.y)}GW`}}},scales:{x:{grid:noGrid},y:{grid,min:yMin,max:yMax}}}});
   $('n21b').textContent=`${o.n} · ‘1시’ = 0~1시${miss.length?' · '+miss.join(' · '):''}`;
-  const s0=hrSeries(P,cG,DM.sys),s1=hrSeries(M,cG,DM.sys),i=ms.length-1;
   const t0=avg(days(D.wx,P,cG).map(d=>D.wx[d].tmp)),t1=avg(days(D.wx,M,cG).map(d=>D.wx[d].tmp));
-  $('h21').textContent=`${mo}월 계통수요 ${f1(a[i])}→${f1(b[i])}TWh(${sg(pc(b[i],a[i]))}%) · 평일 평균 ${f1(s0&&avg(s0))}→${f1(s1&&avg(s1))}GW`;
   const md=h0&&h1?Math.max(...h1.map((v,k)=>v!=null&&h0[k]!=null?Math.abs(v-h0[k]):0)):null;
   $('b21').innerHTML=`<li>평일 수 ${calWd(P,cG)}→${calWd(M,cG)}일 (주말·연휴 배치 차이)</li><li>서울 평균기온 ${f1(t0)}→${f1(t1)}℃ (냉난방 수요 영향)</li><li>평일 시간대별 ${o.t} 차이 최대 ${f1(md)}GW</li>`}
 
 /* --- 2-2 --- */
 const SRC=[['원자력',['nuc']],['석탄',['coal']],['LNG',['lng']],['신재생(기타)',['renew','wind']],['태양광 계',SOL],['계통수요',MK]];
-const COLS=[{t:'원자력',k:['nuc']},{t:'원전 정비(GW)',mt:'nuc'},{t:'석탄',k:['coal']},{t:'석탄 정비(GW)',mt:'coal'},{t:'LNG',k:['lng']},{t:'신재생(기타)',k:['renew','wind']},{t:'태양광 계',k:SOL},{t:'계통수요',k:MK}];
-const TD='padding:5px 10px;line-height:1.25';
+const COLS=[{t:'원자력',k:['nuc']},{t:'석탄',k:['coal']},{t:'LNG',k:['lng']},{t:'신재생(기타)',k:['renew','wind']},{t:'태양광 계',k:SOL},{t:'계통수요',k:MK},{t:'원전 정비(GW)',mt:'nuc',sep:1},{t:'석탄 정비(GW)',mt:'coal'}];
+const TD='padding:5px 10px;line-height:1.25',SEP=';border-left:3px solid #8A96A8';
 function cell(a,b){if(!a||!b)return `<td class="r" style="${TD}">-</td>`;const p=pc(b,a),dv=b-a,x=GMODE==='pct'?p:dv;
   return `<td class="r" style="${TD}" title="전년 ${f2(a)} → 올해 ${f2(b)} TWh (${sg(p)}%, ${sg(dv,2)}TWh)"><span class="${x>0?'up':'dn'}" style="font-size:19px;font-weight:700">${GMODE==='pct'?sg(p)+'%':sg(dv,2)}</span></td>`}
-function mcell(a,b){return `<td class="r" style="${TD};font-size:15px;color:var(--ink2);background:#F7F9FB">${a==null&&b==null?'-':`${f1(a)}→<b>${f1(b)}</b>`}</td>`}
+function mcell(a,b,sep){return `<td class="r" style="${TD};font-size:15px;color:var(--ink2);background:#F7F9FB${sep?SEP:''}">${a==null&&b==null?'-':`${f1(a)}→<b>${f1(b)}</b>`}</td>`}
 function r22(){if(!D)return;const cG=cutOf(D.gen,M),ms=monthsTo(M);
   document.querySelectorAll('.gm').forEach(b=>{const on=b.dataset.m===GMODE;b.style.background=on?'var(--navy)':'#fff';b.style.color=on?'#fff':'var(--navy)'});
-  let h='<table class="t" style="font-size:15px"><tr><th style="padding:6px 10px">월</th>'+COLS.map(c=>`<th class="r" style="padding:6px 10px${c.mt?';background:var(--slate-d)':''}">${c.t}</th>`).join('')+'</tr>';
+  let h='<table class="t" style="font-size:15px"><tr><th style="padding:6px 10px">월</th>'+COLS.map(c=>`<th class="r" style="padding:6px 10px${c.mt?';background:var(--slate-d)':''}${c.sep?SEP:''}">${c.mt?'<small style="display:block;font-size:11px;font-weight:400">참고</small>':''}${c.t}</th>`).join('')+'</tr>';
   ms.forEach(m=>{const c=m===M?cG:null;h+=`<tr class="${m===M?'hl':''}"><td class="rh" style="${TD}">${moN(m)}월${c?'*':''}</td>`+
-    COLS.map(o=>o.mt?mcell(mtMonth(py(m),o.mt),mtMonth(m,o.mt)):cell(E(py(m),c,o.k),E(m,c,o.k))).join('')+'</tr>'});
+    COLS.map(o=>o.mt?mcell(mtMonth(py(m),o.mt),mtMonth(m,o.mt),o.sep):cell(E(py(m),c,o.k),E(m,c,o.k))).join('')+'</tr>'});
   $('t22w').innerHTML=h+'</table>';
   const so=[E(py(M),cG,SOL),E(M,cG,SOL)],lgE=[E(py(M),cG,['lng']),E(M,cG,['lng'])];
   $('h22').textContent=`${moN(M)}월 태양광 ${sg(pc(so[1],so[0]))}%, LNG 발전 ${sg(pc(lgE[1],lgE[0]))}%`;
@@ -633,12 +637,13 @@ function r23(){if(!D)return;const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.
   const side=(m,L,cvs,strip,tt,st)=>{const ds=days(D.smp,m,cS).filter(isWd),labs=[],vals=[],fu=[];
     ds.forEach(d=>D.smp[d].forEach((v,h)=>{labs.push(`${+d.slice(8)}일 ${h+1}시`);vals.push(v);fu.push(est(m,v))}));
     $(tt).textContent=`${m.slice(0,4)}년 ${moN(m)}월 (평일 ${ds.length}일)`;
-    const has=!!(MERIT&&MERIT.months&&MERIT.months[m]);
+    const has=hasM(m);
     if(has){const cnt={};fu.forEach(e=>{const k=!e?'미추정':e.d>TOL?'불확실':e.f;cnt[k]=(cnt[k]||0)+1});
       $(st).textContent=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${k} ${Math.round(n/fu.length*100)}%`).join(' · ')}
     else $(st).textContent=MERIT?'급전순위 파일에 이 달 표 없음':'';
     const tip={callbacks:{title:it=>it.length?labs[it[0].dataIndex]:'',label:c=>`SMP ${f2(vals[c.dataIndex])}원/kWh`,
       afterLabel:c=>{const e=fu[c.dataIndex];if(!e)return has?'':'급전순위 파일을 선택하면 결정 발전기 표시';
+        if(!e.n)return `추정 결정 연료: ${e.f}${e.d>TOL?' (추정 불확실)':''}`;
         return [`추정 결정: ${e.n} (${e.f}${e.raw&&e.raw!==e.f?' · '+e.raw:''})`,`발전가격 ${f2(e.p)}원/kWh · 차이 ${f2(e.d)}원${e.d>TOL?' → 추정 불확실':''}`]}}};
     mkc(cvs,{type:'line',data:{labels:labs,datasets:[{data:vals,borderColor:L?C.slateD:C.ci,borderWidth:1.5,pointRadius:0,pointHitRadius:3}]},
       options:{interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:tip},
@@ -655,36 +660,40 @@ function r23(){if(!D)return;const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.
   $('t23').innerHTML=t+'</table>'}
 
 /* --- 3 기타 특이사항 --- */
+const dayBand={id:'dayBand',beforeDatasetsDraw(ch,_,o){if(!o||o.a==null||o.a<0)return;const x=ch.scales.x,ar=ch.chartArea,w=Math.abs(x.getPixelForValue(1)-x.getPixelForValue(0))/2;
+  const L=x.getPixelForValue(o.a)-w,R=x.getPixelForValue(o.b)+w,ctx=ch.ctx;ctx.save();ctx.fillStyle='rgba(217,58,63,.10)';ctx.fillRect(L,ar.top,R-L,ar.bottom-ar.top);
+  ctx.fillStyle='#D93A3F';ctx.font=`700 12px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(o.t||'',(L+R)/2,ar.top+2);ctx.restore()}};
+Chart.register(dayBand);
 function r3(){if(!D||!D.smp)return;const d=EVT;if(!d||!D.smp[d]){$('h3').textContent='대상일 자료 없음';return}
   const wd=Object.keys(D.smp).sort().filter(x=>x!==d&&isWd(x)),d0=wd.filter(x=>x<d).pop(),d2=wd.find(x=>x>d),near=[d0,d2].filter(Boolean),DS=[d0,d,d2];
   const dl=x=>x?`${+x.slice(5,7)}/${+x.slice(8)}`:'-',ok=v=>v!=null&&!isNaN(v),S=v=>ok(v)?sg(v):'-',F=v=>ok(v)?f1(v):'-';
   const dy=a=>a&&a.length?avg(a.slice(10,17)):null,nb=f=>{const a=near.map(f).filter(ok);return a.length?avg(a):null};
-  const avH=src=>[...Array(24)].map((_,h)=>{const a=near.map(x=>src&&src[x]&&src[x][h]).filter(ok);return a.length?avg(a):null});
-  const g=a=>(a||[]).map(v=>v==null?null:v/1000);
-  mkc('c3a',{type:'line',data:{labels:H24(),datasets:[
-    d0&&{label:dl(d0)+' 전 평일',data:D.smp[d0],borderColor:C.slate,borderWidth:2.5,borderDash:[6,4],pointRadius:0},
-    {label:dl(d)+' 당일',data:D.smp[d],borderColor:C.red,borderWidth:3.5,pointRadius:0},
-    d2&&{label:dl(d2)+' 다음 평일',data:D.smp[d2],borderColor:C.slateD,borderWidth:2.5,borderDash:[2,3],pointRadius:0}].filter(Boolean)},
-    options:{interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{font:{size:12}}}},scales:{x:{grid:noGrid},y:{grid,title:{display:true,text:'원/kWh'}}}}});
-  mkc('c3b',{type:'line',data:{labels:H24(),datasets:[
-    {label:'계통수요',data:g(D.dem[d]),borderColor:C.navy,borderWidth:3,pointRadius:0},{label:'계통수요(전후 평일)',data:g(avH(D.dem)),borderColor:C.navy,borderDash:[6,4],pointRadius:0},
-    {label:'시장 밖 태양광',data:g(D.hid&&D.hid[d]),borderColor:C.amber,borderWidth:3,pointRadius:0},{label:'시장 밖 태양광(전후 평일)',data:g(avH(D.hid)),borderColor:C.amber,borderDash:[6,4],pointRadius:0}]},
-    options:{interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{font:{size:12}}}},scales:{x:{grid:noGrid},y:{grid,title:{display:true,text:'GW'}}}}});
+  const netH=x=>D.dem[x]&&D.sun&&D.sun[x]?D.dem[x].map((v,h)=>v==null||D.sun[x][h]==null?null:v-D.sun[x][h]):null;
+  const mds=days(D.smp,d.slice(0,7)).filter(isWd),labs=[],sv=[],nv=[];
+  mds.forEach(x=>{const n=netH(x);for(let h=0;h<24;h++){labs.push(`${+x.slice(8)}일 ${h+1}시`);sv.push(D.smp[x][h]);nv.push(n&&n[h]!=null?Math.round(n[h]/100)/10:null)}});
+  const i0=mds.indexOf(d)*24;
+  mkc('c3',{type:'line',data:{labels:labs,datasets:[
+    {label:'SMP(원/kWh)',data:sv,borderColor:C.red,backgroundColor:C.red,borderWidth:1.6,pointRadius:0,yAxisID:'y'},
+    {label:'순부하(GW, 총수요 − 모든 태양광)',data:nv,borderColor:C.navy,backgroundColor:C.navy,borderWidth:1.6,pointRadius:0,yAxisID:'y1'}]},
+    options:{animation:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{font:{size:12}}},dayBand:{a:i0,b:i0+23,t:dl(d)},tooltip:{callbacks:{label:c=>c.datasetIndex?`순부하 ${f1(c.parsed.y)}GW`:`SMP ${f2(c.parsed.y)}원/kWh`}}},
+      scales:{x:{grid:noGrid,ticks:{autoSkip:false,maxRotation:0,callback:(v,i)=>i%24===0&&labs[i]?labs[i].split(' ')[0]:''}},
+        y:{grid,title:{display:true,text:'원/kWh'}},y1:{position:'right',grid:noGrid,title:{display:true,text:'GW'}}}}});
   const G=v=>v==null?null:v/1e3,V={
-    smp:x=>x&&D.smp[x]?dy(D.smp[x]):null,dem:x=>x&&D.dem[x]?G(dy(D.dem[x])):null,hid:x=>x&&D.hid&&D.hid[x]?G(dy(D.hid[x])):null,
+    smp:x=>x&&D.smp[x]?dy(D.smp[x]):null,dem:x=>x&&D.dem[x]?G(dy(D.dem[x])):null,net:x=>x?G(dy(netH(x))):null,hid:x=>x&&D.hid&&D.hid[x]?G(dy(D.hid[x])):null,
     rad:x=>x&&D.wx&&D.wx[x]?D.wx[x].rad:null,prcp:x=>x&&D.wx&&D.wx[x]?D.wx[x].prcp:null,
     nuc:x=>x&&D.gen[x]?G(D.gen[x].nuc):null,lng:x=>x&&D.gen[x]?G(D.gen[x].lng):null,
     mB:x=>x?G(mtSum(x,['nuc','coal'])):null,mP:x=>x?G(mtSum(x,['lng','pump'])):null};
-  const R=[['낮 SMP(원/kWh)','smp'],['계통수요(GW)','dem'],['시장 밖 태양광(GW)','hid'],['일사량(MJ/㎡)','rad'],['강수량(mm)','prcp'],['원자력 출력(GW)','nuc'],['LNG 출력(GW)','lng'],['정비 중 원전·석탄(GW)','mB'],['정비 중 LNG·양수(GW)','mP']];
-  $('t3').innerHTML='<table class="t" style="font-size:14px"><tr><th></th>'+DS.map((x,i)=>`<th class="r">${dl(x)}${i==1?' 당일':''}</th>`).join('')+'</tr>'+
-    R.map(([n,k])=>`<tr><td class="rh">${n}</td>`+DS.map((x,i)=>`<td class="r"${i==1?' style="font-weight:700"':''}>${F(V[k](x))}</td>`).join('')+'</tr>').join('')+'</table>';
+  const R=[['낮 SMP(원/kWh)','smp'],['계통수요(GW)','dem'],['순부하(GW)','net'],['시장 밖 태양광(GW)','hid'],['일사량(MJ/㎡)','rad'],['강수량(mm)','prcp']],TS='padding:3px 8px';
+  $('t3').innerHTML=`<table class="t" style="font-size:13px"><tr><th style="${TS}">낮(11~17시)</th>`+DS.map((x,i)=>`<th class="r" style="${TS}">${dl(x)}${i==1?' 당일':''}</th>`).join('')+'</tr>'+
+    R.map(([n,k])=>`<tr><td class="rh" style="${TS}">${n}</td>`+DS.map((x,i)=>`<td class="r" style="${TS}${i==1?';font-weight:700;color:var(--red)':''}">${F(V[k](x))}</td>`).join('')+'</tr>').join('')+'</table>';
   const df=k=>{const a=V[k](d),b=nb(V[k]);return ok(a)&&ok(b)?a-b:null};
   const ds=df('smp'),dd=df('dem'),dh=df('hid'),dn=df('nuc'),dmB=df('mB'),sup=(ok(dn)?-dn:0)+(ok(dmB)?dmB:0);
   const smax=Math.max(...D.smp[d]),hmax=D.smp[d].indexOf(smax)+1;
   const key=u=>u[0]+u[3],nbSet=new Set(near.flatMap(x=>(mtOut(x,'10:00','18:00')||[]).map(key)));
   const only=(mtOut(d,'10:00','18:00')||[]).filter(u=>!nbSet.has(key(u))).sort((a,b)=>b[2]-a[2]);
   const tm=u=>`${u[3].slice(5,10)==d.slice(5)?u[3].slice(11):u[3].slice(5,10)}~${u[4].slice(5,10)==d.slice(5)?u[4].slice(11):u[4].slice(5,10)}`;
-  const onlyTxt=!MT?'정비 자료 수집 중':only.length?`당일에만 정비: ${only.slice(0,4).map(u=>`${u[0]}(${MF[u[1]]||u[1]} ${Math.round(u[2])}MW, ${tm(u)})`).join(', ')}${only.length>4?` 외 ${only.length-4}기`:''}`:'당일에만 해당하는 정비 없음';
+  const onlyTxt=!MT?'정비 자료 수집 중':only.length?`당일에만 정비: ${only.slice(0,3).map(u=>`${u[0]}(${MF[u[1]]||u[1]} ${Math.round(u[2])}MW, ${tm(u)})`).join(', ')}${only.length>3?` 외 ${only.length-3}기`:''}`:'당일에만 해당하는 정비 없음';
   const fz=x=>{if(!x)return null;const c={};D.smp[x].slice(10,17).forEach(v=>{const e=est(x.slice(0,7),v);if(e&&e.d<=TOL)c[e.f]=(c[e.f]||0)+1});
     const a=Object.entries(c).sort((p,q)=>q[1]-p[1]);return a.length?a.map(([k,n])=>`${k} ${n}시간`).join('·'):null};
   let why;
@@ -693,24 +702,28 @@ function r3(){if(!D||!D.smp)return;const d=EVT;if(!d||!D.smp[d]){$('h3').textCon
   else why='수요·공급 모두 뚜렷한 변화가 없음 → 연료가격·입찰 변동 등 추가 확인 필요';
   $('h3').textContent=`${+d.slice(5,7)}월 ${+d.slice(8)}일 낮 SMP ${F(V.smp(d))}원/kWh, 전후 평일보다 ${S(ds)}원 (최고 ${f1(smax)}원·${hmax}시)`;
   $('x3').innerHTML=[
-    `<b>수요 측</b> 시장 밖 태양광 ${S(dh)}GW → 계통수요 ${S(dd)}GW${ok(V.rad(d))?` · 일사량 ${F(nb(V.rad))}→${F(V.rad(d))}MJ/㎡, 강수 ${F(V.prcp(d))}mm`:''}`,
+    `<b>수요 측</b> 시장 밖 태양광 ${S(dh)}GW → 계통수요 ${S(dd)}GW · 순부하 ${S(df('net'))}GW${ok(V.rad(d))?` · 일사량 ${F(nb(V.rad))}→${F(V.rad(d))}MJ/㎡, 강수 ${F(V.prcp(d))}mm`:''}`,
     `<b>공급 측</b> 원자력 출력 ${S(dn)}GW · 정비 중 원전·석탄 ${ok(dmB)?S(dmB)+'GW':'-'} · ${onlyTxt}`,
     fz(d)?`<b>추정 결정 연료(11~17시)</b> 당일 ${fz(d)} / 전 평일 ${fz(d0)||'-'}`:'',
     `<b>판단</b> ${why}`].filter(Boolean).join('<br>')+
-    `<br><small style="color:var(--ink3)">※ 낮 = 11~17시 · 정비: KPX 주간 예방정비계획(계획 기준)${MT&&MT.updated?' · '+MT.updated:''}</small>`}
+    `<br><small style="color:var(--ink3)">※ 낮 = 11~17시 · 비교 = 전후 평일 평균 · 정비: KPX 주간 예방정비계획(계획 기준)</small>`}
 
 /* --- 시작 --- */
 function safe(f){try{f()}catch(e){console.error(f.name,e)}}
 function refreshNav(){slides.forEach((s,i)=>{if(!i||!sel.options[i])return;const no=s.querySelector('.pno'),pt=s.querySelector('.pt');sel.options[i].text=((no?no.textContent+'. ':'')+(pt?pt.textContent:'')).trim()})}
 function renderAll(){document.querySelectorAll('.moT,.msT').forEach(e=>e.textContent=moN(M));
   document.querySelectorAll('.per').forEach(e=>e.textContent=per(M,cutOf(D.smp,M)));[r0,r1,r11,r21,r22,r23,r3].forEach(safe);refreshNav()}
-$('dSel').onchange=()=>{DMODE=$('dSel').value;safe(r21)};
+$('dSel').onchange=()=>{DMODE=$('dSel').value;safe(r21b)};
 document.querySelectorAll('.gm').forEach(b=>b.onclick=()=>{GMODE=b.dataset.m;safe(r22)});
-fetch('data/maint.json?'+Date.now()).then(r=>r.ok?r.json():null).then(j=>{MT=j;MTR=null;if(D){safe(r22);safe(r3)}}).catch(()=>{});
-fetch('data/summary.json?'+Date.now()).then(r=>r.json()).then(j=>{D=j;
+const EMB=window.EMBED||null;if(EMB&&EMB.MERIT)MERIT=EMB.MERIT;
+let SRCH=null;if(!EMB)fetch(location.href.split('#')[0],{cache:'no-store'}).then(r=>r.text()).then(t=>SRCH=t).catch(()=>{});
+const getJ=(u,k)=>EMB?Promise.resolve(EMB[k]||null):fetch(u+'?'+Date.now()).then(r=>r.ok?r.json():null);
+getJ('data/maint.json','MT').then(j=>{MT=j;MTR=null;if(D){safe(r22);safe(r3)}}).catch(()=>{});
+getJ('data/summary.json','D').then(j=>{if(!j)throw new Error('summary.json 없음');D=j;
   const ms=[...new Set(Object.keys(D.smp).map(d=>d.slice(0,7)))].sort().filter(m=>Object.keys(D.smp).some(d=>d.startsWith(py(m))));
   if(!ms.length){$('h1').textContent='전년 비교 가능한 SMP 자료가 아직 없음';return}
-  const nowM=new Date(Date.now()+9*36e5).toISOString().slice(0,7);while(ms.length>1&&ms[ms.length-1]>=nowM)ms.pop();M=ms[ms.length-1];CMP=M;
+  const nowM=new Date(Date.now()+9*36e5).toISOString().slice(0,7);while(ms.length>1&&ms[ms.length-1]>=nowM)ms.pop();M=ms[ms.length-1];
+  if(EMB&&EMB.M&&ms.includes(EMB.M))M=EMB.M;CMP=M;
   document.querySelectorAll('.sM').forEach(s=>{ms.forEach(m=>s.add(new Option(lab(m),m)));s.value=M;
     s.onchange=()=>{M=s.value;CMP=M;$('sC').value=M;document.querySelectorAll('.sM').forEach(x=>x.value=M);fillE();renderAll()}});
   ms.filter(m=>m.slice(0,4)===M.slice(0,4)).forEach(m=>$('sC').add(new Option(moN(m)+'월',m)));$('sC').value=M;
@@ -719,7 +732,20 @@ fetch('data/summary.json?'+Date.now()).then(r=>r.json()).then(j=>{D=j;
     EVT=ds.includes('2026-10-13')?'2026-10-13':ds.reduce((a,d)=>avg(D.smp[d])>avg(D.smp[a]||[0])?d:a,ds[0]);s.value=EVT}
   fillE();$('sE').onchange=()=>{EVT=$('sE').value;safe(r3)};
   renderAll()}).catch(e=>{$('h1').textContent='데이터 불러오기 실패: '+e.message});
+$('saveH').onclick=()=>{
+  if(EMB){alert('이미 저장된 파일입니다. 이 파일을 그대로 보내면 됩니다.');return}
+  if(!D||!SRCH){alert('데이터를 불러오는 중입니다. 잠시 후 다시 눌러 주세요.');return}
+  let mer=null;
+  if(MERIT&&MERIT.months){const ch=prompt('급전순위 추정 결과를 어떻게 넣을까요? 숫자를 입력하세요.\n1 = 상세 (마우스를 올리면 발전기명·발전가격 표시)\n2 = 간략 (연료 색만, 발전기명·발전가격 제외)','2');
+    if(ch==null)return;
+    if(String(ch).trim()==='1')mer=MERIT;
+    else{const simple={};Object.keys(MERIT.months).forEach(m=>{const t={};Object.keys(D.smp).filter(d=>d.startsWith(m)).forEach(d=>D.smp[d].forEach(v=>{const e=est(m,v);if(e)t[v]=[e.f,e.d>TOL?99:0]}));if(Object.keys(t).length)simple[m]=t});mer={file:MERIT.file,simple}}}
+  else if(!confirm('급전순위 파일이 선택되지 않았습니다. 결정 연료 없이 저장할까요?'))return;
+  const emb=JSON.stringify({D,MT,MERIT:mer,M}).replace(/</g,'\\u003c'),rx=/<script>\s*\/\* ===== 데이터 연결/;
+  if(!rx.test(SRCH)){alert('저장 실패: 페이지 구조를 찾지 못했습니다');return}
+  const html=SRCH.replace(rx,m=>'<script>window.EMBED='+emb+';<\/script>\n'+m);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=`전력시장_검토_${M}${mer?(mer.simple?'_간략':'_상세'):''}.html`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
 </script>
 </body>
 </html>
-
