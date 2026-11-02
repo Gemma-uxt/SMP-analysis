@@ -580,24 +580,53 @@ function r23(){const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.querySelector
   $('t23').innerHTML=t+'</table>'}
 
 /* --- 3 기타 특이사항 --- */
-function r3(){const d=EVT;if(!d||!D.smp[d]){$('h3').textContent='대상일 자료 없음';return}
-  const m=d.slice(0,7),wd=days(D.smp,m).filter(x=>isWd(x)&&x!==d),i=wd.findIndex(x=>x>d),near=[wd[i-1],wd[i]].filter(Boolean);
-  const avH=(src,k)=>[...Array(24)].map((_,h)=>avg(near.map(x=>src[x]&&src[x][h])));
-  const sB=avH(D.smp),dm=D.dem[d]||[],dB=avH(D.dem),hd=D.hid[d]||[],hB=avH(D.hid);
-  mkc('c3a',{type:'line',data:{labels:H24(),datasets:[{label:d.slice(5),data:D.smp[d],borderColor:C.red,borderWidth:3,pointRadius:0},{label:'전후 평일 평균',data:sB,borderColor:C.slate,borderWidth:3,borderDash:[6,4],pointRadius:0}]},options:{scales:{x:{grid:noGrid},y:{grid}}}});
-  const g=a=>a.map(v=>v==null?null:v/1000);
+const MF={nuc:'원자력',coal:'석탄',lng:'LNG',pump:'양수',hydro:'수력',oil:'유류',etc:'기타'};
+function mtOut(d,a,b){if(!MT||!MT.units)return null;const s0=d+'T'+a,e0=d+'T'+b;return MT.units.filter(u=>u[3]<e0&&u[4]>s0)}
+function mtSum(d,ks){const L=mtOut(d,'14:00','14:01');return L?L.filter(u=>ks.includes(u[1])).reduce((t,u)=>t+u[2],0):null}
+function r3(){if(typeof D==='undefined'||!D||!D.smp)return;const d=EVT;if(!d||!D.smp[d]){$('h3').textContent='대상일 자료 없음';return}
+  const wd=Object.keys(D.smp).sort().filter(x=>x!==d&&isWd(x)),d0=wd.filter(x=>x<d).pop(),d2=wd.find(x=>x>d),near=[d0,d2].filter(Boolean),DS=[d0,d,d2];
+  const dl=x=>x?`${+x.slice(5,7)}/${+x.slice(8)}`:'-',ok=v=>v!=null&&!isNaN(v),S=v=>ok(v)?sg(v):'-',F=v=>ok(v)?f1(v):'-';
+  const dy=a=>a&&a.length?avg(a.slice(10,17)):null,nb=f=>{const a=near.map(f).filter(ok);return a.length?avg(a):null};
+  const avH=src=>[...Array(24)].map((_,h)=>{const a=near.map(x=>src[x]&&src[x][h]).filter(ok);return a.length?avg(a):null});
+  const g=a=>(a||[]).map(v=>v==null?null:v/1000);
+  mkc('c3a',{type:'line',data:{labels:H24(),datasets:[
+    d0&&{label:dl(d0)+' 전 평일',data:D.smp[d0],borderColor:C.slate,borderWidth:2.5,borderDash:[6,4],pointRadius:0},
+    {label:dl(d)+' 당일',data:D.smp[d],borderColor:C.red,borderWidth:3.5,pointRadius:0},
+    d2&&{label:dl(d2)+' 다음 평일',data:D.smp[d2],borderColor:C.slateD,borderWidth:2.5,borderDash:[2,3],pointRadius:0}].filter(Boolean)},
+    options:{plugins:{legend:{labels:{font:{size:12}}}},scales:{x:{grid:noGrid},y:{grid,title:{display:true,text:'원/kWh'}}}}});
   mkc('c3b',{type:'line',data:{labels:H24(),datasets:[
-    {label:'계통수요',data:g(dm),borderColor:C.navy,borderWidth:3,pointRadius:0},{label:'계통수요(비교)',data:g(dB),borderColor:C.navy,borderDash:[6,4],pointRadius:0},
-    {label:'시장 외 태양광',data:g(hd),borderColor:C.amber,borderWidth:3,pointRadius:0},{label:'시장 외 태양광(비교)',data:g(hB),borderColor:C.amber,borderDash:[6,4],pointRadius:0}]},
-    options:{plugins:{legend:{labels:{font:{size:12}}}},scales:{x:{grid:noGrid},y:{grid}}}});
-  const day=a=>avg((a||[]).slice(10,17)),gn=D.gen[d]||{},nb=k=>avg(near.map(x=>D.gen[x]&&D.gen[x][k]));
-  const R=[['SMP(원/kWh)',day(D.smp[d]),day(sB),1],['계통수요(GW)',day(dm),day(dB),1e3],['시장 외 태양광(GW)',day(hd),day(hB),1e3],['원자력 평균(GW)',gn.nuc,nb('nuc'),1e3],['LNG 평균(GW)',gn.lng,nb('lng'),1e3]];
-  $('t3').innerHTML='<table class="t" style="font-size:14.5px"><tr><th></th><th class="r">당일</th><th class="r">비교</th></tr>'+R.map(([n,a,b,u])=>`<tr><td class="rh">${n}</td><td class="r">${f1(a/u)}</td><td class="r">${f1(b/u)}</td></tr>`).join('')+'</table>';
-  const ds=day(D.smp[d])-day(sB),dh=(day(hd)-day(hB))/1e3,dd=(day(dm)-day(dB))/1e3,dn=((gn.nuc||0)-(nb('nuc')||0))/1e3,w=D.wx[d];
-  $('h3').textContent=`${+m.slice(5)}월 ${+d.slice(8)}일 낮 SMP 전후 평일 대비 ${sg(ds)}원/kWh`;
-  $('x3').innerHTML=`<b>원인 분석:</b> 시장 외 태양광 ${sg(dh)}GW → 계통수요 ${sg(dd)}GW${w?` (일사량 ${f1(w.rad)}MJ/㎡, 강수 ${f1(w.prcp)}mm)`:''} · 원자력 ${sg(dn)}GW. `+
-    (dh<-2?'흐림·비로 시장 밖 태양광이 줄어 그만큼 시장 수요가 늘었고, 비싼 LNG가 가격을 결정한 것으로 판단':'뚜렷한 수요 요인이 없어 공급 측(발전기 정지 등) 요인 확인 필요')+
-    (d==='2026-10-13'?' · 같은 날 한울 5·6호기 원자로 정지 보도 있음':'');}
+    {label:'계통수요',data:g(D.dem[d]),borderColor:C.navy,borderWidth:3,pointRadius:0},{label:'계통수요(전후 평일)',data:g(avH(D.dem)),borderColor:C.navy,borderDash:[6,4],pointRadius:0},
+    {label:'시장 밖 태양광',data:g(D.hid[d]),borderColor:C.amber,borderWidth:3,pointRadius:0},{label:'시장 밖 태양광(전후 평일)',data:g(avH(D.hid)),borderColor:C.amber,borderDash:[6,4],pointRadius:0}]},
+    options:{plugins:{legend:{labels:{font:{size:12}}}},scales:{x:{grid:noGrid},y:{grid,title:{display:true,text:'GW'}}}}});
+  const G=v=>v==null?null:v/1e3,V={
+    smp:x=>x?dy(D.smp[x]):null, dem:x=>x&&D.dem[x]?G(dy(D.dem[x])):null, hid:x=>x&&D.hid[x]?G(dy(D.hid[x])):null,
+    rad:x=>x&&D.wx&&D.wx[x]?D.wx[x].rad:null, prcp:x=>x&&D.wx&&D.wx[x]?D.wx[x].prcp:null,
+    nuc:x=>x&&D.gen[x]?G(D.gen[x].nuc):null, lng:x=>x&&D.gen[x]?G(D.gen[x].lng):null,
+    mB:x=>x?G(mtSum(x,['nuc','coal'])):null, mP:x=>x?G(mtSum(x,['lng','pump'])):null};
+  const R=[['낮 SMP(원/kWh)','smp'],['계통수요(GW)','dem'],['시장 밖 태양광(GW)','hid'],['일사량(MJ/㎡)','rad'],['강수량(mm)','prcp'],
+    ['원자력 출력(GW)','nuc'],['LNG 출력(GW)','lng'],['정비 중 원전·석탄(GW)','mB'],['정비 중 LNG·양수(GW)','mP']];
+  $('t3').innerHTML='<table class="t" style="font-size:14px"><tr><th></th>'+DS.map((x,i)=>`<th class="r">${dl(x)}${i==1?' 당일':''}</th>`).join('')+'</tr>'+
+    R.map(([n,k])=>`<tr><td class="rh">${n}</td>`+DS.map((x,i)=>`<td class="r"${i==1?' style="font-weight:700"':''}>${F(V[k](x))}</td>`).join('')+'</tr>').join('')+'</table>';
+  const df=k=>{const a=V[k](d),b=nb(V[k]);return ok(a)&&ok(b)?a-b:null};
+  const ds=df('smp'),dd=df('dem'),dh=df('hid'),dn=df('nuc'),dmB=df('mB'),sup=(ok(dn)?-dn:0)+(ok(dmB)?dmB:0);
+  const smax=Math.max(...D.smp[d]),hmax=D.smp[d].indexOf(smax)+1;
+  const key=u=>u[0]+u[3],nbSet=new Set(near.flatMap(x=>(mtOut(x,'10:00','18:00')||[]).map(key)));
+  const only=(mtOut(d,'10:00','18:00')||[]).filter(u=>!nbSet.has(key(u))).sort((a,b)=>b[2]-a[2]);
+  const tm=u=>`${u[3].slice(5,10)==d.slice(5)?u[3].slice(11):u[3].slice(5,10)}~${u[4].slice(5,10)==d.slice(5)?u[4].slice(11):u[4].slice(5,10)}`;
+  const onlyTxt=!MT?'정비 자료 수집 중':only.length?`당일에만 정비: ${only.slice(0,4).map(u=>`${u[0]}(${MF[u[1]]||u[1]} ${Math.round(u[2])}MW, ${tm(u)})`).join(', ')}${only.length>4?` 외 ${only.length-4}기`:''}`:'당일에만 해당하는 정비 없음';
+  const fz=x=>{try{if(!x||typeof est!=='function')return null;const c={};D.smp[x].slice(10,17).forEach(v=>{const e=est(x.slice(0,7),v);if(e&&e.d<=TOL)c[e.f]=(c[e.f]||0)+1});
+    const a=Object.entries(c).sort((p,q)=>q[1]-p[1]);return a.length?a.map(([k,n])=>`${k} ${n}시간`).join('·'):null}catch(e){return null}};
+  let why;
+  if(ok(dd)&&dd>=1.5&&dd>=sup) why=`<b>수요 요인</b>: ${ok(dh)&&dh<-1?'흐림·비로 시장 밖 태양광이 줄어든 만큼 ':''}계통수요가 늘어, 낮에도 석탄보다 비싼 LNG 발전기가 가격을 결정`;
+  else if(sup>=1) why=`<b>공급 요인</b>: 원전 출력 감소·정비 확대로 기저 공급이 ${f1(sup)}GW 줄어 더 비싼 발전기가 가격 결정`;
+  else why='수요·공급 모두 뚜렷한 변화가 없음 → 연료가격·입찰 변동 등 추가 확인 필요';
+  $('h3').textContent=`${+d.slice(5,7)}월 ${+d.slice(8)}일 낮 SMP ${F(V.smp(d))}원/kWh, 전후 평일보다 ${S(ds)}원 (최고 ${f1(smax)}원·${hmax}시)`;
+  $('x3').innerHTML=[
+    `<b>수요 측</b> 시장 밖 태양광 ${S(dh)}GW → 계통수요 ${S(dd)}GW${ok(V.rad(d))?` · 일사량 ${F(nb(V.rad))}→${F(V.rad(d))}MJ/㎡, 강수 ${F(V.prcp(d))}mm`:''}`,
+    `<b>공급 측</b> 원자력 출력 ${S(dn)}GW · 정비 중 원전·석탄 ${ok(dmB)?S(dmB)+'GW':'-'} · ${onlyTxt}`,
+    fz(d)?`<b>추정 결정 연료(11~17시)</b> 당일 ${fz(d)} / 전 평일 ${fz(d0)||'-'}`:'',
+    `<b>판단</b> ${why}`].filter(Boolean).join('<br>')+
+    `<br><small style="color:var(--ink3)">※ 낮 = 11~17시 · 정비: KPX 주간 예방정비계획(계획 기준)${MT&&MT.updated?' · '+MT.updated:''}</small>`}
 
 /* --- 시작 --- */
 function safe(f){try{f()}catch(e){console.error(f.name,e)}}
