@@ -72,14 +72,15 @@ def parse_cells(cells):
     if len(di) < 2 or di[0] < 2:
         return None
     i1, i2 = di[0], di[1]
-    mw = num(cells[i1 - 1])
-    if mw is None:
+    fj = next((j for j in range(i1 - 1, -1, -1) if cells[j] in FUEL), None)
+    mid = cells[(fj + 1 if fj is not None else max(i1 - 2, 0)):i1]
+    nums = [k for k, c in enumerate(mid) if num(c) is not None]
+    if not nums:
         return None
-    fj = next((j for j in range(i1 - 2, -1, -1) if cells[j] in FUEL), None)
-    if fj is None:
-        name, fuel_raw = cells[i1 - 2], ""
-    else:
-        name, fuel_raw = " ".join(cells[fj + 1:i1 - 1]), cells[fj]
+    k = nums[-1]
+    mw = num(mid[k])
+    name = " ".join(mid[:k] + mid[k + 1:])
+    fuel_raw = cells[fj] if fj is not None else ""
     if not name:
         return None
     try:
