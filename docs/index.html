@@ -632,6 +632,7 @@ function r3(){if(typeof D==='undefined'||!D||!D.smp)return;const d=EVT;if(!d||!D
 function safe(f){try{f()}catch(e){console.error(f.name,e)}}
 function renderAll(){document.querySelectorAll('.moT').forEach(e=>e.textContent=moN(M));document.querySelectorAll('.msT').forEach(e=>e.textContent=moN(M));
   document.querySelectorAll('.per').forEach(e=>e.textContent=per(M,cutOf(D.smp,M)));[r0,r1,r11,r21,r22,r23,r3].forEach(safe)}
+let MT=null;fetch('data/maint.json?'+Date.now()).then(r=>r.ok?r.json():null).then(j=>{MT=j;safe(r3)}).catch(()=>{});
 fetch('data/summary.json?'+Date.now()).then(r=>r.json()).then(j=>{D=j;
   const ms=[...new Set(Object.keys(D.smp).map(d=>d.slice(0,7)))].sort().filter(m=>D.smp[py(m)+'-01']||Object.keys(D.smp).some(d=>d.startsWith(py(m))));
   if(!ms.length){$('h1').textContent='전년 비교 가능한 SMP 자료가 아직 없음';return}
