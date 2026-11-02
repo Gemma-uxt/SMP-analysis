@@ -636,7 +636,7 @@ let MT=null;fetch('data/maint.json?'+Date.now()).then(r=>r.ok?r.json():null).the
 fetch('data/summary.json?'+Date.now()).then(r=>r.json()).then(j=>{D=j;
   const ms=[...new Set(Object.keys(D.smp).map(d=>d.slice(0,7)))].sort().filter(m=>D.smp[py(m)+'-01']||Object.keys(D.smp).some(d=>d.startsWith(py(m))));
   if(!ms.length){$('h1').textContent='전년 비교 가능한 SMP 자료가 아직 없음';return}
-  M=ms[ms.length-1];CMP=M;
+  const nowM=new Date(Date.now()+9*36e5).toISOString().slice(0,7);while(ms.length>1&&ms[ms.length-1]>=nowM)ms.pop();M=ms[ms.length-1];CMP=M;
   document.querySelectorAll('.sM').forEach(s=>{ms.forEach(m=>s.add(new Option(lab(m),m)));s.value=M;
     s.onchange=()=>{M=s.value;CMP=M;$('sC').value=M;document.querySelectorAll('.sM').forEach(x=>x.value=M);fillE();renderAll()}});
   ms.filter(m=>m.slice(0,4)===M.slice(0,4)).forEach(m=>$('sC').add(new Option(moN(m)+'월',m)));$('sC').value=M;
