@@ -135,8 +135,11 @@ def main():
     log(f"게시글 {len(posts)}개 확인, 저장됨 {len(done)}개, 이번에 {len(todo)}개 수집")
     for n in todo:
         try:
-            r = s.get(FILE.format(n=n), headers=HEAD, timeout=120)
-            if not r.content.startswith(b"%PDF"):
+            for seq in (1, 2, 3):
+                r = s.get(FILE.format(n=n).replace("seq=1", f"seq={seq}"), headers=HEAD, timeout=120)
+                if r.content.startswith(b"%PDF"):
+                    break
+            else:
                 raise ValueError("PDF가 아님")
             rows, sample = parse_pdf(r.content)
             if not rows:
