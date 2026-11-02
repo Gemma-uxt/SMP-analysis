@@ -154,7 +154,7 @@ for fp in glob.glob(str(RAW / "kpx_live" / "*" / "*.csv")):
             acc[d][h]["coal"] += tc if tc is not None else (num(r.get("coal")) or 0.0) + (num(r.get("localCoal")) or 0.0)
             cnt[d][h] += 1
 
-gen, dem, hid, lng = {}, {}, {}, {}
+gen, dem, hid, lng, sun = {}, {}, {}, {}, {}
 for d in sorted(acc):
     hrs = {h: {k: v / cnt[d][h] for k, v in acc[d][h].items()} for h in acc[d] if cnt[d][h]}
     if len(hrs) < 20:
@@ -163,7 +163,7 @@ for d in sorted(acc):
     dem[d] = [round(sum(hrs[h].get(k, 0) for k in MARKET)) if h in hrs else None for h in range(24)]
     hid[d] = [round(hrs[h].get("ppa", 0) + hrs[h].get("btm", 0)) if h in hrs else None for h in range(24)]
     lng[d] = [round(hrs[h].get("lng", 0)) if h in hrs else None for h in range(24)]
-
+    sun[d] = [round(hrs[h].get("sunM", 0)) if h in hrs else None for h in range(24)]
 
 # ---------- 4) 연료원별 SMP 결정 횟수(육지, 월 합계) ----------
 fuel = defaultdict(lambda: defaultdict(int))
@@ -223,7 +223,7 @@ if isinstance(wdata, list) and len(wdata) == len(SITES):
 
 # ---------- 저장 ----------
 out = {"updated": datetime.now(KST).strftime("%Y-%m-%d %H:%M"), "first": FIRST,
-       "gas": gas, "smp": dict(sorted(smp.items())), "gen": gen, "dem": dem, "hid": hid, "lng": lng,
+       "gas": gas, "smp": dict(sorted(smp.items())), "gen": gen, "dem": dem, "hid": hid, "lng": lng, "sun": sun,
        "fuel": {m: dict(v) for m, v in sorted(fuel.items())}, "wx": wx, "src": src}
 OUT.mkdir(parents=True, exist_ok=True)
 (OUT / "summary.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
