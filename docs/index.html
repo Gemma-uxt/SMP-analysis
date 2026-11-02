@@ -504,13 +504,24 @@ function parseMerit(book){const res={},pri={},src={},T=v=>v==null?'':String(v).t
     Object.entries(part).forEach(([k,L])=>{if(L.length<5)return;if(!res[k]||p>pri[k]){res[k]=L.sort((a,b)=>a[2]-b[2]);pri[k]=p;src[k]=sh.name}})}
   return {months:res,src}}
 const hasM=m=>!!(MERIT&&((MERIT.months&&MERIT.months[m])||(MERIT.simple&&MERIT.simple[m])));
+const CAL={},GRP={'석탄':'coal','LNG 개별·직도입':'lng','LNG 평균':'lng','도시가스':'lng','유류':'oil'};
+function calOf(m){if(m in CAL)return CAL[m];const f=D&&D.fuel&&D.fuel[m];
+  const vs=days(D.smp,m).flatMap(d=>D.smp[d]).filter(v=>v!=null).sort((a,b)=>a-b);
+  const c=f?+f['석탄']||0:0,l=f?+f['LNG']||0:0,o=f?+f['유류']||0:0,t=c+l+o;
+  if(!t||!vs.length)return CAL[m]=null;
+  const n=vs.length,ic=Math.round(n*c/t),io=Math.round(n*o/t);
+  return CAL[m]={coal:ic>0?vs[ic-1]:-Infinity,oil:io>0?vs[n-io]:Infinity}}
 function est(m,v){if(!MERIT||v==null)return null;
-  if(MERIT.simple){const t=MERIT.simple[m],r=t&&t[v];return r?{n:'',f:r[0],p:null,d:r[1],raw:''}:null}
-  const L=MERIT.months&&MERIT.months[m];if(!L)return null;let b=null;
-  for(const u of L){if(u[1]==='원전')continue;const d=Math.abs(u[2]-v);if(!b||d<b.d)b={n:u[0],f:u[1],p:u[2],d,raw:u[3]}}return b}
+  if(MERIT.simple){const t=MERIT.simple[m],r=t&&t[v];return r?{n:'',f:r[0],p:null,d:r[1],raw:'',cal:r[2]}:null}
+  const L=MERIT.months&&MERIT.months[m];if(!L)return null;
+  const K=calOf(m),g=!K?null:v<=K.coal?'coal':v>=K.oil?'oil':'lng';let b=null,b2=null;
+  for(const u of L){if(u[1]==='원전')continue;const d=Math.abs(u[2]-v),x={n:u[0],f:u[1],p:u[2],d,raw:u[3]};
+    if(!b||d<b.d)b=x;if(g&&GRP[u[1]]===g&&(!b2||d<b2.d))b2=x}
+  if(b2){b2.cal=1;return b2}return b}
+
 let HATCH=null;
 function hatch(){if(HATCH)return HATCH;const c=document.createElement('canvas');c.width=c.height=6;const x=c.getContext('2d');x.fillStyle='#EEF1F5';x.fillRect(0,0,6,6);x.strokeStyle='#8A96A8';x.beginPath();x.moveTo(0,6);x.lineTo(6,0);x.stroke();return HATCH=x.createPattern(c,'repeat')}
-const colOf=e=>!e?'#F1F5F9':e.d>TOL?hatch():(FC[e.f]||FC['기타']);
+const colOf=e=>!e?'#F1F5F9':(!e.cal&&e.d>TOL)?hatch():(FC[e.f]||FC['기타']);
 function meritNote(){if(!MERIT)return '급전순위 파일을 선택하면 시간대별 결정 연료를 추정해 표시(이 PC 브라우저에만 저장, 외부 전송 없음)';
   if(MERIT.simple)return `급전순위: ${MERIT.file} 기준 추정 결과(간략본 · 발전기명·발전가격 제외)`;
   const ks=Object.keys(MERIT.months).sort(),by={};ks.forEach(k=>{const s=(MERIT.src&&MERIT.src[k])||'?';(by[s]=by[s]||[]).push(k)});
@@ -651,7 +662,7 @@ function r23(){if(!D)return;const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.
     ds.forEach((d,k)=>{dayAt[k*24+12]=[+d.slice(8),k];D.smp[d].forEach((v,h)=>{labs.push(`${+d.slice(8)}일 ${h+1}시`);vals.push(v);fu.push(est(m,v))})});
     $(tt).textContent=`${m.slice(0,4)}년 ${moN(m)}월 · 평일 ${ds.length}일`;
     const has=hasM(m);
-    if(has){const cnt={};fu.forEach(e=>{const k=!e?'미추정':e.d>TOL?'불확실':e.f;cnt[k]=(cnt[k]||0)+1});
+    if(has){const cnt={};fu.forEach(e=>{const k=!e?'미추정':(!e.cal&&e.d>TOL)?'불확실':e.f;cnt[k]=(cnt[k]||0)+1});
       $(st).textContent=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${k} ${Math.round(n/fu.length*100)}%`).join(' · ')}
     else $(st).textContent=MERIT?'급전순위 파일에 이 달 표 없음':'';
     const i13=ds.findIndex(d=>+d.slice(8)===13);
@@ -659,7 +670,7 @@ function r23(){if(!D)return;const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.
     const tip={callbacks:{title:it=>it.length?labs[it[0].dataIndex]:'',label:c=>`SMP ${f2(vals[c.dataIndex])}원/kWh`,
       afterLabel:c=>{const e=fu[c.dataIndex];if(!e)return has?'':'급전순위 파일을 선택하면 결정 발전기 표시';
         if(!e.n)return `추정 결정 연료: ${e.f}${e.d>TOL?' (추정 불확실)':''}`;
-        return [`추정 결정: ${e.n} (${e.f}${e.raw&&e.raw!==e.f?' · '+e.raw:''})`,`발전가격 ${f2(e.p)}원/kWh · 차이 ${f2(e.d)}원${e.d>TOL?' → 추정 불확실':''}`]}}};
+        return [`추정 결정: ${e.n} (${e.f}${e.raw&&e.raw!==e.f?' · '+e.raw:''})`,`발전가격 ${f2(e.p)}원/kWh · 차이 ${f2(e.d)}원${e.cal?' · 공식 비중 보정':e.d>TOL?' → 추정 불확실':''}`]}}};
     mkc(cvs,{type:'line',data:{labels:labs,datasets:[{data:vals,borderColor:L?C.slateD:C.ci,borderWidth:1.5,pointRadius:0,pointHitRadius:3}]},
       options:{interaction:{mode:'index',intersect:false},
         plugins:{legend:{display:false},tooltip:tip,xSep:{n:24},vGuide:{on:true},fStrip:{fu,top:stTop}},
@@ -669,7 +680,7 @@ function r23(){if(!D)return;const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.
   $('h23').textContent=`${moN(m1)}월 평일 SMP ${f1(smpWd(m0,cS).v)}→${f1(smpWd(m1,cS).v)}원/kWh · 아래 띠 = 추정 결정 연료`;
   const sw=bg=>`<span style="display:inline-block;width:12px;height:12px;background:${bg};vertical-align:-1px;margin:0 4px 0 12px;border:1px solid #CBD2DC"></span>`;
   $('g23').innerHTML='범례'+['석탄','LNG 개별·직도입','LNG 평균','도시가스','유류','기타'].map(k=>sw(FC[k])+k).join('')+sw('repeating-linear-gradient(45deg,#EEF1F5 0 3px,#8A96A8 3px 4px)')+`불확실(차이 ${TOL}원 초과)`+sw('#F1F5F9')+'미추정 · 원전은 가격결정 제외';
-  $('n23').textContent=`※ ${meritNote()} · SMP와 가장 가까운 발전가격의 발전기로 추정 · 마우스를 올리면 발전기 표시`;
+  $('n23').textContent=`※ ${meritNote()} · 전력거래소 공식 연료별 결정 비중에 맞춰 월 전체 SMP 하위 구간=석탄·상위=유류·나머지=LNG로 배정 후, 같은 연료 중 발전가격이 가장 가까운 발전기로 추정(공식 집계 미발표 월은 보정 없이 최근접 추정) · 마우스를 올리면 발전기 표시`;
   let t='<table class="t"><tr><th>월</th><th class="r">LNG</th><th class="r">석탄</th><th class="r">유류</th><th class="r">기타</th></tr>';
   [m0,m1].forEach(m=>{const f=D.fuel[m]||{},s=sum(Object.values(f))||1;t+=`<tr><td class="rh">${lab(m)}</td>`+['LNG','석탄','유류','기타'].map(k=>`<td class="r">${f1((f[k]||0)/s*100)}%</td>`).join('')+'</tr>'});
   $('t23').innerHTML=t+'</table>'}
@@ -710,7 +721,7 @@ function r3(){if(!D||!D.smp)return;const d=EVT;if(!d||!D.smp[d]){$('h3').textCon
   const only=(mtOut(d,'10:00','18:00')||[]).filter(u=>!nbSet.has(key(u))).sort((a,b)=>b[2]-a[2]);
   const tm=u=>`${u[3].slice(5,10)==d.slice(5)?u[3].slice(11):u[3].slice(5,10)}~${u[4].slice(5,10)==d.slice(5)?u[4].slice(11):u[4].slice(5,10)}`;
   const onlyTxt=!MT?'정비 자료 수집 중':only.length?`당일에만 정비: ${only.slice(0,3).map(u=>`${u[0]}(${MF[u[1]]||u[1]} ${Math.round(u[2])}MW, ${tm(u)})`).join(', ')}${only.length>3?` 외 ${only.length-3}기`:''}`:'당일에만 해당하는 정비 없음';
-  const fz=x=>{if(!x)return null;const c={};D.smp[x].slice(10,17).forEach(v=>{const e=est(x.slice(0,7),v);if(e&&e.d<=TOL)c[e.f]=(c[e.f]||0)+1});
+  const fz=x=>{if(!x)return null;const c={};D.smp[x].slice(10,17).forEach(v=>{const e=est(x.slice(0,7),v);if(e&&(e.cal||e.d<=TOL))c[e.f]=(c[e.f]||0)+1});
     const a=Object.entries(c).sort((p,q)=>q[1]-p[1]);return a.length?a.map(([k,n])=>`${k} ${n}시간`).join('·'):null};
   let why;
   if(ok(dd)&&dd>=1.5&&dd>=sup)why=`<b>수요 요인</b>: ${ok(dh)&&dh<-1?'흐림·비로 시장 밖 태양광이 줄어든 만큼 ':''}계통수요가 늘어, 낮에도 석탄보다 비싼 LNG 발전기가 가격을 결정`;
