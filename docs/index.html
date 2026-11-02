@@ -621,7 +621,7 @@ function r21b(){const P=py(M),cG=cutOf(D.gen,M),o=DM[DMODE];
 /* --- 2-2 --- */
 const SRC=[['원자력',['nuc']],['석탄',['coal']],['LNG',['lng']],['신재생(기타)',['renew','wind']],['태양광 계',SOL],['계통수요',MK]];
 const COLS=[{t:'원자력',k:['nuc']},{t:'석탄',k:['coal']},{t:'LNG',k:['lng']},{t:'신재생(기타)',k:['renew','wind']},{t:'태양광 계',k:SOL},{t:'계통수요',k:MK},{t:'원전 정비(GW)',mt:'nuc',sep:1},{t:'석탄 정비(GW)',mt:'coal'}];
-const TD='padding:2px 10px;line-height:1.2',SEP=';border-left:3px solid #8A96A8';
+const TD='padding:2px 10px;line-height:1.25',SEP=';border-left:3px solid #8A96A8';
 function cell(a,b){if(!a||!b)return `<td class="r" style="${TD}">-</td>`;const p=pc(b,a),dv=b-a,x=GMODE==='pct'?p:dv;
   return `<td class="r" style="${TD}" title="전년 ${f2(a)} → 올해 ${f2(b)} TWh (${sg(p)}%, ${sg(dv,2)}TWh)"><span class="${x>0?'up':'dn'}" style="font-size:17px;font-weight:700">${GMODE==='pct'?sg(p)+'%':sg(dv,2)}</span></td>`}
 function mcell(a,b,sep){return `<td class="r" style="${TD};font-size:15px;color:var(--ink2);background:#F7F9FB${sep?SEP:''}">${a==null&&b==null?'-':`${f1(a)}→<b>${f1(b)}</b>`}</td>`}
