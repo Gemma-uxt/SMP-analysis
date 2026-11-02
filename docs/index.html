@@ -762,6 +762,20 @@ $('saveH').onclick=()=>{
   const html=SRCH.replace(rx,m=>'<script>window.EMBED='+emb+';<\/script>\n'+m);
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
   a.download=`전력시장_검토_${M}${mer?(mer.simple?'_간략':'_상세'):''}.html`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
+/* ===== 헤드메시지 직접 입력 (비워 두면 자동 문구) ===== */
+const HL={
+  "2026-10":{
+    "1":"",
+    "1-1":"",
+    "2-1":"",
+    "2-2":"",
+    "2-3":"",
+    "3":""
+  }
+};
+function applyHL(){slides.forEach(s=>{const e=s.querySelector('.msg'),no=s.querySelector('.pno');if(!e||!no||typeof M==='undefined')return;
+  const t=(HL[M]||{})[no.textContent.trim()];if(t&&e.textContent!==t)e.textContent=t})}
+new MutationObserver(applyHL).observe(document.getElementById('stage'),{childList:true,subtree:true,characterData:true});
 </script>
 </body>
 </html>
