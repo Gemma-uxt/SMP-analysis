@@ -215,9 +215,9 @@ if isinstance(wdata, list) and len(wdata) == len(SITES):
             vs = [wdata[j]["daily"].get(key, [None] * (i + 1))[i] for j in idx]
             vs = [v for v in vs if v is not None]
             return round(sum(vs) / len(vs), 2) if vs else None
-        sun = av("sunshine_duration", range(4))
+        sdur = av("sunshine_duration", range(4))
         wx[d] = {"rad": av("shortwave_radiation_sum", range(4)), "cloud": av("cloud_cover_mean", range(4)),
-                 "prcp": av("precipitation_sum", range(4)), "sun": round(sun / 3600, 2) if sun is not None else None,
+                 "prcp": av("precipitation_sum", range(4)), "sun": round(sdur / 3600, 2) if sdur is not None else None,
                  "tmp": av("temperature_2m_mean", [4])}
 
 
