@@ -647,19 +647,64 @@ getJ('data/summary.json','D').then(j=>{if(!j)throw new Error('summary.json 없�
   fillE();$('sE').onchange=()=>{EVT=$('sE').value;safe(r3)};
   renderAll()}).catch(e=>{$('h1').textContent='데이터 불러오기 실패: '+e.message});
 
-/* ===== 헤드메시지 직접 입력 (비워 두면 자동 문구) ===== */
+/* ===== 헤드메시지: 직접 입력 > 자동 문구 =====
+   - 직접 쓰고 싶은 달·장만 적으면 됨. 안 적은 장은 숫자로 자동 작성
+   - 예) "2026-11":{"1":"직접 쓴 문장", "2-2":"직접 쓴 문장"}            */
 const HL={
   "2026-10":{
     "1":"10월 LNG단가는 전년 대비 +48.1% 상승했음에도 불구, 평일 SMP는 +0.5% 상승",
     "1-1":"SMP/LNG 비율 10.4로 올해 최저치",
     "2-1":"10월 계통수요는 43.3TWh에서 43.8TWh로 상승하였으나, 평일 낮 태양광 제외 전력수요는 최대 5.8GW 감소",
     "2-2":"10월 태양광 발전량은 +44.2% 증가하였으며, LNG 발전량은 ▼23.6% 감소",
-    "2-3":"",
+    "2-3":"전년 동월 대비 석탄 및 평균요금제 발전기의 SMP 결정 횟수 증가 ",
     "3":"10월 13일 낮 SMP 171.6원/kWh로 일시 상승. 강수 영향으로 추정"
   }
 };
-function applyHL(){slides.forEach(s=>{const e=s.querySelector('.msg'),no=s.querySelector('.pno');if(!e||!no||typeof M==='undefined')return;
-  const t=(HL[M]||{})[no.textContent.trim()];if(t&&e.textContent!==t)e.textContent=t})}
+/* ===== 3장 기타 특이사항 자동 판단 =====
+   EVT_TH  : 낮(11~17시) 평균 SMP가 전후 평일보다 이만큼(원/kWh) 이상 높으면 특이일
+   EVT_FIX : 대상일 고정. "YYYY-MM":null 로 적으면 그 달 3장 숨김            */
+const EVT_TH=15;
+const EVT_FIX={"2026-10":"2026-10-13"};
+
+const av2=a=>{a=a.filter(v=>v!=null&&!isNaN(v));return a.length?a.reduce((s,v)=>s+v,0)/a.length:null};
+const ud=(x,u,d)=>x>=0?u:d;
+function autoHL(){const o={};if(!D||!M)return o;const mo=moN(M),P=py(M),cS=cutOf(D.smp,M),cG=cutOf(D.gen,M);
+  try{const lg=pc(D.gas[M],D.gas[P]),sp=pc(smpWd(M,cS).v,smpWd(P,cS).v);
+    if(lg!=null&&sp!=null)o['1']=lg>0&&sp<lg-5
+      ?`${mo}월 LNG단가는 전년 대비 ${sg(lg)}% 상승했음에도 불구, 평일 SMP는 ${sg(sp)}% ${ud(sp,'상승','하락')}`
+      :`${mo}월 LNG단가는 전년 대비 ${sg(lg)}%, 평일 SMP는 ${sg(sp)}% ${ud(sp,'상승','하락')}`}catch(e){}
+  try{const ms=monthsTo(M),r=ms.map(m=>{const s=smpWd(m,m===M?cS:null).v,g=D.gas[m];return s!=null&&g?s/g*100:null});
+    const v=r[r.length-1],pv=r[r.length-2],ok=r.filter(x=>x!=null);
+    if(v!=null)o['1-1']=ok.length>1&&v<=Math.min(...ok)?`SMP/LNG 비율 ${f1(v)}로 올해 최저치`
+      :ok.length>1&&v>=Math.max(...ok)?`SMP/LNG 비율 ${f1(v)}로 올해 최고치`
+      :`SMP/LNG 비율 ${f1(v)}${pv!=null?`, 전월(${f1(pv)}) 대비 ${ud(v-pv,'상승','하락')}`:''}`}catch(e){}
+  try{const a=E(P,cG,MK),b=E(M,cG,MK),s0=hrSeries(P,cG,DM.xa),s1=hrSeries(M,cG,DM.xa);
+    if(a!=null&&b!=null){let t=`${mo}월 계통수요는 ${f1(a)}TWh에서 ${f1(b)}TWh로 ${ud(b-a,'상승','감소')}`;
+      if(s0&&s1){const dv=s1.map((v,k)=>v!=null&&s0[k]!=null?v-s0[k]:null).filter(x=>x!=null);
+        if(dv.length&&Math.min(...dv)<0)t+=`${b>=a?'하였으나':'하였고'}, 평일 태양광 제외 전력수요는 최대 ${f1(-Math.min(...dv))}GW 감소`}
+      o['2-1']=t}}catch(e){}
+  try{const s=pc(E(M,cG,SOL),E(P,cG,SOL)),l=pc(E(M,cG,['lng']),E(P,cG,['lng']));
+    if(s!=null&&l!=null)o['2-2']=`${mo}월 태양광 발전량은 ${ud(s,'▲','▼')}${f1(Math.abs(s))}% ${ud(s,'증가','감소')}하였으며, LNG 발전량은 ${ud(l,'▲','▼')}${f1(Math.abs(l))}% ${ud(l,'증가','감소')}`}catch(e){}
+  return o}
+let AH={};
+function applyHL(){if(typeof M==='undefined'||!M)return;slides.forEach(s=>{const e=s.querySelector('.msg'),no=s.querySelector('.pno');if(!e||!no)return;
+  const k=no.textContent.trim(),t=(HL[M]||{})[k]||AH[k];if(t&&e.textContent!==t)e.textContent=t})}
+
+function findEvt(m){if(m in EVT_FIX)return EVT_FIX[m];
+  const ds=days(D.smp,m).filter(isWd),mid=d=>av2((D.smp[d]||[]).slice(10,17));let best=null;
+  ds.forEach((d,k)=>{const nb=av2([ds[k-2],ds[k-1],ds[k+1],ds[k+2]].filter(Boolean).map(mid)),g=mid(d);
+    if(nb==null||g==null)return;if(!best||g-nb>best.g)best={d,g:g-nb}});
+  return best&&best.g>=EVT_TH?best.d:null}
+(()=>{const s=document.createElement('style');s.textContent='.slide.off{display:none!important}';document.head.appendChild(s)})();
+const S3=slides.find(s=>s.querySelector('#sE'));
+function show3(on){if(!S3)return;S3.classList.toggle('off',!on);const idx=slides.indexOf(S3);
+  if(sel.options[idx]){sel.options[idx].hidden=!on;sel.options[idx].disabled=!on}
+  const vis=slides.filter(x=>!x.classList.contains('off'));vis.forEach((x,k)=>{const pg=x.querySelector('.pg');if(pg)pg.textContent=(k+1)+' / '+vis.length});
+  if(!on&&cur===idx)go(idx-1)}
+const go0=go;go=function(n){let last=slides.length-1;while(last>0&&slides[last].classList.contains('off'))last--;go0(Math.min(n,last))};
+const rAll0=renderAll;renderAll=function(){
+  if(D&&M){const d=findEvt(M);if(d){EVT=d;if([...$('sE').options].some(x=>x.value===d))$('sE').value=d}show3(!!d)}
+  rAll0();AH=autoHL();applyHL()};
 new MutationObserver(applyHL).observe(document.getElementById('stage'),{childList:true,subtree:true,characterData:true});
 </script>
 </body>
