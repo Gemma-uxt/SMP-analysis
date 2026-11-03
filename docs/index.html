@@ -449,95 +449,6 @@ function peak(m,cut){const v=days(D.dem,m,cut).filter(isWd).map(d=>Math.max(...D
 const dayE=(d,keys)=>sum(keys.map(k=>D.gen[d][k]))*24/1e6;
 function E(m,cut,keys){const ds=days(D.gen,m,cut);if(!ds.length)return null;return avg(ds.map(d=>dayE(d,keys)))*(cut||mLen(m))}
 
-/* --- 급전순위 (브라우저 안에서만 읽음) --- */
-async function unzip(buf){const u8=new Uint8Array(buf),dv=new DataView(buf);let e=-1;
-  for(let i=u8.length-22;i>=Math.max(0,u8.length-70000);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break}}
-  if(e<0)throw new Error('엑셀(xlsx) 형식이 아닙니다');
-  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const F={},td=new TextDecoder();
-  for(let k=0;k<n;k++){if(dv.getUint32(p,true)!==0x02014b50)break;
-    const meth=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
-    const name=td.decode(u8.subarray(p+46,p+46+nl)),s=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true);
-    F[name]={meth,data:u8.subarray(s,s+cs)};p+=46+nl+xl+cl}
-  return F}
-async function inflate(f){if(!f)return '';let b=f.data;if(f.meth===8){const s=new Blob([b]).stream().pipeThrough(new DecompressionStream('deflate-raw'));b=new Uint8Array(await new Response(s).arrayBuffer())}return new TextDecoder().decode(b)}
-const xml=s=>new DOMParser().parseFromString(s||'<x/>','application/xml');
-function colN(r){let n=0;for(const ch of r.match(/^[A-Z]+/)[0])n=n*26+ch.charCodeAt(0)-64;return n-1}
-async function readBook(file){const F=await unzip(await file.arrayBuffer());
-  const ss=[...xml(await inflate(F['xl/sharedStrings.xml'])).getElementsByTagName('si')].map(si=>[...si.getElementsByTagName('t')].filter(t=>t.parentNode.nodeName!=='rPh').map(t=>t.textContent).join(''));
-  const wb=xml(await inflate(F['xl/workbook.xml'])),rel=xml(await inflate(F['xl/_rels/workbook.xml.rels']));
-  const tg={};[...rel.getElementsByTagName('Relationship')].forEach(r=>tg[r.getAttribute('Id')]=r.getAttribute('Target'));
-  const out=[];
-  for(const sh of wb.getElementsByTagName('sheet')){const t=(tg[sh.getAttribute('r:id')]||'').replace(/^\//,''),path=t.startsWith('xl/')?t:'xl/'+t;
-    const doc=xml(await inflate(F[path])),g=[];
-    for(const row of doc.getElementsByTagName('row')){const r=+row.getAttribute('r')-1,arr=[];
-      for(const c of row.getElementsByTagName('c')){const ref=c.getAttribute('r');if(!ref)continue;const tt=c.getAttribute('t'),v=c.getElementsByTagName('v')[0];
-        arr[colN(ref)]=tt==='s'&&v?ss[+v.textContent]:tt==='inlineStr'?c.textContent:v?v.textContent:null}
-      g[r]=arr}
-    out.push({name:sh.getAttribute('name'),grid:g})}
-  return out}
-function fuelOf(f,n){f=String(f||'').replace(/\s/g,'');n=String(n||'');
-  if(/원자력|원전|핵연료/.test(f)||(!f&&/한빛|한울|고리|월성|새울|신한울|신고리|신월성/.test(n)))return '원전';
-  if(/도시가스/.test(f))return '도시가스';
-  if(/부생|혼소/.test(f))return '기타';
-  if(/탄/.test(f))return '석탄';
-  if(/직도입|개별/.test(f))return 'LNG 개별·직도입';
-  if(/LNG|가스|평균|집단|천연|KOGAS/i.test(f))return 'LNG 평균';
-  if(/유|LPG/i.test(f))return '유류';
-  if(!f&&/복합|CC|GT|열병합/.test(n))return 'LNG 평균';
-  return '기타'}
-const RX_NM=/발전기\s*명|^발전기$/,RX_PR=/발전\s*가격|변동비|발전\s*단가/,RX_FU=/연료|발전원|원별/,RX_MO=/^\s*(?:(20\d{2}|\d{2})\s*년\s*)?(\d{1,2})\s*월/;
-function parseMerit(book){const res={},pri={},src={},T=v=>v==null?'':String(v).trim();
-  for(const sh of book){const g=sh.grid,sy=(sh.name.match(/(20\d{2}|\d{2})\s*년/)||[])[1],sm=(sh.name.match(/(\d{1,2})\s*월/)||[])[1],part={};
-    for(let r=0;r<g.length;r++){const row=g[r];if(!row)continue;
-      for(let c=0;c<row.length;c++){if(!RX_NM.test(T(row[c])))continue;
-        let pi=null,fc=null,fd=99;
-        for(let k=c+1;k<=c+10;k++){const t=T(row[k]);if(RX_NM.test(t))break;if(pi==null&&RX_PR.test(t))pi=k;if(RX_FU.test(t)&&!RX_PR.test(t)&&k-c<fd){fc=k;fd=k-c}}
-        for(let k=c-1;k>=Math.max(0,c-4);k--){const t=T(row[k]);if(RX_NM.test(t)||RX_PR.test(t))break;if(RX_FU.test(t)&&c-k<fd){fc=k;fd=c-k}}
-        if(pi==null)continue;
-        let mo=null,yr=null;
-        for(let rr=r-1;rr>=Math.max(0,r-6)&&mo==null;rr--){const rw=g[rr]||[];let best=null;
-          for(let k=Math.max(0,c-6);k<=c+10;k++){const t=T(rw[k]);if(!t||t.length>30)continue;const mm=t.match(/(?:(20\d{2}|\d{2})\s*년\s*)?(\d{1,2})\s*월/);
-            if(mm&&+mm[2]>=1&&+mm[2]<=12){const d=Math.abs(k-c);if(!best||d<best.d)best={d,mo:+mm[2],yr:mm[1]}}}
-          if(best){mo=best.mo;yr=best.yr}}
-        if(mo==null&&sm)mo=+sm;yr=yr||sy;if(mo==null||!yr)continue;
-        const key=`${yr.length===2?2000+ +yr:+yr}-${dd2(mo)}`,list=part[key]||(part[key]=[]),seen=new Set(list.map(x=>x[0]));let blank=0;
-        for(let rr=r+1;rr<g.length&&blank<5;rr++){const rw=g[rr]||[],nm=T(rw[c]);
-          if(RX_NM.test(nm)||RX_MO.test(nm))break;
-          if(!nm){blank++;continue}blank=0;
-          const pr=parseFloat(T(rw[pi]).replace(/,/g,''));
-          if(isNaN(pr)||pr<=0||/합계|소계|누계/.test(nm))continue;
-          if(!seen.has(nm)){seen.add(nm);const raw=fc!=null?T(rw[fc]):'';list.push([nm,fuelOf(raw,nm),Math.round(pr*100)/100,raw])}}}}
-    const p=sm?2:1;
-    Object.entries(part).forEach(([k,L])=>{if(L.length<5)return;if(!res[k]||p>pri[k]){res[k]=L.sort((a,b)=>a[2]-b[2]);pri[k]=p;src[k]=sh.name}})}
-  return {months:res,src}}
-const hasM=m=>!!(MERIT&&((MERIT.months&&MERIT.months[m])||(MERIT.simple&&MERIT.simple[m])));
-const CAL={},GRP={'석탄':'coal','LNG 개별·직도입':'lng','LNG 평균':'lng','도시가스':'lng','유류':'oil'};
-function calOf(m){if(m in CAL)return CAL[m];const f=D&&D.fuel&&D.fuel[m];
-  const vs=days(D.smp,m).flatMap(d=>D.smp[d]).filter(v=>v!=null).sort((a,b)=>a-b);
-  const c=f?+f['석탄']||0:0,l=f?+f['LNG']||0:0,o=f?+f['유류']||0:0,t=c+l+o;
-  if(!t||!vs.length)return CAL[m]=null;
-  const n=vs.length,ic=Math.round(n*c/t),io=Math.round(n*o/t);
-  return CAL[m]={coal:ic>0?vs[ic-1]:-Infinity,oil:io>0?vs[n-io]:Infinity}}
-function est(m,v){if(!MERIT||v==null)return null;
-  if(MERIT.simple){const t=MERIT.simple[m],r=t&&t[v];return r?{n:'',f:r[0],p:null,d:r[1],raw:'',cal:r[2]}:null}
-  const L=MERIT.months&&MERIT.months[m];if(!L)return null;
-  const K=calOf(m),g=!K?null:v<=K.coal?'coal':v>=K.oil?'oil':'lng';let b=null,b2=null;
-  for(const u of L){if(u[1]==='원전')continue;const d=Math.abs(u[2]-v),x={n:u[0],f:u[1],p:u[2],d,raw:u[3]};
-    if(!b||d<b.d)b=x;if(g&&GRP[u[1]]===g&&(!b2||d<b2.d))b2=x}
-  if(b2){b2.cal=1;return b2}return b}
-
-let HATCH=null;
-function hatch(){if(HATCH)return HATCH;const c=document.createElement('canvas');c.width=c.height=6;const x=c.getContext('2d');x.fillStyle='#EEF1F5';x.fillRect(0,0,6,6);x.strokeStyle='#8A96A8';x.beginPath();x.moveTo(0,6);x.lineTo(6,0);x.stroke();return HATCH=x.createPattern(c,'repeat')}
-const colOf=e=>!e?'#F1F5F9':(!e.cal&&e.d>TOL)?hatch():(FC[e.f]||FC['기타']);
-function meritNote(){if(!MERIT)return '급전순위 파일을 선택하면 시간대별 결정 연료를 추정해 표시(이 PC 브라우저에만 저장, 외부 전송 없음)';
-  if(MERIT.simple)return `급전순위: ${MERIT.file} 기준 추정 결과(간략본 · 발전기명·발전가격 제외)`;
-  const ks=Object.keys(MERIT.months).sort(),by={};ks.forEach(k=>{const s=(MERIT.src&&MERIT.src[k])||'?';(by[s]=by[s]||[]).push(k)});
-  return `급전순위: ${MERIT.file} · 읽은 월 ${ks.length}개 (`+Object.entries(by).map(([s,a])=>`${s}: ${lab(a[0])}~${lab(a[a.length-1])} ${a.length}개`).join(' / ')+')'}
-$('moFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('n23').textContent='급전순위 파일 읽는 중…';
-  try{const r=parseMerit(await readBook(f));if(!Object.keys(r.months).length)throw new Error('발전기명·발전가격(변동비) 제목 줄을 찾지 못함');
-    MERIT={file:f.name,months:r.months,src:r.src};try{localStorage.setItem('meritV3',JSON.stringify(MERIT))}catch(_){}
-    safe(r23);safe(r3)}catch(err){$('n23').textContent='급전순위 파일 읽기 실패: '+err.message}};
-
 /* --- 예방정비 --- */
 const MF={nuc:'원자력',coal:'석탄',lng:'LNG',pump:'양수',hydro:'수력',oil:'유류',etc:'기타'};
 function mtRange(){if(MTR||!MT||!MT.units||!MT.units.length)return MTR;let a='9',b='0';MT.units.forEach(u=>{if(u[3]<a)a=u[3];if(u[4]>b)b=u[4]});return MTR=[a.slice(0,10),b.slice(0,10)]}
@@ -759,20 +670,7 @@ getJ('data/summary.json','D').then(j=>{if(!j)throw new Error('summary.json 없�
     EVT=ds.includes('2026-10-13')?'2026-10-13':ds.reduce((a,d)=>avg(D.smp[d])>avg(D.smp[a]||[0])?d:a,ds[0]);s.value=EVT}
   fillE();$('sE').onchange=()=>{EVT=$('sE').value;safe(r3)};
   renderAll()}).catch(e=>{$('h1').textContent='데이터 불러오기 실패: '+e.message});
-$('saveH').onclick=()=>{
-  if(EMB){alert('이미 저장된 파일입니다. 이 파일을 그대로 보내면 됩니다.');return}
-  if(!D||!SRCH){alert('데이터를 불러오는 중입니다. 잠시 후 다시 눌러 주세요.');return}
-  let mer=null;
-  if(MERIT&&MERIT.months){const ch=prompt('급전순위 추정 결과를 어떻게 넣을까요? 숫자를 입력하세요.\n1 = 상세 (마우스를 올리면 발전기명·발전가격 표시)\n2 = 간략 (연료 색만, 발전기명·발전가격 제외)','2');
-    if(ch==null)return;
-    if(String(ch).trim()==='1')mer=MERIT;
-    else{const simple={};Object.keys(MERIT.months).forEach(m=>{const t={};Object.keys(D.smp).filter(d=>d.startsWith(m)).forEach(d=>D.smp[d].forEach(v=>{const e=est(m,v);if(e)t[v]=[e.f,e.d>TOL?99:0]}));if(Object.keys(t).length)simple[m]=t});mer={file:MERIT.file,simple}}}
-  else if(!confirm('급전순위 파일이 선택되지 않았습니다. 결정 연료 없이 저장할까요?'))return;
-  const emb=JSON.stringify({D,MT,MERIT:mer,M}).replace(/</g,'\\u003c'),rx=/<script>\s*\/\* ===== 데이터 연결/;
-  if(!rx.test(SRCH)){alert('저장 실패: 페이지 구조를 찾지 못했습니다');return}
-  const html=SRCH.replace(rx,m=>'<script>window.EMBED='+emb+';<\/script>\n'+m);
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-  a.download=`전력시장_검토_${M}${mer?(mer.simple?'_간략':'_상세'):''}.html`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
+
 /* ===== 헤드메시지 직접 입력 (비워 두면 자동 문구) ===== */
 const HL={
   "2026-10":{
