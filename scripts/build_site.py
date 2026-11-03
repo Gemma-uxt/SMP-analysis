@@ -186,39 +186,61 @@ if fp.exists():
 
 
 # ---------- 5) 날씨(태양광 밀집 4곳 평균 + 서울 기온) ----------
+import time
 SITES = [("목포", 34.82, 126.38), ("전주", 35.82, 127.15), ("서산", 36.78, 126.49), ("안동", 36.57, 128.71), ("서울", 37.57, 126.97)]
-VARS_FULL = "shortwave_radiation_sum,cloud_cover_mean,precipitation_sum,sunshine_duration,temperature_2m_mean"
-VARS_LITE = "shortwave_radiation_sum,precipitation_sum,sunshine_duration,temperature_2m_mean"
+DAILY = "shortwave_radiation_sum,cloud_cover_mean,precipitation_sum,sunshine_duration,temperature_2m_mean"
+today = datetime.now(KST).date()
+
+# 이전에 만든 날씨는 보관(이번에 받기 실패해도 사라지지 않게)
+try:
+    wx = json.loads((OUT / "summary.json").read_text(encoding="utf-8")).get("wx") or {}
+except Exception:
+    wx = {}
 
 
-def fetch_weather(end, daily):
+def fetch(base, extra):
     q = {"latitude": ",".join(str(s[1]) for s in SITES), "longitude": ",".join(str(s[2]) for s in SITES),
-         "start_date": FIRST, "end_date": end, "daily": daily, "timezone": "Asia/Seoul"}
-    url = "https://archive-api.open-meteo.com/v1/archive?" + urllib.parse.urlencode(q)
-    with urllib.request.urlopen(url, timeout=120) as res:
-        return json.loads(res.read())
-
-
-wx, wdata, today = {}, None, datetime.now(KST).date()
-for daily in (VARS_FULL, VARS_LITE):
-    for lag in (2, 6, 10):
+         "daily": DAILY, "timezone": "Asia/Seoul", **extra}
+    url = base + "?" + urllib.parse.urlencode(q)
+    for i in range(3):
         try:
-            wdata = fetch_weather((today - timedelta(days=lag)).isoformat(), daily)
-            break
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (SMP-analysis)"})
+            with urllib.request.urlopen(req, timeout=120) as res:
+                return json.loads(res.read())
         except Exception as e:
-            print("날씨 받기 실패", lag, "일 전까지:", e)
-    if wdata:
-        break
-if isinstance(wdata, list) and len(wdata) == len(SITES):
-    for i, d in enumerate(wdata[0]["daily"]["time"]):
+            print("날씨 받기 실패", i + 1, "회:", e)
+            time.sleep(20 * (i + 1))
+    return None
+
+
+def merge(data):
+    if not (isinstance(data, list) and len(data) == len(SITES)):
+        return 0
+    n = 0
+    for i, d in enumerate(data[0]["daily"]["time"]):
         def av(key, idx):
-            vs = [wdata[j]["daily"].get(key, [None] * (i + 1))[i] for j in idx]
+            vs = [data[j]["daily"].get(key, [None] * (i + 1))[i] for j in idx]
             vs = [v for v in vs if v is not None]
             return round(sum(vs) / len(vs), 2) if vs else None
+        rad = av("shortwave_radiation_sum", range(4))
+        if rad is None:
+            continue
         sdur = av("sunshine_duration", range(4))
-        wx[d] = {"rad": av("shortwave_radiation_sum", range(4)), "cloud": av("cloud_cover_mean", range(4)),
-                 "prcp": av("precipitation_sum", range(4)), "sun": round(sdur / 3600, 2) if sdur is not None else None,
+        wx[d] = {"rad": rad, "cloud": av("cloud_cover_mean", range(4)),
+                 "prcp": av("precipitation_sum", range(4)),
+                 "sun": round(sdur / 3600, 2) if sdur is not None else None,
                  "tmp": av("temperature_2m_mean", [4])}
+        n += 1
+    return n
+
+
+# 최근 2주(예보 모델) 먼저 → 과거 관측 기록으로 덮어쓰기
+n2 = merge(fetch("https://api.open-meteo.com/v1/forecast", {"past_days": 14, "forecast_days": 1}))
+start = FIRST if len(wx) < 300 else (today - timedelta(days=60)).isoformat()
+n1 = merge(fetch("https://archive-api.open-meteo.com/v1/archive",
+                 {"start_date": start, "end_date": (today - timedelta(days=2)).isoformat()}))
+wx = dict(sorted((d, v) for d, v in wx.items() if FIRST <= d < today.isoformat()))
+print(f"날씨: 과거 {n1}일 · 최근 {n2}일 갱신, 보관 {len(wx)}일")
 
 
 # ---------- 저장 ----------
