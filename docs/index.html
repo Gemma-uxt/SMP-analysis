@@ -289,32 +289,19 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
   <div class="hd"><span class="pno">2-3</span><span class="pt"><span class="cmT">-</span>월 SMP 변동 요인 - 원별 SMP 결정</span>
     <span class="mo">비교 월 <select id="sC"></select></span></div>
   <div class="msg" id="h23">-</div>
-  <div class="bd" style="padding-top:14px">
-    <div class="row f1">
-      <div class="card f1"><div class="cb" style="gap:4px">
-        <div class="sh"><span id="t23L" style="white-space:nowrap">전년</span><small id="s23L"></small></div>
-        <div class="cv"><canvas id="c23L"></canvas></div>
-      </div></div>
-      <div class="card f1"><div class="cb" style="gap:4px">
-        <div class="sh"><span id="t23R" style="white-space:nowrap">올해</span><small id="s23R"></small></div>
-        <div class="cv"><canvas id="c23R"></canvas></div>
-      </div></div>
-    </div>
-    <div class="row" style="height:180px;flex:none">
-      <div class="card f1"><div class="cb" style="gap:4px;padding:8px 16px">
-        <div class="sh"><span>공식 연료별 SMP 결정 비중</span><small id="s23f"></small></div>
-        <div class="cv"><canvas id="c23f"></canvas></div>
-      </div></div>
-      <div class="card f1"><div class="cb" style="gap:4px;padding:8px 16px">
-        <div class="sh"><span>월별 석탄 결정 비중</span><small>% · 월 전체</small></div>
-        <div class="cv"><canvas id="c23t"></canvas></div>
-      </div></div>
-    </div>
+  <div class="bd" style="padding-top:14px;gap:12px">
+    <div class="card" style="flex:1.1;min-height:0"><div class="cb" style="gap:4px">
+      <div class="sh"><span>연료별 SMP 결정 비중</span><small id="s23f"></small></div>
+      <div class="cv"><canvas id="c23f"></canvas></div>
+    </div></div>
+    <div class="card" style="flex:1;min-height:0"><div class="cb" style="gap:4px">
+      <div class="sh"><span>월별 석탄 결정 비중</span><small>% · 월 전체(주말 포함)</small></div>
+      <div class="cv"><canvas id="c23t"></canvas></div>
+    </div></div>
     <div class="note" id="n23">-</div>
   </div>
   <div class="ft"><span class="pg"></span></div>
 </section>
-
 
 <!-- ===================== 3 기타 특이사항 ===================== -->
 <section class="slide">
@@ -353,7 +340,7 @@ slides.forEach((s,i)=>{const no=s.querySelector('.pno'),pt=s.querySelector('.pt'
   sel.add(new Option(i===0?'표지':((no?no.textContent+'. ':'')+(pt?pt.textContent:'')).trim(),i));
   const pg=s.querySelector('.pg');if(pg)pg.textContent=(i+1)+' / '+slides.length});
 function go(n){n=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>s.classList.toggle('active',i===n));cur=n;sel.value=n;
-  history.replaceState(null,'','#'+(n+1));(chartsBySlide[n]||[]).forEach(c=>{c.reset();c.update()})}
+  history.replaceState(null,'','#'+(n+1));requestAnimationFrame(()=>(chartsBySlide[n]||[]).forEach(c=>{c.resize();c.reset();c.update()}))}
 function goTo(t){if(typeof t==='number')return go(t);const i=slides.findIndex(s=>s.id===t);if(i>=0)go(i)}
 sel.onchange=()=>go(+sel.value);
 document.getElementById('prev').onclick=()=>go(cur-1);
@@ -552,10 +539,12 @@ function r22(){if(!D)return;const cG=cutOf(D.gen,M),ms=monthsTo(M);
   const so=[E(py(M),cG,SOL),E(M,cG,SOL)],lgE=[E(py(M),cG,['lng']),E(M,cG,['lng'])];
   $('h22').textContent=`${moN(M)}월 태양광 ${sg(pc(so[1],so[0]))}%, LNG 발전 ${sg(pc(lgE[1],lgE[0]))}%`;
   $('b22').innerHTML=`<li>태양광 계 ${f2(so[0])}→${f2(so[1])}TWh · LNG ${f2(lgE[0])}→${f2(lgE[1])}TWh · 정비(${moN(M)}월 평균) 원전 ${f1(mtMonth(py(M),'nuc'))}→${f1(mtMonth(M,'nuc'))}GW, 석탄 ${f1(mtMonth(py(M),'coal'))}→${f1(mtMonth(M,'coal'))}GW</li>`;
-  const W=(m,k)=>avg(days(D.wx,m,cG).map(d=>D.wx[d][k])),R=[['일사량(MJ/㎡)','rad'],['운량(%)','cloud'],['강수량(mm/일)','prcp'],['일조(시간)','sun']];
-  $('w22').innerHTML='<table class="t" style="font-size:14px"><tr><th></th><th class="r">전년</th><th class="r">올해</th></tr>'+R.map(([n,k])=>`<tr><td class="rh">${n}</td><td class="r">${f1(W(py(M),k))}</td><td class="r">${f1(W(M,k))}</td></tr>`).join('')+'</table>';
-  const dr=pc(W(M,'rad'),W(py(M),'rad')),dp=W(M,'prcp')-W(py(M),'prcp');
-  $('x22').innerHTML=`일사량 <b>${sg(dr)}%</b>, 강수 ${sg(dp)}mm/일. ${dr>3?'맑은 날이 늘어 설비 증가분에 날씨 효과가 더해짐':'날씨 효과는 크지 않아 증가분은 주로 설비 확대(PPA·BTM 포함)로 추정'}`;
+   if(!D.wx)D.wx={};
+  const W=(m,k)=>avg(days(D.wx,m,cG).map(d=>D.wx[d][k]).filter(v=>v!=null)),CL=m=>days(D.wx,m,cG).filter(d=>D.wx[d].cloud!=null&&D.wx[d].cloud<30).length,hasW=days(D.wx,M,cG).length>0&&days(D.wx,py(M),cG).length>0;
+  const R=[['평균 운량(%)','cloud'],['일조시간(h/일)','sun'],['맑은 날(운량 30%↓)',null],['일사량(MJ/㎡·일)','rad'],['강수량(mm/일)','prcp']];
+  $('w22').innerHTML='<table class="t" style="font-size:14px"><tr><th></th><th class="r">전년</th><th class="r">올해</th></tr>'+R.map(([n,k],i)=>`<tr${i<3?' style="font-weight:700"':''}><td class="rh">${n}</td><td class="r">${k?f1(W(py(M),k)):CL(py(M))+'일'}</td><td class="r">${k?f1(W(M,k)):CL(M)+'일'}</td></tr>`).join('')+'</table>';
+  const dc=hasW?W(M,'cloud')-W(py(M),'cloud'):null,dsu=hasW?W(M,'sun')-W(py(M),'sun'):null;
+  $('x22').innerHTML=!hasW?'날씨 자료 없음(다음 자동 갱신 때 채워짐)':`운량 <b>${sg(dc)}%p</b>, 일조 <b>${sg(dsu)}시간/일</b> → ${dc<-3||dsu>0.5?'맑은 날이 늘어 설비 증가분에 날씨 효과가 더해짐':dc>3||dsu<-0.5?'날씨는 오히려 불리 → 증가분은 설비 확대(PPA·BTM 포함) 효과':'날씨 차이는 크지 않아 증가분은 주로 설비 확대(PPA·BTM 포함)로 추정'}`;
   let c='<table class="t"><tr><th>구분</th><th class="r">전년(TWh)</th><th class="r">올해(TWh)</th><th class="r">증감</th></tr>';
   SRC.forEach(([n,k])=>{const a=sum(ms.map(m=>E(py(m),m===M?cG:null,k))),b=sum(ms.map(m=>E(m,m===M?cG:null,k)));
     c+=`<tr><td class="rh">${n}</td><td class="r">${f1(a)}</td><td class="r">${f1(b)}</td><td class="r"><span class="${b>a?'up':'dn'}">${sg(pc(b,a))}%</span></td></tr>`});
@@ -566,39 +555,26 @@ const xSep={id:'xSep',beforeDatasetsDraw(ch,_,o){if(!o||!o.n)return;const x=ch.s
   for(let i=o.n;i<N;i+=o.n){const px=(x.getPixelForValue(i-1)+x.getPixelForValue(i))/2;ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke()}ctx.restore()}};
 const vGuide={id:'vGuide',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const t=ch.tooltip,act=t&&t.getActiveElements();if(!act||!act.length)return;const px=act[0].element.x,a=ch.chartArea,ctx=ch.ctx;
   ctx.save();ctx.strokeStyle='rgba(26,34,48,.6)';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(px,a.top);ctx.lineTo(px,a.bottom);ctx.stroke();ctx.restore()}};
-const segLbl={id:'segLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const ctx=ch.ctx;ctx.save();ctx.font=`700 13px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
-  ch.data.datasets.forEach((ds,di)=>{const m=ch.getDatasetMeta(di);if(m.hidden)return;m.data.forEach((el,i)=>{const v=ds.data[i];if(v==null||v<7)return;ctx.fillText(f1(v)+'%',(el.x+el.base)/2,el.y)})});ctx.restore()}};
+const segLbl={id:'segLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const ctx=ch.ctx;ctx.save();ctx.font=`700 ${o.size||16}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+  ch.data.datasets.forEach((ds,di)=>{const m=ch.getDatasetMeta(di);if(m.hidden)return;m.data.forEach((el,i)=>{const v=ds.data[i];if(v==null||v<5)return;ctx.fillText(f1(v)+'%',(el.x+el.base)/2,el.y)})});ctx.restore()}};
 Chart.register(xSep,vGuide,segLbl);
 const FK=['석탄','LNG','유류','기타'],FCOL={'석탄':'#8A96A8','LNG':'#00A6ED','유류':'#D93A3F','기타':'#1A2230'};
 function fShare(m){const f=D.fuel&&D.fuel[m];if(!f)return null;const s=sum(FK.map(k=>+f[k]||0));if(!s)return null;const o={};FK.forEach(k=>o[k]=(+f[k]||0)/s*100);return o}
-function r23(){if(!D)return;const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1);document.querySelectorAll('.cmT').forEach(e=>e.textContent=moN(m1));
-  const all=[m0,m1].flatMap(m=>days(D.smp,m,cS).filter(isWd).flatMap(d=>D.smp[d])).filter(v=>v!=null),yMin=all.length?Math.floor(Math.min(...all)/10)*10:0,yMax=all.length?Math.ceil(Math.max(...all)/10)*10:200;
-  const side=(m,L,cvs,tt,st)=>{const ds=days(D.smp,m,cS).filter(isWd),labs=[],vals=[],dayAt={};
-    ds.forEach((d,k)=>{dayAt[k*24+12]=[+d.slice(8),k];D.smp[d].forEach((v,h)=>{labs.push(`${+d.slice(8)}일 ${h+1}시`);vals.push(v)})});
-    const ok=vals.filter(v=>v!=null);
-    $(tt).textContent=`${m.slice(0,4)}년 ${moN(m)}월 · 평일 ${ds.length}일`;
-    $(st).textContent=ok.length?`평균 ${f1(avg(ok))} · 최고 ${f1(Math.max(...ok))}원/kWh`:'자료 없음';
-    const i13=ds.findIndex(d=>+d.slice(8)===13);
-    const showDay=i=>{const t=dayAt[i];if(!t)return '';const [dn,k]=t;if(dn===13)return '13일';if(i13>=0&&Math.abs(k-i13)===1)return '';return k%2===0?dn+'일':''};
-    mkc(cvs,{type:'line',data:{labels:labs,datasets:[{data:vals,borderColor:L?C.slateD:C.ci,borderWidth:1.5,pointRadius:0,pointHitRadius:3}]},
-      options:{interaction:{mode:'index',intersect:false},
-        plugins:{legend:{display:false},xSep:{n:24},vGuide:{on:true},tooltip:{callbacks:{title:it=>it.length?labs[it[0].dataIndex]:'',label:c=>`SMP ${f2(c.parsed.y)}원/kWh`}}},
-        scales:{x:{grid:noGrid,ticks:{autoSkip:false,maxRotation:0,callback:(v,i)=>showDay(i)}},y:{grid,min:yMin,max:yMax}}}})};
-  side(m0,true,'c23L','t23L','s23L');side(m1,false,'c23R','t23R','s23R');
+function r23(){if(!D)return;const m1=CMP,m0=py(CMP),cS=cutOf(D.smp,m1),mo=moN(m1);document.querySelectorAll('.cmT').forEach(e=>e.textContent=mo);
   const s0=fShare(m0),s1=fShare(m1),rows=[[m0,s0],[m1,s1]];
-  $('s23f').textContent=`${moN(m1)}월 · 월 전체(주말 포함)`;
-  mkc('c23f',{type:'bar',data:{labels:rows.map(([m,s])=>m.slice(0,4)+'년'+(s?'':' (미발표)')),datasets:FK.map(k=>({label:k,data:rows.map(([,s])=>s?s[k]:null),backgroundColor:FCOL[k],barPercentage:.75}))},
-    options:{indexAxis:'y',plugins:{legend:{position:'right',labels:{font:{size:12}}},segLbl:{on:true},tooltip:{callbacks:{label:c=>`${c.dataset.label} ${f1(c.parsed.x)}%`}}},
-      scales:{x:{stacked:true,min:0,max:100,grid,ticks:{callback:v=>v+'%'}},y:{stacked:true,grid:noGrid}}}});
+  $('s23f').textContent=`${mo}월 · 육지 · 월 전체(주말 포함)`;
+  mkc('c23f',{type:'bar',data:{labels:rows.map(([m,s])=>`${m.slice(0,4)}년 ${mo}월`+(s?'':' (미발표)')),datasets:FK.map(k=>({label:k,data:rows.map(([,s])=>s?s[k]:null),backgroundColor:FCOL[k],barPercentage:.7,categoryPercentage:.85}))},
+    options:{indexAxis:'y',plugins:{legend:{position:'right',labels:{font:{size:15}}},segLbl:{on:true,size:17},tooltip:{callbacks:{label:c=>`${c.dataset.label} ${f1(c.parsed.x)}%`}}},
+      scales:{x:{stacked:true,min:0,max:100,grid,ticks:{callback:v=>v+'%'}},y:{stacked:true,grid:noGrid,ticks:{font:{size:16,weight:'700'}}}}}});
   const ms=monthsTo(m1),coal=f=>ms.map(m=>{const s=fShare(f(m));return s?Math.round(s['석탄']*10)/10:null});
   mkc('c23t',{type:'line',data:{labels:ms.map(m=>moN(m)+'월'),datasets:[
-    {label:m0.slice(0,4)+'년',data:coal(py),borderColor:C.slate,backgroundColor:C.slate,borderWidth:3,pointRadius:3},
-    {label:m1.slice(0,4)+'년',data:coal(m=>m),borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:3}]},
-    options:{layout:{padding:{top:14}},plugins:{legend:{position:'right',labels:{font:{size:12}}},hlBand:{idx:ms.length-1},lbl:{on:true,only:[1],size:11,fmt:v=>f1(v)}},
-      scales:{x:{grid:noGrid},y:{grid,beginAtZero:true,grace:'15%',ticks:{callback:v=>v+'%'}}}}});
-  $('h23').textContent=s0&&s1?`${moN(m1)}월 석탄의 SMP 결정 비중 ${f1(s0['석탄'])}%→${f1(s1['석탄'])}%, LNG ${f1(s0.LNG)}%→${f1(s1.LNG)}%`
-    :`${moN(m1)}월 평일 SMP ${f1(smpWd(m0,cS).v)}→${f1(smpWd(m1,cS).v)}원/kWh · 공식 결정 비중 일부 미발표`;
-  $('n23').textContent=`※ 결정 비중: 전력거래소 EPSIS 연료원별 SMP 결정 횟수(육지, 주말 포함 월 전체) · 위 그래프: 평일 시간대별 SMP(육지)${cS?` · ${moN(m1)}월은 1~${cS}일 잠정`:''}`}
+    {label:m0.slice(0,4)+'년',data:coal(py),borderColor:C.slate,backgroundColor:C.slate,borderWidth:3,pointRadius:4},
+    {label:m1.slice(0,4)+'년',data:coal(m=>m),borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:4}]},
+    options:{layout:{padding:{top:18}},plugins:{legend:{position:'right',labels:{font:{size:15}}},hlBand:{idx:ms.length-1},lbl:{on:true,auto:true,size:14,fmt:v=>f1(v),color:(v,di)=>di?'#0080C4':C.slateD}},
+      scales:{x:{grid:noGrid,ticks:{font:{size:15}}},y:{grid,beginAtZero:true,grace:'15%',ticks:{callback:v=>v+'%'}}}}});
+  $('h23').textContent=s0&&s1?`${mo}월 석탄의 SMP 결정 비중 ${f1(s0['석탄'])}%→${f1(s1['석탄'])}%, LNG ${f1(s0.LNG)}%→${f1(s1.LNG)}%`
+    :`${mo}월 평일 SMP ${f1(smpWd(m0,cS).v)}→${f1(smpWd(m1,cS).v)}원/kWh · 공식 결정 비중 일부 미발표`;
+  $('n23').textContent=`※ 전력거래소 EPSIS 연료원별 SMP 결정 횟수 기준(육지, 주말 포함 월 전체)${cS?` · ${mo}월은 1~${cS}일 잠정`:''}`}
 
 /* --- 3 기타 특이사항 --- */
 const dayBand={id:'dayBand',beforeDatasetsDraw(ch,_,o){if(!o||o.a==null||o.a<0)return;const x=ch.scales.x,ar=ch.chartArea,w=Math.abs(x.getPixelForValue(1)-x.getPixelForValue(0))/2;
