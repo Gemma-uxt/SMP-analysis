@@ -338,24 +338,28 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
         <div class="ch blue">발전가격 순위 변화 (10월 → 11월)</div>
         <div class="cb">
           <div class="sh">가격대별 공급 가능량<small>누적 입찰량 · GW</small></div>
-          <div style="height:150px;position:relative"><canvas id="cRefB"></canvas></div>
-          <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:1.35">
+          <div style="height:120px;position:relative"><canvas id="cRefB"></canvas></div>
+          <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:1.3">
             <thead><tr style="background:var(--navy);color:#fff">
-              <th style="padding:5px 8px;text-align:left">발전기(LNG 직도입)</th><th style="padding:5px 8px">입찰량</th>
-              <th style="padding:5px 8px">10월</th><th style="padding:5px 8px">11월</th></tr></thead>
+              <th style="padding:4px 8px;text-align:left">발전기(LNG 직도입)</th><th style="padding:4px 8px">입찰량</th>
+              <th style="padding:4px 8px">10월</th><th style="padding:4px 8px">11월</th></tr></thead>
             <tbody>
-              <tr style="background:var(--red-l)"><td style="padding:5px 8px">광양복합1·2CC</td><td style="text-align:right;white-space:nowrap">1,172MW</td><td style="text-align:center;white-space:nowrap">43원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">235~239원</td></tr>
-              <tr style="background:var(--red-l)"><td style="padding:5px 8px">파주문산1·2CC</td><td style="text-align:right;white-space:nowrap">1,915MW</td><td style="text-align:center;white-space:nowrap">105원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">172원</td></tr>
-              <tr style="background:var(--red-l)"><td style="padding:5px 8px">여주복합CC</td><td style="text-align:right;white-space:nowrap">1,098MW</td><td style="text-align:center;white-space:nowrap">106원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">164원</td></tr>
-              <tr style="background:var(--red-l)"><td style="padding:5px 8px">신평택복합1CC</td><td style="text-align:right;white-space:nowrap">1,030MW</td><td style="text-align:center;white-space:nowrap">139원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">248원</td></tr>
-              <tr style="border-top:2px solid var(--navy);background:var(--amber-l)"><td style="padding:5px 8px" colspan="2"><b>11/4 SMP 174.2원</b>(9~16시)</td><td colspan="2" style="text-align:center">≈ 동두천복합1CC <b>174.23원</b></td></tr>
+              <tr style="background:var(--red-l)"><td style="padding:4px 8px">광양복합1·2CC</td><td style="text-align:right;white-space:nowrap">1,172MW</td><td style="text-align:center;white-space:nowrap">43원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">235~239원</td></tr>
+              <tr style="background:var(--red-l)"><td style="padding:4px 8px">파주문산1·2CC</td><td style="text-align:right;white-space:nowrap">1,915MW</td><td style="text-align:center;white-space:nowrap">105원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">172원</td></tr>
+              <tr style="background:var(--red-l)"><td style="padding:4px 8px">여주복합CC</td><td style="text-align:right;white-space:nowrap">1,098MW</td><td style="text-align:center;white-space:nowrap">106원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">164원</td></tr>
+              <tr style="background:var(--red-l)"><td style="padding:4px 8px">신평택복합1CC</td><td style="text-align:right;white-space:nowrap">1,030MW</td><td style="text-align:center;white-space:nowrap">139원</td><td style="text-align:center;white-space:nowrap;color:var(--red);font-weight:700">248원</td></tr>
+              <tr style="border-top:2px solid var(--navy);background:var(--amber-l)"><td style="padding:4px 8px" colspan="2"><b>11/4 SMP 174.2원</b>(9~16시)</td><td colspan="2" style="text-align:center">≈ 동두천복합1CC <b>174.23원</b></td></tr>
             </tbody>
           </table>
-          <div style="font-size:15px;color:var(--ink2);line-height:1.45">직도입 발전기 단가가 오르면서 100원대 이하에 있던 약 5.2GW가 160원 이상으로 밀려나, <b>석탄 구간이 끝나면 바로 160원대로 뛰는</b> 공급곡선이 됨(160원 이하 공급 <b class="dn">−5.7GW</b>)</div>
+          <div style="background:var(--tint);border-left:4px solid var(--ci);padding:8px 12px;font-size:16px;line-height:1.55;color:var(--ink)">
+            <div>▸ 직도입 LNG 단가 상승 → 약 <b>5.2GW</b>가 160원 이상으로 이동</div>
+            <div>▸ <b style="color:var(--red)">석탄 구간이 끝나면 바로 160원대</b>로 뛰는 공급곡선</div>
+            <div>▸ 160원 이하 공급 가능량 <b style="color:var(--blue-ink)">−5.7GW</b> (79.4 → 73.7GW)</div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="note" id="nRef"></div>
+    <div id="nRef" style="display:none"></div>
   </div>
   <div class="ft"><span class="pg"></span></div>
 </section>
@@ -400,7 +404,7 @@ function build(){
   ch.push(new Chart(document.getElementById('cRefA'),{type:'line',plugins:[segLbl],
     data:{labels:lab,datasets:[
       {label:'SMP(원/kWh)',data:s,yAxisID:'y',borderColor:'#0B3D66',borderWidth:2.2,pointRadius:0,tension:.35},
-     {label:'계통수요(GW)',data:dm,spanGaps:6,yAxisID:'y2',borderColor:'#00A6ED',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:.35},
+     {label:'계통수요(GW)',data:dm,spanGaps:6,spanGaps:6,yAxisID:'y2',borderColor:'#00A6ED',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:.35},
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'bottom',labels:{font:{size:14},boxWidth:18}},
@@ -811,6 +815,32 @@ const rAll0=renderAll;renderAll=function(){
   if(D&&M){const d=findEvt(M);if(d){EVT=d;if([...$('sE').options].some(x=>x.value===d))$('sE').value=d}show3(!!d)}
   rAll0();AH=autoHL();applyHL()};
 new MutationObserver(applyHL).observe(document.getElementById('stage'),{childList:true,subtree:true,characterData:true});
+</script>
+   <script>
+/* 3장 표: 강수량 위에 운량(%) 줄 추가 */
+(()=>{let W=null,busy=false;
+fetch('data/summary.json?'+Date.now()).then(r=>r.json()).then(j=>{W=j.wx||{};add()});
+function add(){
+  if(!W||busy)return;busy=true;
+  document.querySelectorAll('tr').forEach(tr=>{
+    const c=tr.cells;if(!c.length||!/^강수량/.test(c[0].textContent.trim()))return;
+    const prev=tr.previousElementSibling;
+    if(prev&&/^운량/.test(prev.cells[0].textContent.trim()))prev.remove();
+    const tb=tr.closest('table'),hr=tb.rows[0],sl=tr.closest('.slide');
+    const sel=sl&&[...sl.querySelectorAll('select')].find(s=>/^\d{4}-\d{2}-\d{2}$/.test(s.value));
+    const yr=sel?sel.value.slice(0,4):String(new Date().getFullYear());
+    const nr=tr.cloneNode(true);nr.cells[0].textContent='운량(%)';
+    for(let i=1;i<nr.cells.length;i++){
+      const m=(hr.cells[i]?hr.cells[i].textContent:'').match(/(\d{1,2})\/(\d{1,2})/);
+      const d=m?`${yr}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`:null;
+      const v=d&&W[d]?W[d].cloud:null;nr.cells[i].textContent=v==null?'-':Math.round(v);
+    }
+    tr.parentNode.insertBefore(nr,tr);
+  });
+  busy=false;
+}
+new MutationObserver(()=>{if(!busy)requestAnimationFrame(add)}).observe(document.getElementById('stage'),{childList:true,subtree:true});
+})();
 </script>
 </body>
 </html>
