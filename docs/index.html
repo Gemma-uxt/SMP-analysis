@@ -835,7 +835,7 @@ function add(){
       const d=m?`${yr}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`:null;
       const v=d&&W[d]?W[d].cloud:null;nr.cells[i].textContent=v==null?'-':Math.round(v);
     }
-    tr.parentNode.insertBefore(nr,tr);
+    tr.parentNode.insertBefore(nr,tr);[...tb.rows].forEach(r=>[...r.cells].forEach(td=>{td.style.paddingTop='3px';td.style.paddingBottom='3px';td.style.lineHeight='1.25'}));
   });
   busy=false;
 }
