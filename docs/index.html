@@ -841,5 +841,43 @@ function add(){
 new MutationObserver(()=>{if(!busy)requestAnimationFrame(add)}).observe(document.getElementById('stage'),{childList:true,subtree:true});
 })();
 </script>
+   <script>
+/* 참고 장: SMP 툴팁에 가격결정 추정 발전기 표시 */
+(function(){
+  // [발전기, 연료 구분, 11월 발전가격, 10월 발전가격]  ← 11월 표 기준
+  const PR=[
+    ['동두천복합1CC','LNG 평균요금제',174.23,170.0],
+    ['파주문산복합1·2CC','LNG 직도입',172,105],
+    ['여주복합CC','LNG 직도입',164,106]
+  ];
+  const TH=160;   // 이 값 이상일 때만 표시
+  const TOL=0.6;  // SMP와 발전가격 차이가 이 안이면 그 발전기로 추정
+  function guess(v){
+    let best=null,d=1e9;
+    PR.forEach(p=>{const x=Math.abs(p[2]-v);if(x<d){d=x;best=p}});
+    return d<=TOL?best:null;
+  }
+  function won(x){return (Math.round(x*100)/100).toLocaleString()+'원'}
+  function hook(){
+    const ch=window.Chart&&Chart.getChart('cRefA');
+    if(!ch){setTimeout(hook,500);return}
+    const tp=ch.options.plugins.tooltip;
+    const cb=tp.callbacks||(tp.callbacks={});
+    const tf=cb.title;
+    cb.afterBody=function(items){
+      if(!items.length)return[];
+      const t=String(tf?tf.call(this,items):items[0].label);
+      if(!/^11\//.test(t))return[];
+      const it=items.find(i=>/SMP/.test(i.dataset.label||''));
+      if(!it||it.raw==null||+it.raw<TH)return[];
+      const g=guess(+it.raw);
+      if(g)return['─ 가격결정 추정 ─',g[0]+' ('+g[1]+')','11월 '+won(g[2])+' ← 10월 '+(g[1]==='LNG 평균요금제'?'약 ':'')+won(g[3])];
+      return['─ 가격결정 추정 ─','LNG 평균요금제 구간','11월 166~182원 ← 10월 162~177원'];
+    };
+    ch.update('none');
+  }
+  hook();
+})();
+</script>
 </body>
 </html>
