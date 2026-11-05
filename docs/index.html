@@ -841,29 +841,52 @@ function add(){
 new MutationObserver(()=>{if(!busy)requestAnimationFrame(add)}).observe(document.getElementById('stage'),{childList:true,subtree:true});
 })();
 </script>
-   <script>
-/* 참고 장: SMP 툴팁에 가격결정 추정 발전기 표시 */
+<script>
+/* 참고 장: SMP 툴팁에 가격결정 추정 발전기 표시 (10월 발전가격표 기준) */
 (function(){
-  // [발전기, 연료 구분, 11월 발전가격, 10월 발전가격]  ← 11월 표 기준
+  const F=1097.46/1070.33;   // 11월/10월 가스요금 비율
+  // [발전기, 구분, 10월 가격, 11월 확인값(없으면 null → 10월×F로 계산)]
   const PR=[
-    ['동두천복합1CC','LNG 평균요금제',174.23,170.0],
-    ['파주문산복합1·2CC','LNG 직도입',172,105],
-    ['여주복합CC','LNG 직도입',164,106]
-  ];
-  const TH=160;   // 이 값 이상일 때만 표시
-  const TOL=0.6;  // SMP와 발전가격 차이가 이 안이면 그 발전기로 추정
-  function guess(v){
-    let best=null,d=1e9;
-    PR.forEach(p=>{const x=Math.abs(p[2]-v);if(x<d){d=x;best=p}});
-    return d<=TOL?best:null;
-  }
-  function won(x){return (Math.round(x*100)/100).toLocaleString()+'원'}
+    ['여주복합CC','LNG 직도입',106.24,164],
+    ['포스코에너지복합7CC','LNG 평균요금제',162.35,null],
+    ['포스코에너지복합9CC','LNG 평균요금제',163.20,null],
+    ['영남파워1CC','LNG 평균요금제',163.62,null],
+    ['GS당진복합3CC','LNG 평균요금제',163.88,null],
+    ['대구그린파워CC','LNG 평균요금제',165.33,null],
+    ['울산복합4CC','LNG 평균요금제',165.66,null],
+    ['춘천열병합CC','LNG 평균요금제',165.92,null],
+    ['평택복합2CC','LNG 평균요금제',166.61,null],
+    ['포스코에너지복합8CC','LNG 평균요금제',166.80,null],
+    ['명품오산열병합CC','LNG 평균요금제',166.93,null],
+    ['포천복합1CC(874MW)','LNG 평균요금제',167.25,null],
+    ['파주문산복합1·2CC','LNG 직도입',104.80,172],
+    ['안산복합CC','LNG 평균요금제',168.10,null],
+    ['안동복합CC','LNG 평균요금제',168.24,null],
+    ['동탄열병합#1CC','LNG 평균요금제',169.66,null],
+    ['동두천복합1CC','LNG 평균요금제',169.92,174.23],
+    ['동탄열병합#2CC','LNG 평균요금제',170.13,null],
+    ['율촌복합2CC·동두천복합2CC','LNG 평균요금제',171.32,null],
+    ['부산복합4CC·인천복합2CC','LNG 평균요금제',174.23,null],
+    ['부산복합2CC','LNG 평균요금제',174.76,null],
+    ['부산복합3CC','LNG 평균요금제',175.13,null],
+    ['하남열병합','LNG 평균요금제',175.64,null],
+    ['서울복합1CC','LNG 평균요금제',176.12,null],
+    ['GS당진복합2CC','LNG 평균요금제',176.19,null],
+    ['포천복합1CC(725MW)','LNG 평균요금제',176.48,null],
+    ['포스코에너지복합6CC','LNG 평균요금제',176.53,null],
+    ['부산복합1CC','LNG 평균요금제',176.67,null],
+    ['포천복합2CC','LNG 평균요금제',176.86,null],
+    ['오성복합CC','LNG 평균요금제',177.03,null],
+    ['군산복합CC','LNG 평균요금제',177.11,null],
+    ['포스코에너지복합5CC','LNG 평균요금제',177.30,null]
+  ].map(p=>({n:p[0],t:p[1],o:p[2],v:p[3]!=null?p[3]:Math.round(p[2]*F*100)/100,est:p[3]==null}));
+  const TH=160, TOL=0.5;
+  const w=x=>x.toFixed(2)+'원';
+  function guess(v){let b=null,d=1e9;PR.forEach(p=>{const x=Math.abs(p.v-v);if(x<d){d=x;b=p}});return d<=TOL?b:null}
   function hook(){
     const ch=window.Chart&&Chart.getChart('cRefA');
     if(!ch){setTimeout(hook,500);return}
-    const tp=ch.options.plugins.tooltip;
-    const cb=tp.callbacks||(tp.callbacks={});
-    const tf=cb.title;
+    const tp=ch.options.plugins.tooltip, cb=tp.callbacks||(tp.callbacks={}), tf=cb.title;
     cb.afterBody=function(items){
       if(!items.length)return[];
       const t=String(tf?tf.call(this,items):items[0].label);
@@ -871,8 +894,8 @@ new MutationObserver(()=>{if(!busy)requestAnimationFrame(add)}).observe(document
       const it=items.find(i=>/SMP/.test(i.dataset.label||''));
       if(!it||it.raw==null||+it.raw<TH)return[];
       const g=guess(+it.raw);
-      if(g)return['─ 가격결정 추정 ─',g[0]+' ('+g[1]+')','11월 '+won(g[2])+' ← 10월 '+(g[1]==='LNG 평균요금제'?'약 ':'')+won(g[3])];
-      return['─ 가격결정 추정 ─','LNG 평균요금제 구간','11월 166~182원 ← 10월 162~177원'];
+      if(!g)return['─ 가격결정 추정 ─','LNG 평균요금제 구간','11월 166~182원 ← 10월 162~177원'];
+      return['─ 가격결정 추정 ─',g.n+' ('+g.t+')','11월 '+(g.est?'≈':'')+w(g.v)+' ← 10월 '+w(g.o)];
     };
     ch.update('none');
   }
