@@ -388,7 +388,7 @@ function build(){
   document.getElementById('nRef').textContent=`SMP: KPX 육지 시간별 SMP · 계통수요: KPX 실시간 수급현황(시장 외 태양광 제외) 시간 평균 · 비교 일수 10월 ${A.days}일 / 11월 ${B.days}일(나머지 날은 데이터 확보 후 자동 반영) · 공급 가능량: 10·11월 발전가격 순위 누적 입찰량(정비 미반영), 세로축 50GW부터`;
   const lab=[],tl=[],s=[],dm=[],seg=[];
   [[A.ds,'10월 마지막 주'],[B.ds,'11월 첫 주']].forEach(([ds,name],k)=>{
-    if(k){lab.push('');tl.push('');s.push(null);dm.push(null)}
+    if(k){for(let q=0;q<8;q++){lab.push('');tl.push('');s.push(null);dm.push(null)}}
     const st=s.length;
     ds.forEach(d=>{const w='일월화수목금토'[new Date(d+'T12:00:00Z').getUTCDay()],md=`${+d.slice(5,7)}/${+d.slice(8)}(${w})`;
       for(let h=0;h<24;h++){lab.push(h===0?md:'');tl.push(`${md} ${h+1}시`);s.push(D.smp[d][h]);
@@ -400,8 +400,9 @@ function build(){
   ch.push(new Chart(document.getElementById('cRefA'),{type:'line',plugins:[segLbl],
     data:{labels:lab,datasets:[
       {label:'SMP(원/kWh)',data:s,yAxisID:'y',borderColor:'#0B3D66',borderWidth:2.2,pointRadius:0,tension:.35},
-      {label:'계통수요(GW)',data:dm,yAxisID:'y2',borderColor:'#00A6ED',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:.35},
- ]},
+     {label:'계통수요(GW)',data:dm,spanGaps:6,yAxisID:'y2',borderColor:'#00A6ED',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:.35},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'bottom',labels:{font:{size:14},boxWidth:18}},
         tooltip:{callbacks:{title:i=>tl[i[0].dataIndex]}}},
       scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0,font:{size:13},callback:(v,i)=>lab[i]}},
