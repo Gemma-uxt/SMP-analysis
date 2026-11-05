@@ -338,12 +338,23 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
         <div class="ch blue">발전가격 순위 변화 (10월 → 11월)</div>
         <div class="cb">
           <div class="sh">가격대별 공급 가능량<small>누적 입찰량 · GW</small></div>
-          <div class="cv"><canvas id="cRefB"></canvas></div>
-          <ul class="d">
-            <li><b>LNG 직도입 약 5.2GW</b>(광양·파주문산·여주·신평택)가 100원대 이하 → 160원 이상으로 이동</li>
-            <li>118~160원 중간 가격대 <b>4.9GW → 1.35GW</b> : 석탄 다음이 바로 160원대</li>
-            <li>석탄 1~3원 하락, 평균요금제 LNG는 가스요금만큼 +2.5%</li>
-          </ul>
+          <div style="height:150px;position:relative"><canvas id="cRefB"></canvas></div>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.3">
+            <thead><tr style="background:var(--navy);color:#fff">
+              <th style="padding:4px 6px;text-align:left">발전기</th><th style="padding:4px 6px">입찰량</th>
+              <th style="padding:4px 6px">10월</th><th style="padding:4px 6px">11월</th></tr></thead>
+            <tbody>
+              <tr style="background:var(--red-l)"><td style="padding:3px 6px">광양복합1·2CC</td><td style="text-align:right">1,172MW</td><td style="text-align:center">27~28위 · 43원</td><td style="text-align:center;color:var(--red);font-weight:700">180~181위 · 235~239원</td></tr>
+              <tr style="background:var(--red-l)"><td style="padding:3px 6px">파주문산1·2CC</td><td style="text-align:right">1,915MW</td><td style="text-align:center">87·89위 · 105원</td><td style="text-align:center;color:var(--red);font-weight:700">116·119위 · 172원</td></tr>
+              <tr style="background:var(--red-l)"><td style="padding:3px 6px">여주복합CC</td><td style="text-align:right">1,098MW</td><td style="text-align:center">92위 · 106원</td><td style="text-align:center;color:var(--red);font-weight:700">104위 · 164원</td></tr>
+              <tr style="background:var(--red-l)"><td style="padding:3px 6px">신평택복합1CC</td><td style="text-align:right">1,030MW</td><td style="text-align:center">107위 · 139원</td><td style="text-align:center;color:var(--red);font-weight:700">183위 · 248원</td></tr>
+              <tr><td style="padding:3px 6px">울산GPS(LNG→LPG)</td><td style="text-align:right">1,226MW</td><td style="text-align:center">104위 · 125원</td><td style="text-align:center;color:var(--blue-ink);font-weight:700">62위 · 93원</td></tr>
+              <tr><td style="padding:3px 6px">GS당진복합4CC</td><td style="text-align:right">941MW</td><td style="text-align:center">105위 · 126원</td><td style="text-align:center;color:var(--blue-ink);font-weight:700">92위 · 102원</td></tr>
+              <tr><td style="padding:3px 6px">음성천연가스</td><td style="text-align:right">661MW</td><td style="text-align:center">53위 · 92원</td><td style="text-align:center;color:var(--blue-ink);font-weight:700">33위 · 80원</td></tr>
+              <tr style="border-top:2px solid var(--navy);background:var(--amber-l)"><td style="padding:3px 6px" colspan="2"><b>11/4 SMP 174.2원</b>(9~16시)</td><td colspan="2" style="text-align:center">≈ 동두천복합1CC <b>174.23원</b>(평균요금제)</td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:14px;color:var(--ink2)">석탄 1~3원↓ · 평균요금제 LNG +2.5%(가스요금만큼) · 160원↓ 공급 <b class="dn">−5.7GW</b></div>
         </div>
       </div>
     </div>
