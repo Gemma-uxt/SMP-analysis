@@ -28998,5 +28998,8 @@
 {"fuelType": "LNG", "areaNm": "육지", "cnt": "13", "tradeDay": "20261117"},
 {"fuelType": "유연탄", "areaNm": "육지", "cnt": "11", "tradeDay": "20261117"},
 {"fuelType": "LNG", "areaNm": "제주", "cnt": "1", "tradeDay": "20261117"},
-{"fuelType": "기타", "areaNm": "제주", "cnt": "23", "tradeDay": "20261117"}
+{"fuelType": "기타", "areaNm": "제주", "cnt": "23", "tradeDay": "20261117"},
+{"fuelType": "LNG", "areaNm": "육지", "cnt": "15", "tradeDay": "20261118"},
+{"fuelType": "유연탄", "areaNm": "육지", "cnt": "9", "tradeDay": "20261118"},
+{"fuelType": "기타", "areaNm": "제주", "cnt": "24", "tradeDay": "20261118"}
 ]
