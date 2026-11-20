@@ -255,6 +255,42 @@ def est_accuracy(days):
     return round(ag / tot * 100) if tot else None
 
 
+# 발전가격 stack(공급곡선) 요약: 순위표가 있는 PC에서 계산해 data/manual/merit_summary.json 에 저장
+#  - stack: 5원 단위 가격 구간별 누적 입찰량(GW) · 개별 발전기 단가는 저장하지 않음
+#  - movers: 전월 대비 160원 선을 넘어 올라간 발전기(메인 페이지에 이미 공개된 발전기만 단가 표기, 그 외는 가격대)
+MS_P = MAN / "merit_summary.json"
+MS = json.loads(MS_P.read_text(encoding="utf-8")) if MS_P.exists() else {}
+_PUB = set(re.findall(r"\['([^']+)','\w',[\d.]+,[\d.]+\]", re.search(r"const PR=\[(.*?)\];", _ix, re.S).group(1))) if "const PR=[" in _ix else set()
+
+
+def merit_summary(m):
+    if m in MERIT:
+        L = [r for r in MERIT[m] if r[3]]
+        stack = []
+        for p in range(0, 305, 5):
+            stack.append([p, round(sum(r[3] for r in L if r[2] < p) / 1000, 2)])
+        rec = {"stack": stack, "below160": round(sum(r[3] for r in L if r[2] < 160) / 1000, 1),
+               "below110": round(sum(r[3] for r in L if r[2] < 110) / 1000, 1), "total": round(sum(r[3] for r in L) / 1000, 1)}
+        pm = shift(m, -1)
+        if pm in MERIT:
+            po = {r[0]: r for r in MERIT[pm]}
+            mv = []
+            for r in L:
+                if r[0] in po and po[r[0]][2] < 160 <= r[2]:
+                    a_, b_ = po[r[0]][2], r[2]
+                    pub = r[0] in _PUB
+                    mv.append([r[0], flabel(r[1]), round(a_) if pub else f"{int(a_ // 10 * 10)}원대",
+                               round(b_) if pub else f"{int(b_ // 10 * 10)}원대", round(r[3])])
+            rec["movers"] = sorted(mv, key=lambda x: -x[4])
+        MS[m] = rec
+    return MS.get(m)
+
+
+def save_ms():
+    if MERIT:
+        MS_P.write_text(json.dumps(MS, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
 def save_est():
     if MERIT:
         EST_P.write_text(json.dumps({"_설명": "발전가격 순위표로 추정한 날짜별 낮 시간 가격결정 발전기(상위 3)·연료 시간 수. "
@@ -287,7 +323,9 @@ def stats(a, b):
     g = {"all": {x: mean(H[d][h].get(x, 0) for d, h in hrs) / 1000 for x in K},
          "day": {x: mean(H[d][h].get(x, 0) for d, h in day) / 1000 for x in K}}
     pk = max(((H[d][h]["dem"], d, h) for d, h in hrs), default=(0, None, None))
-    dprof = [round(mean(H[d][h]["dem"] for d in ds if h in H[d]) / 1000, 1) if any(h in H[d] for d in ds) else None for h in range(24)]
+    def prof(f):
+        return [round(mean(f(H[d][h]) for d in ds if h in H[d]) / 1000, 1) if any(h in H[d] for d in ds) else None for h in range(24)]
+    dprof = {"dem": prof(lambda v: v["dem"]), "tot": prof(lambda v: v["dem"] + v["hid"]), "net": prof(lambda v: v["dem"] - v.get("sunM", 0))}
     bins = defaultdict(list)
     for d, h in hrs:
         bins[int(H[d][h]["dem"] / 1000 // 5 * 5)].append(SMP[d][h])
@@ -446,6 +484,7 @@ def build(m, today):
     D = dict(lab=lab, monthly=monthly, prof=dict(cur=cur["prof"], prev=prv["prof"], ly=lyr["prof"]),
              band=dict(cur=cur["band"], prev=prv["band"], ly=lyr["band"]), dprof=dict(cur=cur["dprof"], prev=prv["dprof"]),
              gen=dict(cur=cur["gen"], prev=prv["gen"], ly=lyr["gen"]), wx=dict(cur=cur["wx"], prev=prv["wx"]),
+             ms=dict(cur=merit_summary(m), prev=merit_summary(pm)),
              bins=dict(cur=cur["bins"], prev=prv["bins"], ly=lyr["bins"]), fuel=dict(cur=cur["fuel"], prev=prv["fuel"], ly=lyr["fuel"]),
              peak=dict(cur=cur["peak"], ly=lyr["peak"], curD=cur["peakD"]), daily=daily, monthStart=a, scen=sc)
     html = TPL.read_text(encoding="utf-8")
@@ -500,8 +539,8 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     gc, gp = cur["gen"]["day"], prv["gen"]["day"]
     sol_c, sol_p = gc["sunM"] + gc["hid"], gp["sunM"] + gp["hid"]
     dD = gc["dem"] - gp["dem"]
-    T["s3_msg"] = (f"평일 낮 계통수요 <span class=\"em\">{sg(dD, 'GW')}</span> ({f1(gp['dem'])} → {f1(gc['dem'])}GW) — "
-                   f"태양광 {f1(sol_p)} → {f1(sol_c)}GW, 서울 기온 {f1(prv['wx']['tmp'])} → {f1(cur['wx']['tmp'])}℃")
+    T["s3_msg"] = (f"평일 낮 총수요 {f1(gp['dem'] + gp['hid'])} → {f1(gc['dem'] + gc['hid'])}GW, 태양광이 {f1(sol_p)} → {f1(sol_c)}GW로 줄어 "
+                   f"<span class=\"em\">계통수요 {sg(dD, 'GW')}</span> ({f1(gp['dem'])} → {f1(gc['dem'])}GW)")
     T["s3_bullets"] = (f"<li>낮 시간 태양광(시장+시장 외) <b>{f1(sol_p)} → {f1(sol_c)}GW</b>"
                        f"{', 그만큼 계통이 더 공급' if sol_c < sol_p else ', 그만큼 계통 부담 감소'}</li>"
                        f"<li>저녁(17~19시) 계통수요 {f1(prv['eve'])} → {f1(cur['eve'])}GW</li>")
@@ -509,29 +548,44 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
                     "날씨: Open-Meteo, 기온은 서울, 일사량은 목포·전주·서산·안동 평균"
                     + (f" · 발전량 미수집 {cur['missing']}시간 제외" if cur["missing"] else ""))
     T["sub_31"] = f"평일 · {P_} → {M_}"
-    # 3-2
+    # 3-2 발전가격 stack
+    pm_ = shift(m, -1)
+    msc, msp = merit_summary(m), merit_summary(pm_)
     common = [k for k in cur["bins"] if k in prv["bins"]]
     diffs = [cur["bins"][k][0] - prv["bins"][k][0] for k in common]
-    if diffs:
-        lo, hi = min(diffs), max(diffs)
-        if lo > 0:
-            s4 = f"수요가 같아도 {M_} SMP가 <span class=\"rd\">{round(lo)}~{round(hi)}원 높음</span>"
-        elif hi < 0:
-            s4 = f"수요가 같아도 {M_} SMP가 <span class=\"dn\">{round(-hi)}~{round(-lo)}원 낮음</span>"
-        else:
-            s4 = f"같은 수요 구간의 SMP 차이 {round(lo)}~{round(hi)}원"
+    lo, hi = (min(diffs), max(diffs)) if diffs else (0, 0)
+    mv = (msc or {}).get("movers") or []
+    if msc and msp and mv:
+        fl = Counter(r[1] for r in mv).most_common(1)[0][0]
+        s4 = (f"{fl} 등 <span class=\"rd\">{len(mv)}기({sum(r[4] for r in mv) / 1000:.1f}GW)</span>의 발전가격이 160원 이상으로 뛰어 "
+              f"160원 미만 공급 {f1(msp['below160'])} → <span class=\"em\">{f1(msc['below160'])}GW</span>")
+    elif msc and msp:
+        s4 = f"160원 미만 공급 {f1(msp['below160'])} → {f1(msc['below160'])}GW"
+    elif diffs:
+        s4 = f"같은 수요 구간의 SMP 차이 {round(lo)}~{round(hi)}원"
     else:
-        lo = hi = 0; s4 = "같은 수요 구간 비교 자료 부족"
+        s4 = "발전가격 순위표 요약 자료 없음"
     if note.get("s4_msg_tail"):
         s4 += " — " + note["s4_msg_tail"]
+    elif msc and msp and msp["below160"] - msc["below160"] >= 2:
+        s4 += " — 석탄 다음이 곧바로 160원대"
     T["s4_msg"] = s4
 
     def share(f):
-        t = sum(f.values()) or 1
-        return f.get("LNG", 0) / t * 100
-    T["s4_bullets"] = "".join(f"<li>{x}</li>" for x in
-                              [f"LNG가 가격을 정한 비중 {P_} {f1(share(prv['fuel']))}% → {M_} {f1(share(cur['fuel']))}%"] + note.get("s4_bullets", []))
-    T["s4_note"] = f"※ 수요 구간: 5GW 단위(예: 65 = 65~70GW), 10시간 이상 구간만 표시 · 연료별 결정: EPSIS 연료원별 SMP 결정 횟수({per})"
+        t_ = sum(f.values()) or 1
+        return f.get("LNG", 0) / t_ * 100
+    b4 = []
+    if msc and msp:
+        b4.append(f"110원 미만 공급은 {f1(msp['below110'])} → {f1(msc['below110'])}GW로 비슷 — 달라진 것은 <b>110~160원 구간</b>"
+                  f"({f1(msp['below160'] - msp['below110'])} → {f1(msc['below160'] - msc['below110'])}GW)")
+    if diffs:
+        b4.append(f"그 결과 같은 수요에서도 {M_} SMP가 {P_}보다 {round(lo)}~{round(hi)}원 {'높음' if lo > 0 else '낮음' if hi < 0 else '차이'} (평일 시간, 5GW 수요 구간별 평균)")
+    b4.append(f"LNG가 가격을 정한 비중은 {P_} {f1(share(prv['fuel']))}% → {M_} {f1(share(cur['fuel']))}%로 비슷 — 같은 LNG라도 더 비싼 LNG가 결정")
+    b4 += note.get("s4_bullets", [])
+    T["s4_bullets"] = "".join(f"<li>{x}</li>" for x in b4)
+    T["s4_note"] = (f"※ 발전가격 stack: 사업기획팀 발전가격 순위표(육지·입찰량 기준, 정비·고장 미반영)를 5원 구간으로 누적 · 점 = 160원 미만 누적 입찰량 · "
+                    f"표는 {P_}에 160원 미만이던 발전기 중 {M_}에 160원 이상이 된 발전기 · 연료별 결정: EPSIS 연료원별 SMP 결정 횟수({per})")
+    T["prevM"], T["curM"], T["month"] = P_, M_, m
     # 3-3
     ga, gl = cur["gen"]["all"], lyr["gen"]["all"]
     dB = ga["nuc"] + ga["coal"] - gl["nuc"] - gl["coal"]; dL = ga["lng"] - gl["lng"]
@@ -569,12 +623,14 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["s8_msg"] = (f"최근 3년 태양광은 연 {' → '.join(f1(x) for x in sc['adds'])}GW 증가(평균 <span class=\"em\">+{f1(sc['add'])}GW</span>, 연 {f1(sc['cagr'])}%) "
                    f"— 이 속도면 {tg}년 말 <span class=\"em\">{round(lo_e)}~{round(hi_e)}GW</span>")
     T["s8_sub"] = f"GW · {sc['ys'][0]}~{sc['ys'][-1]} 실적, {sc['ys'][-1]+1}~{tg} 시나리오"
-    T["s8_rows"] = (f"<tr><td>기본(정량 증가)</td><td class=\"tl\">매년 <b>+{f1(sc['add'])}GW</b>({sc['ys'][1]}~{str(sc['ys'][-1])[2:]} 평균)</td></tr>"
-                    f"<tr><td>상단(비율 증가)</td><td class=\"tl\">매년 <b>+{f1(sc['cagr'])}%</b>({sc['ys'][0]}→{str(sc['ys'][-1])[2:]} 연평균 증가율)</td></tr>"
-                    f"<tr><td>날씨</td><td class=\"tl\">올해(1.1~{per.split('~')[1]}) 시간별 일사·기온 그대로</td></tr>"
-                    "<tr><td>태양광 출력</td><td class=\"tl\">시장·PPA·자가용 모두 설비 배수만큼 증가</td></tr>"
-                    "<tr><td>그 외</td><td class=\"tl\">수요·연료비·원전/석탄 설비·입찰 행태 <b>올해와 동일</b></td></tr>"
-                    f"<tr><td>출력제어</td><td class=\"tl\">순부하가 올해 최저({f1(sc['NMIN'])}GW) 아래면 그만큼 출력제어</td></tr>")
+    T["s8_rows"] = (f"<tr><td>날씨</td><td class=\"tl\">올해(1.1~{per.split('~')[1]}) 시간별 일사·기온이 매년 반복</td></tr>"
+                    "<tr><td>수요·연료비</td><td class=\"tl\">올해와 동일(가스요금·석탄가격·전력수요 변화 미반영)</td></tr>"
+                    "<tr><td>발전설비</td><td class=\"tl\">원전·석탄·LNG 설비와 입찰 행태 올해와 동일</td></tr>")
+    T["s8_case"] = (f"<tr><td>기본<br>(정량 증가)</td><td class=\"tl\">매년 <b>+{f1(sc['add'])}GW</b> — {sc['ys'][1]}~{sc['ys'][-1]}년 연간 증가량 평균"
+                    f"({' · '.join(f1(x) for x in sc['adds'])}GW)이 그대로 이어짐</td></tr>"
+                    f"<tr><td>상단<br>(비율 증가)</td><td class=\"tl\">매년 <b>+{f1(sc['cagr'])}%</b> — {sc['ys'][0]}→{sc['ys'][-1]}년 연평균 증가율이 이어짐(설비가 늘수록 증가량도 커짐)</td></tr>"
+                    f"<tr><td>{tg}년 말</td><td class=\"tl\">기본 <b>{f1(sc['lin_end'][str(tg)])}GW</b> · 상단 <b>{f1(sc['cg_end'][str(tg)])}GW</b> (올해 초 {f1(sc['end'][str(sc['ys'][-1])])}GW)</td></tr>")
+    T["nmin"], T["add"], T["cagr"] = f1(sc["NMIN"]), f1(sc["add"]), f1(sc["cagr"])
     T["s8_valid"] = f"같은 방법으로 올해 실적을 재현하면 월평균 SMP 오차 ±{f1(sc['err'])}원 이내"
     T["s8_note"] = ("※ 설비: " + CAP.get("_출처", "") +
                     (f" · 정부의 2030년 목표({f1(CAP['gov_target_2030'])}GW)는 이 시나리오보다 훨씬 큼" if CAP.get("gov_target_2030") else ""))
@@ -660,6 +716,9 @@ def main():
                 if d in SMP and d < tdy:
                     est_day(d)
         save_est()
+        for mm in sorted(MERIT):
+            merit_summary(mm)
+        save_ms()
     lst = sorted(reps.values(), key=lambda r: r["m"])
     STATE.parent.mkdir(parents=True, exist_ok=True)
     STATE.write_text(json.dumps(lst, ensure_ascii=False, indent=1), encoding="utf-8")

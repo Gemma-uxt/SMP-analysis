@@ -121,7 +121,7 @@ fetch('data/hourly_est.json?'+Date.now()).then(r=>{if(!r.ok)throw new Error(r.st
   /* 세로축은 달 선택과 상관없이 전체 기간 최댓값 기준으로 고정 */
   YMAX=Math.max(200,Math.ceil(Math.max(...Object.values(D.days).flatMap(r=>r.smp))/20)*20);
   const ms=[...new Set(Object.keys(D.days).map(d=>d.slice(0,7)))].sort();
-  const lastM=ms[ms.length-1];
+  const hm=decodeURIComponent(location.hash.slice(1)),lastM=ms.includes(hm)?hm:ms[ms.length-1]; /* hourly.html#2026-11 처럼 열면 그 달 표시 */
   $('months').innerHTML=ms.map(m=>{const ds=Object.keys(D.days).filter(d=>d.startsWith(m)).sort(),e=+ds[ds.length-1].slice(8),full=new Date(+m.slice(0,4),+m.slice(5),0).getDate();
     return `<label><input type="checkbox" value="${m}" ${m===lastM?'checked':''}>${+m.slice(5)}월${e<full?` (~${e}일)`:''}</label>`}).join('');
   $('months').insertAdjacentHTML('beforeend','<button type="button" class="allbtn" id="allBtn" aria-pressed="false">한번에 보기</button>');
