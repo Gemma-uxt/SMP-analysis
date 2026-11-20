@@ -56,13 +56,13 @@ body{margin:0;background:#E4E7EC;color:var(--ink);font:15px/1.5 "Noto Sans KR","
 
 <section class="slide">
   <div class="hd">
-    <span class="pno">참고</span><span class="pt">시간별 SMP와 가격결정 연료<small id="per"></small></span>
+    <span class="pno">참고</span><span class="pt">시간별 SMP와 가격결정 연료<small id="per"></small><small>평일만(주말·공휴일 제외)</small></span>
     <div class="months" id="months" role="group" aria-label="표시할 달"></div>
   </div>
   <div class="msg" id="msg">자료를 불러오는 중…</div>
   <div class="sum" id="sum"></div>
   <div class="box">
-    <div class="bt">시간별 SMP<small>원/kWh · 선에 마우스를 올리면 추정 가격결정 발전기·연료 표시</small></div>
+    <div class="bt">시간별 SMP<small>원/kWh · 평일만 이어 붙여 표시 · 선에 마우스를 올리면 추정 가격결정 발전기·연료 표시</small></div>
     <div class="fig"><canvas id="cL" role="img" aria-label="시간별 SMP 선그래프"></canvas></div>
     <div class="bt" style="margin-top:10px">시간별 가격결정 연료 (추정)<small>한 칸 = 1시간 · 위 그래프와 같은 시간축</small></div>
     <div class="strip"><canvas id="cS" role="img" aria-label="시간별 가격결정 연료 띠"></canvas></div>
@@ -87,9 +87,9 @@ const YW=52; /* 두 그래프 왼쪽 축 폭을 맞춰 시간축 정렬 */
 const tipStyle={backgroundColor:'rgba(255,255,255,.97)',titleColor:'#0B3D66',bodyColor:'#1A2230',borderColor:'#C9D2DD',borderWidth:1,padding:10,displayColors:false,titleFont:{size:13,weight:'800'},bodyFont:{size:12}};
 
 function rows(){const ms=[...document.querySelectorAll('#months input:checked')].map(x=>x.value);
-  const out=[];Object.keys(D.days).sort().forEach(d=>{if(!ms.includes(d.slice(0,7)))return;const r=D.days[d];
+  const out=[];Object.keys(D.days).sort().forEach(d=>{if(!ms.includes(d.slice(0,7)))return;const r=D.days[d];if(!r.wd)return; /* 평일만 */
     for(let h=0;h<24;h++)out.push({d,h,smp:r.smp[h],u:r.u[h],lb:r.lb[h],c:r.c[h],wd:r.wd,a:r.a})});return {ms,out}}
-function title(p){const dt=new Date(p.d+'T00:00:00');return `${+p.d.slice(5,7)}/${+p.d.slice(8)}(${DOW[dt.getDay()]}) ${p.h+1}시 · ${p.wd?'평일':'주말·공휴일'}`}
+function title(p){const dt=new Date(p.d+'T00:00:00');return `${+p.d.slice(5,7)}/${+p.d.slice(8)}(${DOW[dt.getDay()]}) ${p.h+1}시`}
 function body(p){const o=[`SMP ${f1(p.smp)}원/kWh`,'',`추정 가격결정 발전기: ${p.u}`,(p.lb===CAT[p.c][0]?`연료: ${p.lb}`:`연료: ${p.lb} (${CAT[p.c][0]})`)];
   const a=Object.entries(p.a||{});if(a.length)o.push('',`그날 공식 연료별 결정(24시간): ${a.map(([k,v])=>k+' '+v).join(' · ')}`);return o}
 
@@ -104,11 +104,11 @@ function render(){
   $('sum').innerHTML=ORDER.map(k=>`<div class="chip" style="border-top-color:${CAT[k][1]}"><div class="l">${CAT[k][0]}</div><div class="v">${(cnt[k]/n*100).toFixed(1)}%</div><div class="s">${cnt[k]}시간 · 평균 SMP ${f1(mean(sm[k]))}원</div></div>`).join('')+
     `<div class="chip ref" title="가격표만으로 추정한 연료(석탄·LNG 등)의 날짜별 시간 수가 전력거래소 '연료원별 SMP 결정 횟수(일별)'와 겹치는 비율"><div class="l">참고 · 연료 일치율</div><div class="v">${tot?(ag/tot*100).toFixed(1)+'%':'-'}</div><div class="s">추정만 했을 때, 공식 일별 집계 대비</div></div>`;
   const top=ORDER.slice().sort((a,b)=>cnt[b]-cnt[a])[0];
-  $('msg').innerHTML=`선택 기간 ${n.toLocaleString()}시간 중 가격을 가장 많이 정한 연료: <span style="color:${CAT[top][1]}">${CAT[top][0]}</span>(${(cnt[top]/n*100).toFixed(0)}%) · 평균연료비 LNG가 정한 시간의 평균 SMP ${f1(mean(sm.avg))}원`;
+  $('msg').innerHTML=`평일 ${n.toLocaleString()}시간 중 가격을 가장 많이 정한 연료: <span style="color:${CAT[top][1]}">${CAT[top][0]}</span>(${(cnt[top]/n*100).toFixed(0)}%) · 평균연료비 LNG가 정한 시간의 평균 SMP ${f1(mean(sm.avg))}원`;
   const labels=out.map(p=>p.h===0?`${+p.d.slice(5,7)}/${+p.d.slice(8)}`:'');
   if(!OK)return;
   if(chL){chL.destroy();chS.destroy()}
-  const tick={autoSkip:false,maxRotation:0,callback:(v,i)=>{const p=out[i];if(p.h!==0)return null;const day=+p.d.slice(8);const step=out.length>24*40?7:out.length>24*20?3:1;return (day-1)%step===0&&!(step>1&&day>=28)?labels[i]:null}};
+  const nd=out.length/24,step=nd>40?5:nd>18?2:1;const tick={autoSkip:false,maxRotation:0,callback:(v,i)=>{const p=out[i];if(p.h!==0)return null;return Math.floor(i/24)%step===0?labels[i]:null}};
   chL=new Chart($('cL'),{type:'line',data:{labels,datasets:[{data:out.map(p=>p.smp),borderColor:'#0B3D66',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:out.map(p=>CAT[p.c][1]),tension:0}]},
     options:{interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{...tipStyle,callbacks:{title:c=>title(out[c[0].dataIndex]),label:c=>body(out[c.dataIndex])}}},
       scales:{x:{grid:{color:c=>out[c.index]&&out[c.index].h===0?'#E3E8EE':'transparent'},ticks:tick},y:{min:0,max:YMAX,afterFit:a=>{a.width=YW},grid:{color:'#EEF1F5'},ticks:{stepSize:20},title:{display:true,text:'원/kWh'}}}}});
@@ -128,7 +128,7 @@ fetch('data/hourly_est.json?'+Date.now()).then(r=>{if(!r.ok)throw new Error(r.st
   const boxes=[...document.querySelectorAll('#months input')];
   $('months').addEventListener('change',e=>{if(e.target.type!=='checkbox')return;boxes.forEach(b=>b.checked=b===e.target);$('allBtn').setAttribute('aria-pressed','false');render()});
   $('allBtn').onclick=()=>{boxes.forEach(b=>b.checked=true);$('allBtn').setAttribute('aria-pressed','true');render()};
-  $('note').textContent=`※ SMP: KPX 육지 시간별 · 가격결정 발전기·연료는 사업기획팀 발전가격 순위표의 단가와 순위 위치로 추정하고, 날짜별 석탄·LNG 시간 수는 전력거래소 연료별 SMP 결정 횟수에 맞춤 — SMP에는 무부하·기동가격이 포함돼 순위표 단가와 정확히 같지 않으므로 발전기는 추정치 · 연료 일치율: 전력거래소 일별 집계로 보정하기 전 추정치가 날짜별 석탄·LNG 시간 수와 겹치는 비율(시간 단위 정확도의 최대치, LNG 평균·개별 구분과 발전기명은 공식 자료가 없어 검증 불가) · 'LNG(평균·직도입)' 혼합 발전기는 평균연료비, 원자력·LPG·중유·도시가스 LNG 등은 기타로 분류 · 기간 ${D.from}~${D.to}`;
+  $('note').textContent=`※ SMP: KPX 육지 시간별 · 가격결정 발전기·연료는 사업기획팀 발전가격 순위표의 단가와 순위 위치로 추정하고, 날짜별 석탄·LNG 시간 수는 전력거래소 연료별 SMP 결정 횟수에 맞춤 — SMP에는 무부하·기동가격이 포함돼 순위표 단가와 정확히 같지 않으므로 발전기는 추정치 · 연료 일치율: 전력거래소 일별 집계로 보정하기 전 추정치가 날짜별 석탄·LNG 시간 수와 겹치는 비율(시간 단위 정확도의 최대치, LNG 평균·개별 구분과 발전기명은 공식 자료가 없어 검증 불가) · 'LNG(평균·직도입)' 혼합 발전기는 평균연료비, 원자력·LPG·중유·도시가스 LNG 등은 기타로 분류 · 평일만 표시(주말·공휴일 제외) · 기간 ${D.from}~${D.to}`;
   render()}).catch(e=>{$('msg').textContent='자료를 불러오지 못했습니다: '+e.message});
 }
 </script>
