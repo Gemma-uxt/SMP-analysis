@@ -511,9 +511,9 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     if rp is None:
         tail = f"SMP/LNG 비율 {f1(rc)}"
     elif rc > rp + 0.5:
-        tail = f"가스요금이 SMP에 더 반영되며 SMP/LNG 비율 {f1(rp)} → {f1(rc)}"
+        tail = f"SMP/LNG 비율 {f1(rp)} → {f1(rc)}로 상승"
     elif rc < rp - 0.5:
-        tail = f"가스요금보다 SMP가 약세, SMP/LNG 비율 {f1(rp)} → {f1(rc)}"
+        tail = f"SMP/LNG 비율 {f1(rp)} → {f1(rc)}로 하락"
     else:
         tail = f"SMP/LNG 비율 {f1(rp)} → {f1(rc)}로 비슷"
     T["s1_msg"] = f"{M_} 평일 SMP <span class=\"em\">{f1(N['smp'])}원</span>(전년 {sg(N['smpYoY'], '%')}, {P_} 대비 {sg(mom, '%')}) — {tail}"
@@ -568,8 +568,6 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
         s4 = "발전가격 순위표 요약 자료 없음"
     if note.get("s4_msg_tail"):
         s4 += " — " + note["s4_msg_tail"]
-    elif msc and msp and msp["below160"] - msc["below160"] >= 2:
-        s4 += " — 석탄 다음이 곧바로 160원대"
     T["s4_msg"] = s4
 
     def share(f):
@@ -580,12 +578,17 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
         b4.append(f"110원 미만 공급은 {f1(msp['below110'])} → {f1(msc['below110'])}GW로 비슷 — 달라진 것은 <b>110~160원 구간</b>"
                   f"({f1(msp['below160'] - msp['below110'])} → {f1(msc['below160'] - msc['below110'])}GW)")
     if diffs:
-        b4.append(f"그 결과 같은 수요에서도 {M_} SMP가 {P_}보다 {round(lo)}~{round(hi)}원 {'높음' if lo > 0 else '낮음' if hi < 0 else '차이'} (평일 시간, 5GW 수요 구간별 평균)")
-    b4.append(f"LNG가 가격을 정한 비중은 {P_} {f1(share(prv['fuel']))}% → {M_} {f1(share(cur['fuel']))}%로 비슷 — 같은 LNG라도 더 비싼 LNG가 결정")
-    b4 += note.get("s4_bullets", [])
+        b4.append(f"그 결과 같은 수요에서도 {M_} SMP가 {P_}보다 {round(lo)}~{round(hi)}원 {'높음' if lo > 0 else '낮음' if hi < 0 else '차이'}")
+    b4.append(f"LNG가 가격을 정한 비중은 {f1(share(prv['fuel']))}% → {f1(share(cur['fuel']))}%로 비슷 — 더 비싼 LNG가 결정")
+    # 두 칸 배치(행 순서): [공급 변화, 메모] / [같은 수요 SMP, LNG 비중] — 긴 두 줄끼리 한 행에
+    nb = note.get("s4_bullets", [])
+    if len(b4) == 3 and nb:
+        b4 = [b4[0], nb[0], b4[1], b4[2]] + nb[1:]
+    else:
+        b4 += nb
     T["s4_bullets"] = "".join(f"<li>{x}</li>" for x in b4)
-    T["s4_note"] = (f"※ 발전가격 stack: 사업기획팀 발전가격 순위표(육지·입찰량 기준, 정비·고장 미반영)를 5원 구간으로 누적 · 점 = 160원 미만 누적 입찰량 · "
-                    f"표는 {P_}에 160원 미만이던 발전기 중 {M_}에 160원 이상이 된 발전기 · 연료별 결정: EPSIS 연료원별 SMP 결정 횟수({per})")
+    T["s4_note"] = (f"※ 발전가격 stack: 사업기획팀 발전가격 순위표(육지·입찰량, 정비·고장 미반영)를 5원 구간으로 누적 · 점 = 160원 미만 누적 입찰량 · "
+                    f"같은 수요 SMP 차이: 평일 시간, 5GW 수요 구간별 평균 · 연료별 결정: EPSIS 연료원별 SMP 결정 횟수({per})")
     T["prevM"], T["curM"], T["month"] = P_, M_, m
     # 3-3
     ga, gl = cur["gen"]["all"], lyr["gen"]["all"]
@@ -642,15 +645,14 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
                    f"(▼{f1(min(a1, a2) / base['all'] * 100)}~{f1(max(a1, a2) / base['all'] * 100)}%) 하락</span> — "
                    f"낮 SMP {round(min(d1, d2))}~{round(max(d1, d2))}원 하락, 대신 <span class=\"rd\">출력제어 {f1(L[tg]['curTWh'])}~{f1(G[tg]['curTWh'])}TWh</span> 필요")
     T["s9_bullets"] = (f"<li>SMP 150원 이상 시간: 올해 {base['hiH']}시간 → {tg}년 {min(L[tg]['hiH'], G[tg]['hiH'])}~{max(L[tg]['hiH'], G[tg]['hiH'])}시간</li>"
-                       f"<li>출력제어 시간 SMP를 0원으로 보면 {tg}년 연평균 {f1(min(L[tg]['all0'], G[tg]['all0']))}~{f1(max(L[tg]['all0'], G[tg]['all0']))}원</li>")
+                       f"<li>출력제어 시간 SMP 0원 가정 시 {tg}년 연평균 {f1(min(L[tg]['all0'], G[tg]['all0']))}~{f1(max(L[tg]['all0'], G[tg]['all0']))}원</li>")
     drops = {mm: (L[y0]["mon"][mm] - L[tg]["mon"][mm], G[y0]["mon"][mm] - G[tg]["mon"][mm]) for mm in L[y0]["mon"]}
     top = sorted(drops, key=lambda k: -drops[k][1])[:2]
     top_s = "·".join(f"{mo_n(x)}월" for x in sorted(top))
     t_lo = round(min(min(drops[x]) for x in top)); t_hi = round(max(max(drops[x]) for x in top))
-    T["s9_bullets2"] = (f"<li><b>하락 폭이 작은 이유</b>: 태양광이 늘면 낮 가격이 LNG 수준에서 석탄·열병합 수준으로 내려오지만 그 아래로는 잘 떨어지지 않음. "
-                        f"올해 순부하가 가장 낮았던 시간({f1(sc['low_nl'][0])}~{f1(sc['low_nl'][1])}GW)에도 SMP는 대부분 {sc['low_smp'][0]}~{sc['low_smp'][1]}원</li>"
+    T["s9_bullets2"] = (f"<li><b>하락 폭이 작은 이유</b>: 낮 가격은 석탄·열병합 수준까지만 내려옴 — 올해 순부하 최저 시간({f1(sc['low_nl'][0])}~{f1(sc['low_nl'][1])}GW)에도 SMP {sc['low_smp'][0]}~{sc['low_smp'][1]}원</li>"
                         f"<li><b>영향이 큰 달</b>: {top_s}({tg}년 ▼{t_lo}~{t_hi}원) · {M_}은 ▼{round(min(drops[m]))}~{round(max(drops[m]))}원</li>"
-                        f"<li><b>남는 위험</b>: 남는 태양광을 줄여야 하는 시간이 {tg}년 {L[tg]['curH']}~{G[tg]['curH']}시간 — 연료비·수요가 그대로라면 SMP 하락보다 출력제어 확대가 더 큰 변화</li>")
+                        f"<li><b>남는 위험</b>: 남는 태양광을 줄여야 하는 시간이 {tg}년 {L[tg]['curH']}~{G[tg]['curH']}시간 — SMP 하락보다 출력제어 확대가 더 큰 변화</li>")
     T["s9_note"] = (f"※ 연도별 값은 해당 연도에도 올해(1.1~{per.split('~')[1]})와 같은 날씨·수요가 반복된다고 본 값"
                     + ("" if m.endswith("12") and final else " · 남은 달 미포함") + " · 저장장치(ESS)·양수 확대, 원전 신규·석탄 폐지, LMP 도입은 미반영")
     # 6 종합
