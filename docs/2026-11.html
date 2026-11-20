@@ -244,7 +244,7 @@ mk($('cBin'),{type:'bar',data:{labels:bk.map(b=>`${b}~${+b+5}GW`),datasets:[
  options:{layout:{padding:{top:18}},datasets:{bar:{categoryPercentage:.72,barPercentage:.9}},plugins:{lbl:{on:true,fmt:v=>Math.round(v),pick:i=>i>0}},scales:{x:{grid:noGrid},y:{grid,min:60,title:{display:true,text:'원/kWh'}}}}});
 
 const FB=[['석탄',C.slateD],['LNG',C.ci]];
-const fr=(n,o)=>{const t=Object.values(o).reduce((s,v)=>s+v,0),a=[(o['석탄']||0)/t*100,(o.LNG||0)/t*100];return `<div style="display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:8px;margin:7px 0"><span style="font-size:13px;font-weight:700">${n}</span><div style="display:flex;height:24px;gap:2px">${a.map((v,i)=>`<div style="width:${v}%;background:${FB[i][1]};color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center">${FB[i][0]} ${f1(v)}%</div>`).join('')}</div></div>`};
+const fr=(n,o)=>{const t=Object.values(o).reduce((s,v)=>s+v,0),a=[(o['석탄']||0)/t*100,(o.LNG||0)/t*100];return `<div style="display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:8px;margin:7px 0"><span style="font-size:13px;font-weight:700">${n}</span><div style="display:flex;height:24px;gap:2px">${a.map((v,i)=>`<div style="width:${v}%;background:${FB[i][1]};color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center">${v>=25?FB[i][0]+' ':''}${f1(v)}%</div>`).join('')}</div></div>`};
 $('fuelBars').innerHTML=fr('25년 11월',D.fuel.N25)+fr('26년 10월',D.fuel.O26)+fr('26년 11월',D.fuel.N26);
 
 const GK=[['원자력','nuc'],['석탄','coal'],['LNG','lng'],['신재생(태양광 외)',['renew','wind']],['태양광 계',['sunM','hid']],['계통수요','dem']];
