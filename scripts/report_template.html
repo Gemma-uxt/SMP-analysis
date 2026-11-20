@@ -43,11 +43,6 @@ td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-sp
 tr.hl td{background:#EAF7FD;font-weight:700}
 .up{color:var(--red)}.dn{color:#0072B5}
 .note{font-size:12px;color:var(--ink3)}
-#estTip{position:fixed;z-index:50;pointer-events:none;background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);box-shadow:0 6px 18px rgba(20,30,50,.16);padding:10px 12px;font-size:13px;line-height:1.5;min-width:240px;max-width:330px;opacity:0}
-#estTip .h{font-weight:800;color:var(--navy);margin-bottom:4px}
-#estTip .s{font-size:12px;color:var(--ink3);font-weight:700;margin-top:6px}
-#estTip table{font-size:12.5px}#estTip td{padding:2px 4px;border:0;white-space:normal}#estTip td:first-child{text-align:left}
-@media (prefers-reduced-motion:reduce){#estTip{transition:none}}
 td.tl{text-align:left;white-space:normal}
 .toc select{flex:none;font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink2)}
 .pg{text-align:right;font-size:12px;color:var(--ink3);font-weight:700}
@@ -149,7 +144,7 @@ td.tl{text-align:left;white-space:normal}
 <section class="slide" id="s6">
   <div class="hd"><span class="pno">4</span><span class="pt">일별 추이 및 특이사항<small>{{s6_sub}}</small></span></div>
   <div class="msg">{{s6_msg}}</div>
-  <div class="box"><div class="bt">일별 낮(9~17시) 평균 SMP<small>원/kWh · 진한 막대 = 평일, 연한 막대 = 주말·공휴일</small></div><div class="fig t"><canvas id="cDaily" role="img" aria-label="일별 낮 평균 SMP"></canvas></div></div>
+  <div class="box"><div class="bt">일별 낮(9~17시) 평균 SMP<small>원/kWh · 진한 막대 = 평일, 연한 막대 = 주말·공휴일</small></div><div class="fig" style="height:300px"><canvas id="cDaily" role="img" aria-label="일별 낮 평균 SMP"></canvas></div></div>
   <div class="g2e">
     <div class="box"><div class="bt">{{s6_box1_t}}</div><ul class="b" style="margin:0">{{s6_box1}}</ul></div>
     <div class="box"><div class="bt">{{s6_box2_t}}</div><ul class="b" style="margin:0">{{s6_box2}}</ul></div>
@@ -282,24 +277,17 @@ const gt=p=>`<tr><th>원별</th><th>${L.lyT}</th><th>${L.prevT}</th><th>${L.curT
 $('tGen').innerHTML=gt('all');$('tGenD').innerHTML=gt('day');
 
 const dl=D.daily;
-/* 막대 위 떠 있는 박스: 추정 가격결정 발전기·연료 */
-const tipEl=document.createElement('div');tipEl.id='estTip';tipEl.setAttribute('role','tooltip');document.body.appendChild(tipEl);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function estTip(ctx){const t=ctx.tooltip;if(!t||!t.dataPoints||!t.dataPoints.length){tipEl.style.opacity=0;return}
-  const i=t.dataPoints[0].dataIndex,r=dl[i],e=r[4],dt=new Date(r[0]+'T00:00:00'),dw='일월화수목금토'[dt.getDay()];
-  let h=`<div class="h">${+r[0].slice(5,7)}/${+r[0].slice(8)}(${dw}) 낮 평균 SMP ${f1(r[1])}원</div><div>${r[2]?'평일':'주말·공휴일'} · 서울 ${f1(r[3])}℃</div>`;
-  if(e){h+=`<div class="s">추정 가격결정 발전기 (낮 8시간)</div><table>${e.u.map(u=>`<tr><td>${esc(u[0])}</td><td style="color:var(--ink3)">${esc(u[1])}</td><td>${u[2]}시간</td></tr>`).join('')}</table>`;
-    h+=`<div class="s">추정 연료 (낮 8시간)</div><div>${Object.entries(e.f).map(([k,v])=>`${esc(k)} ${v}시간`).join(' · ')}</div>`;
-    const a=Object.entries(e.a||{});if(a.length)h+=`<div class="s">참고: 공식 연료별 결정 (하루 24시간)</div><div>${a.map(([k,v])=>`${esc(k)} ${v}시간`).join(' · ')}</div>`}
-  else h+='<div class="s">이 달 발전가격 순위표가 없어 추정 불가</div>';
-  tipEl.innerHTML=h;const b=ctx.chart.canvas.getBoundingClientRect();let x=b.left+t.caretX+14,y=b.top+t.caretY-20;
-  tipEl.style.opacity=1;const w=tipEl.offsetWidth,hh=tipEl.offsetHeight;
-  if(x+w>innerWidth-8)x=b.left+t.caretX-w-14;if(y+hh>innerHeight-8)y=innerHeight-hh-8;if(y<8)y=8;
-  tipEl.style.left=Math.max(8,x)+'px';tipEl.style.top=y+'px'}
-$('cDaily').addEventListener('mouseleave',()=>{tipEl.style.opacity=0});
+
 mk($('cDaily'),{type:'bar',data:{labels:dl.map(d=>+d[0].slice(5,7)+'/'+ +d[0].slice(8)),datasets:[
  {label:'낮 평균 SMP',data:dl.map(d=>d[1]),backgroundColor:dl.map(d=>d[2]?(d[0]>=D.monthStart?C.ci:C.navy):'#D5DBE3'),borderRadius:3,borderSkipped:'bottom'}]},
- options:{plugins:{legend:{display:false},tooltip:{enabled:false,external:estTip}},
+ options:{plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(255,255,255,.97)',titleColor:'#0B3D66',bodyColor:'#1A2230',footerColor:'#6B7585',borderColor:'#C9D2DD',borderWidth:1,padding:10,displayColors:false,caretSize:6,
+   titleFont:{size:13,weight:'800'},bodyFont:{size:12},footerFont:{size:11,weight:'400'},
+   callbacks:{title:c=>{const r=dl[c[0].dataIndex],dt=new Date(r[0]+'T00:00:00');return `${+r[0].slice(5,7)}/${+r[0].slice(8)}(${'일월화수목금토'[dt.getDay()]}) 낮 평균 SMP ${f1(r[1])}원`},
+     label:c=>{const r=dl[c.dataIndex];return `${r[2]?'평일':'주말·공휴일'} · 서울 ${f1(r[3])}℃`},
+     afterBody:c=>{const e=dl[c[0].dataIndex][4];if(!e)return['','추정 자료 없음'];const out=['','▶ 추정 가격결정 발전기 (낮 8시간)'];
+       e.u.forEach(u=>out.push(`  ${u[0]} · ${u[1]} · ${u[2]}시간`));
+       out.push('','▶ 추정 연료: '+Object.entries(e.f).map(([k,v])=>`${k} ${v}시간`).join(' · '));
+       const a=Object.entries(e.a||{});if(a.length)out.push('  (공식 집계 하루 24시간: '+a.map(([k,v])=>`${k} ${v}`).join(' · ')+')');return out}}}},
  scales:{x:{grid:noGrid,ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:14}},y:{grid,min:60,title:{display:true,text:'원/kWh'}}}}});
 
 /* 중장기 시나리오 */
