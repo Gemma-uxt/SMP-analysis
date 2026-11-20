@@ -43,7 +43,7 @@ td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-sp
 tr.hl td{background:#EAF7FD;font-weight:700}
 .up{color:var(--red)}.dn{color:#0072B5}
 .note{font-size:12px;color:var(--ink3)}
-#estTip{position:fixed;z-index:50;pointer-events:none;background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);box-shadow:0 6px 18px rgba(20,30,50,.16);padding:10px 12px;font-size:13px;line-height:1.5;min-width:240px;max-width:330px;opacity:0;transition:opacity .12s}
+#estTip{position:fixed;z-index:50;pointer-events:none;background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);box-shadow:0 6px 18px rgba(20,30,50,.16);padding:10px 12px;font-size:13px;line-height:1.5;min-width:240px;max-width:330px;opacity:0}
 #estTip .h{font-weight:800;color:var(--navy);margin-bottom:4px}
 #estTip .s{font-size:12px;color:var(--ink3);font-weight:700;margin-top:6px}
 #estTip table{font-size:12.5px}#estTip td{padding:2px 4px;border:0;white-space:normal}#estTip td:first-child{text-align:left}
@@ -75,7 +75,7 @@ td.tl{text-align:left;white-space:normal}
   <h1>2026년 11월(1~19일)<br><span>전력시장 검토 결과</span></h1>
   <div style="color:var(--ink2)">평일 SMP·LNG 단가 · 시간대별 SMP · 계통수요 · 공급곡선 · 원별 발전량 · 중장기 시나리오</div>
   <div class="tags"><span>잠정 · 11.1~11.19 실적</span><span>비교: 전년 11.1~11.19 · 2026년 10월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
-  <div class="note" style="margin-top:14px">자동 작성 2026-11-20 11:12</div>
+  <div class="note" style="margin-top:14px">자동 작성 2026-11-20 11:13</div>
 </section>
 
 <section class="slide" id="s1">
@@ -285,7 +285,7 @@ const dl=D.daily;
 /* 막대 위 떠 있는 박스: 추정 가격결정 발전기·연료 */
 const tipEl=document.createElement('div');tipEl.id='estTip';tipEl.setAttribute('role','tooltip');document.body.appendChild(tipEl);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function estTip(ctx){const t=ctx.tooltip;if(!t||t.opacity===0||!t.dataPoints||!t.dataPoints.length){tipEl.style.opacity=0;return}
+function estTip(ctx){const t=ctx.tooltip;if(!t||!t.dataPoints||!t.dataPoints.length){tipEl.style.opacity=0;return}
   const i=t.dataPoints[0].dataIndex,r=dl[i],e=r[4],dt=new Date(r[0]+'T00:00:00'),dw='일월화수목금토'[dt.getDay()];
   let h=`<div class="h">${+r[0].slice(5,7)}/${+r[0].slice(8)}(${dw}) 낮 평균 SMP ${f1(r[1])}원</div><div>${r[2]?'평일':'주말·공휴일'} · 서울 ${f1(r[3])}℃</div>`;
   if(e){h+=`<div class="s">추정 가격결정 발전기 (낮 8시간)</div><table>${e.u.map(u=>`<tr><td>${esc(u[0])}</td><td style="color:var(--ink3)">${esc(u[1])}</td><td>${u[2]}시간</td></tr>`).join('')}</table>`;
@@ -296,7 +296,7 @@ function estTip(ctx){const t=ctx.tooltip;if(!t||t.opacity===0||!t.dataPoints||!t
   tipEl.style.opacity=1;const w=tipEl.offsetWidth,hh=tipEl.offsetHeight;
   if(x+w>innerWidth-8)x=b.left+t.caretX-w-14;if(y+hh>innerHeight-8)y=innerHeight-hh-8;if(y<8)y=8;
   tipEl.style.left=Math.max(8,x)+'px';tipEl.style.top=y+'px'}
-addEventListener('scroll',()=>{tipEl.style.opacity=0},{passive:true});
+$('cDaily').addEventListener('mouseleave',()=>{tipEl.style.opacity=0});
 mk($('cDaily'),{type:'bar',data:{labels:dl.map(d=>+d[0].slice(5,7)+'/'+ +d[0].slice(8)),datasets:[
  {label:'낮 평균 SMP',data:dl.map(d=>d[1]),backgroundColor:dl.map(d=>d[2]?(d[0]>=D.monthStart?C.ci:C.navy):'#D5DBE3'),borderRadius:3,borderSkipped:'bottom'}]},
  options:{plugins:{legend:{display:false},tooltip:{enabled:false,external:estTip}},
