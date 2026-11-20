@@ -108,7 +108,7 @@ function render(){
   const labels=out.map(p=>p.h===0?`${+p.d.slice(5,7)}/${+p.d.slice(8)}`:'');
   if(!OK)return;
   if(chL){chL.destroy();chS.destroy()}
-  const tick={autoSkip:false,maxRotation:0,callback:(v,i)=>{const p=out[i];if(p.h!==0)return null;const day=+p.d.slice(8);const step=out.length>24*40?7:out.length>24*20?3:1;return (day-1)%step===0?labels[i]:null}};
+  const tick={autoSkip:false,maxRotation:0,callback:(v,i)=>{const p=out[i];if(p.h!==0)return null;const day=+p.d.slice(8);const step=out.length>24*40?7:out.length>24*20?3:1;return (day-1)%step===0&&!(step>1&&day>=28)?labels[i]:null}};
   chL=new Chart($('cL'),{type:'line',data:{labels,datasets:[{data:out.map(p=>p.smp),borderColor:'#0B3D66',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:out.map(p=>CAT[p.c][1]),tension:0}]},
     options:{interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{...tipStyle,callbacks:{title:c=>title(out[c[0].dataIndex]),label:c=>body(out[c.dataIndex])}}},
       scales:{x:{grid:{color:c=>out[c.index]&&out[c.index].h===0?'#E3E8EE':'transparent'},ticks:tick},y:{afterFit:a=>{a.width=YW},grid:{color:'#EEF1F5'},title:{display:true,text:'원/kWh'}}}}});
