@@ -66,6 +66,7 @@ td.tl{text-align:left;white-space:normal}
 .opts input{width:17px;height:17px;accent-color:var(--navy);margin:0}
 .opts label:has(input:checked){border-color:var(--navy);background:var(--tint);color:var(--navy)}
 ol.b li{margin:4px 0}
+#tScen th,#tScen td{white-space:nowrap;padding:5px 6px;font-size:12.5px}
 </style>
 </head>
 <body>
@@ -188,7 +189,7 @@ ol.b li{margin:4px 0}
   <div class="g2">
     <div class="box"><div class="bt">태양광 설비와 SMP<small>위: 사업용 태양광 누적 설비(연말, GW) · 아래: SMP(원/kWh)</small></div>
       <div class="fig" style="height:380px"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 SMP 시나리오"></canvas></div></div>
-    <div class="box"><div class="bt">연도별 결과<small>원/kWh · TWh</small></div><div class="scroll"><table id="tScen"></table></div>
+    <div class="box"><div class="bt">연도별 결과<small>SMP 원/kWh · 제어 = 출력제어 TWh</small></div><div class="scroll"><table id="tScen"></table></div>
       <ul class="b">{{s9_bullets}}</ul>
     </div>
   </div>
@@ -305,7 +306,7 @@ $('tCap').innerHTML='<tr><th>연말</th><th>누적(GW)</th><th>증가(GW)</th><t
 const sel=()=>[...document.querySelectorAll('#scOpt input:checked')].map(x=>x.value);
 const SCN={lin:['기본',C.ci],cg:['상단',C.slateD]};
 const tScen=()=>{const s=sel();
-  $('tScen').innerHTML=`<tr><th rowspan="2">연도</th>${s.map(k=>`<th colspan="3" style="text-align:center">${SCN[k][0]}</th>`).join('')}</tr><tr>${s.map(()=>'<th>연평균</th><th>낮</th><th>출력제어</th>').join('')}</tr>`+
+  $('tScen').innerHTML=`<tr><th rowspan="2">연도</th>${s.map(k=>`<th colspan="3" style="text-align:center">${SCN[k][0]}</th>`).join('')}</tr><tr>${s.map(()=>'<th>연평균</th><th>낮</th><th>제어</th>').join('')}</tr>`+
    YR.map(y=>`<tr class="${y===TG?'hl':''}"><td>${y===Y0?'올해 기준':y}</td>${s.map(k=>{const r=P[k][y];return `<td>${f1(r.all)}</td><td>${f1(r.day)}</td><td>${f1(r.curTWh)}</td>`}).join('')}</tr>`).join('')+
    (s.length?'':'<tr><td>시나리오를 하나 이상 고르세요</td></tr>')};
 const ds=[{key:'act',type:'bar',label:'설비 실적',data:capY.map(y=>y<=lastA?SC.end[y]??null:null),backgroundColor:C.navy,yAxisID:'yCap',borderRadius:3,borderSkipped:'bottom',order:3}];
@@ -316,7 +317,7 @@ const ds=[{key:'act',type:'bar',label:'설비 실적',data:capY.map(y=>y<=lastA?
 charts.scen=mk($('cScen'),{type:'bar',data:{labels:capY.map(String),datasets:ds},
  options:{interaction:{mode:'index',intersect:false},datasets:{bar:{categoryPercentage:.7,barPercentage:.9}},layout:{padding:{top:14}},
   plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11.5}}},
-   lbl:{on:true,fmt:v=>f1(v),pick:(i,j)=>{const d=ds[i];return (d.type==='bar'&&(j===capY.length-1||(d.key==='act'&&capY[j]===lastA)))||(d.type==='line'&&!d.borderDash&&(capY[j]===TG))}},
+   lbl:{on:true,fmt:v=>f1(v),pick:(i,j)=>{const d=ds[i];return (d.type==='bar'&&(j===capY.length-1||(d.key==='act'&&capY[j]===lastA)))}},
    tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)}${c.dataset.yAxisID==='yCap'?'GW':'원/kWh'}`}}},
   scales:{x:{grid:noGrid},
    ySmp:{type:'linear',position:'left',stack:'sc',stackWeight:1.25,min:95,max:125,grid,title:{display:true,text:'SMP 원/kWh'}},
