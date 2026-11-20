@@ -29,7 +29,11 @@ body{margin:0;background:#E4E7EC;color:var(--ink);font:15px/1.5 "Noto Sans KR","
 .months input{width:18px;height:18px;accent-color:var(--navy);margin:0}
 .months label:has(input:checked){border-color:var(--navy);background:var(--tint);color:var(--navy)}
 .msg{background:var(--tint);border-left:5px solid var(--ci);padding:10px 16px;font-size:17px;font-weight:700;color:var(--navy);text-wrap:balance}
-.sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.sum{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.chip.ref{border-top-color:var(--navy);background:var(--tint)}
+.allbtn{border:1px solid var(--navy);background:#fff;color:var(--navy);font:inherit;font-weight:700;font-size:14px;padding:7px 14px;border-radius:4px;cursor:pointer;min-height:40px}
+.allbtn:hover,.allbtn:focus-visible{background:var(--navy);color:#fff;outline:none}
+.allbtn[aria-pressed=true]{background:var(--navy);color:#fff}
 .chip{border:1px solid var(--line);border-top:4px solid;padding:8px 12px}
 .chip .l{font-size:13px;font-weight:700;color:var(--ink2)}
 .chip .v{font-size:24px;font-weight:800;letter-spacing:-.5px}
@@ -96,7 +100,9 @@ function render(){
   $('per').textContent=`${+first.slice(5,7)}.${+first.slice(8)}~${+last.slice(5,7)}.${+last.slice(8)}`;
   const cnt={coal:0,ind:0,avg:0,etc:0},sm={coal:[],ind:[],avg:[],etc:[]};out.forEach(p=>{cnt[p.c]++;sm[p.c].push(p.smp)});
   const n=out.length,mean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
-  $('sum').innerHTML=ORDER.map(k=>`<div class="chip" style="border-top-color:${CAT[k][1]}"><div class="l">${CAT[k][0]}</div><div class="v">${(cnt[k]/n*100).toFixed(1)}%</div><div class="s">${cnt[k]}시간 · 평균 SMP ${f1(mean(sm[k]))}원</div></div>`).join('');
+  let ag=0,tot=0;[...new Set(out.map(p=>p.d))].forEach(d=>{const r=D.days[d];if(r.tot){ag+=r.ag;tot+=r.tot}});
+  $('sum').innerHTML=ORDER.map(k=>`<div class="chip" style="border-top-color:${CAT[k][1]}"><div class="l">${CAT[k][0]}</div><div class="v">${(cnt[k]/n*100).toFixed(1)}%</div><div class="s">${cnt[k]}시간 · 평균 SMP ${f1(mean(sm[k]))}원</div></div>`).join('')+
+    `<div class="chip ref" title="가격표만으로 추정한 연료(석탄·LNG 등)의 날짜별 시간 수가 전력거래소 '연료원별 SMP 결정 횟수(일별)'와 겹치는 비율"><div class="l">참고 · 연료 일치율</div><div class="v">${tot?(ag/tot*100).toFixed(1)+'%':'-'}</div><div class="s">추정만 했을 때, 공식 일별 집계 대비</div></div>`;
   const top=ORDER.slice().sort((a,b)=>cnt[b]-cnt[a])[0];
   $('msg').innerHTML=`선택 기간 ${n.toLocaleString()}시간 중 가격을 가장 많이 정한 연료: <span style="color:${CAT[top][1]}">${CAT[top][0]}</span>(${(cnt[top]/n*100).toFixed(0)}%) · 평균연료비 LNG가 정한 시간의 평균 SMP ${f1(mean(sm.avg))}원`;
   const labels=out.map(p=>p.h===0?`${+p.d.slice(5,7)}/${+p.d.slice(8)}`:'');
@@ -116,8 +122,11 @@ fetch('data/hourly_est.json?'+Date.now()).then(r=>{if(!r.ok)throw new Error(r.st
   const lastM=ms[ms.length-1];
   $('months').innerHTML=ms.map(m=>{const ds=Object.keys(D.days).filter(d=>d.startsWith(m)).sort(),e=+ds[ds.length-1].slice(8),full=new Date(+m.slice(0,4),+m.slice(5),0).getDate();
     return `<label><input type="checkbox" value="${m}" ${m===lastM?'checked':''}>${+m.slice(5)}월${e<full?` (~${e}일)`:''}</label>`}).join('');
-  $('months').onchange=render;
-  $('note').textContent=`※ SMP: KPX 육지 시간별 · 가격결정 발전기·연료는 사업기획팀 발전가격 순위표의 단가와 순위 위치로 추정하고, 날짜별 석탄·LNG 시간 수는 전력거래소 연료별 SMP 결정 횟수에 맞춤 — SMP에는 무부하·기동가격이 포함돼 순위표 단가와 정확히 같지 않으므로 발전기는 추정치 · 'LNG(평균·직도입)' 혼합 발전기는 평균연료비, 원자력·LPG·중유·도시가스 LNG 등은 기타로 분류 · 기간 ${D.from}~${D.to}`;
+  $('months').insertAdjacentHTML('beforeend','<button type="button" class="allbtn" id="allBtn" aria-pressed="false">한번에 보기</button>');
+  const boxes=[...document.querySelectorAll('#months input')];
+  $('months').addEventListener('change',e=>{if(e.target.type!=='checkbox')return;boxes.forEach(b=>b.checked=b===e.target);$('allBtn').setAttribute('aria-pressed','false');render()});
+  $('allBtn').onclick=()=>{boxes.forEach(b=>b.checked=true);$('allBtn').setAttribute('aria-pressed','true');render()};
+  $('note').textContent=`※ SMP: KPX 육지 시간별 · 가격결정 발전기·연료는 사업기획팀 발전가격 순위표의 단가와 순위 위치로 추정하고, 날짜별 석탄·LNG 시간 수는 전력거래소 연료별 SMP 결정 횟수에 맞춤 — SMP에는 무부하·기동가격이 포함돼 순위표 단가와 정확히 같지 않으므로 발전기는 추정치 · 연료 일치율: 전력거래소 일별 집계로 보정하기 전 추정치가 날짜별 석탄·LNG 시간 수와 겹치는 비율(시간 단위 정확도의 최대치, LNG 평균·개별 구분과 발전기명은 공식 자료가 없어 검증 불가) · 'LNG(평균·직도입)' 혼합 발전기는 평균연료비, 원자력·LPG·중유·도시가스 LNG 등은 기타로 분류 · 기간 ${D.from}~${D.to}`;
   render()}).catch(e=>{$('msg').textContent='자료를 불러오지 못했습니다: '+e.message});
 }
 </script>

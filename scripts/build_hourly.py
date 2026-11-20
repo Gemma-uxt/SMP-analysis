@@ -31,6 +31,9 @@ def main(a, b):
                   "u": [n for h, n, lb in e], "lb": [lb for h, n, lb in e],
                   "c": [cat(lb, raw_fuel[d[:7]].get(n, "")) for h, n, lb in e],
                   "wd": B.is_wd(d), "a": dict(B.fuel_daily().get(d, {}))}
+        B.est_day(d)  # 보정 전 추정의 연료 일치(ag/tot) 계산
+        if "ag" in B.EST.get(d, {}):
+            out[d]["ag"], out[d]["tot"] = B.EST[d]["ag"], B.EST[d]["tot"]
     p = B.DOCS / "data" / "hourly_est.json"
     p.write_text(json.dumps({"from": a, "to": b, "days": out}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"{len(out)}일 → {p}")
