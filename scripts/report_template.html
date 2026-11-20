@@ -139,6 +139,7 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
 <style>
 /* ---------- 이 보고서 전용 보완 (표준 템플릿 위에 추가) ---------- */
 a.lk{text-decoration:none;white-space:nowrap}
+.chip{white-space:nowrap}
 .t.c th{padding:6px 11px} .t.c td{padding:5px 11px}
 .t th.c{text-align:center}
 .t td.tl{white-space:normal}
@@ -155,7 +156,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 .band .bar div{color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .blg{display:flex;gap:14px;font-size:14.5px;color:var(--ink2);margin-top:2px}
 .blg i{display:inline-block;width:11px;height:11px;margin-right:5px}
-#tScen th,#tScen td{padding:5px 8px}
+#scK .kpi{padding:8px 16px} #scK .kpi .k2{font-size:32px}
 .nav select{min-width:300px}
 </style>
 </head>
@@ -304,28 +305,48 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
   <div class="ft"><span class="pg"></span></div>
 </section>
 
-<!-- ===================== 참고 1. 시나리오 설정 ===================== -->
+<!-- ===================== 참고 1. 시나리오 개요 ===================== -->
 <section class="slide">
-  <div class="hd"><span class="pno">참고 1</span><span class="pt">중장기 시나리오 설정과 근거<small>태양광 설비 증가 속도가 이어질 때 SMP는?</small></span></div>
+  <div class="hd"><span class="pno">참고 1</span><span class="pt">중장기 시나리오: 무엇을, 어떻게 봤나</span></div>
   <div class="msg">{{s8_msg}}</div>
+  <div class="bd">
+    <div class="chips" style="margin-top:4px"><span class="chip s">태양광 설비 증가</span><span class="arw">→</span><span class="chip">낮 태양광 발전 증가</span><span class="arw">→</span><span class="chip">순부하 감소</span><span class="arw">→</span><span class="chip">더 싼 발전기가 가격 결정</span><span class="arw">→</span><span class="chip">SMP 하락</span><span class="arw">+</span><span class="chip e">남는 태양광은 출력제어</span></div>
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>계산 방법: 순부하가 같으면 SMP도 비슷하다고 봄</span><small>올해 실적 · 5GW 구간별 평균</small></div>
+        <div class="cv"><canvas id="cNL" role="img" aria-label="순부하 구간별 올해 평균 SMP"></canvas></div>
+        <ul class="d">{{s8_how}}</ul>
+      </div></div>
+      <div class="card" style="width:520px"><div class="ch">출력제어란?</div><div class="cb">
+        <div class="tx">발전이 수요보다 많아 계통이 불안해질 때 <b>전력거래소가 발전을 강제로 줄이는 것</b></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span class="num g">1</span><div class="tx">먼저 <b>석탄·LNG·양수</b>를 최대한 줄이거나 세움 (평소 급전 운영)</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span class="num r">2</span><div class="tx">그래도 남으면 <b>원전·태양광·풍력</b>을 줄임 = '출력제어'</div></div>
+        <div class="tx">태양광은 대부분 <b>보상 없음</b> (2026년부터 호남권 준중앙제도 참여 발전소만 정산금)</div>
+        <div class="bx r" style="margin-top:auto"><b class="rd">이 분석의 가정:</b> 순부하가 올해 최저({{nmin}}GW)보다 낮아지는 만큼을 <b>모두 태양광 출력제어</b>로 계산 — 원전 감발·ESS 충전 등이 나눠 맡으면 실제로는 이보다 작음(상한값)</div>
+      </div></div>
+    </div>
+    <div class="note">※ 순부하 = 계통수요 − 시장 태양광·풍력 = 석탄·LNG·원전 등이 채워야 하는 몫 · 육지 출력제어는 2023년부터(제주 2015년~) · 순서: 산업통상자원부 '가을철 전력계통 안정화 대책'(2023.9.14) · 준중앙제도 = 재생에너지형 준중앙급전 발전제도</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 참고 2. 시나리오 설정과 근거 ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">참고 2</span><span class="pt">시나리오 설정과 근거<small>태양광이 얼마나 늘어난다고 봤나</small></span></div>
+  <div class="msg">{{s8b_msg}}</div>
   <div class="bd">
     <div class="row f1">
       <div class="card f1"><div class="cb">
-        <div class="sh"><span>① 시나리오: 최근 3년 증가 속도</span></div>
+        <div class="sh"><span>① 두 가지 시나리오</span></div>
         <table class="t c"><thead><tr><th style="width:110px">구분</th><th>가정</th></tr></thead><tbody>{{s8_case}}</tbody></table>
-        <div class="sh" style="margin-top:6px"><span>② 근거: 사업용 태양광 설비 실적</span></div>
+        <div class="sh" style="margin-top:6px"><span>② 근거: 사업용 태양광 설비 실적</span><small>연말 누적</small></div>
         <table class="t c" id="tCap"></table>
       </div></div>
       <div class="card f1"><div class="cb">
-        <div class="sh"><span>③ 계산 방법</span></div>
-        <ul class="d">
-          <li>달마다 '순부하(계통수요 − 시장 태양광·풍력)'가 비슷한 40개 시간의 평균 SMP로 순부하–SMP 관계를 구함</li>
-          <li>설비가 늘어난 만큼 시간별 태양광 출력(시장·PPA·자가용)을 늘리고, 그만큼 낮아진 순부하로 SMP를 다시 구함</li>
-          <li>순부하가 올해 최저({{nmin}}GW)보다 낮아지는 만큼은 출력제어로 처리</li>
-        </ul>
-        <div class="sh" style="margin-top:6px"><span>④ 나머지 조건은 올해와 동일</span></div>
+        <div class="sh"><span>③ 태양광 말고는 올해와 같다고 봄</span></div>
         <table class="t c"><thead><tr><th style="width:110px">항목</th><th>가정</th></tr></thead><tbody>{{s8_rows}}</tbody></table>
-        <div class="bx" style="margin-top:auto"><b class="em">검증:</b> {{s8_valid}}</div>
+        <div class="bx"><b class="em">계산이 맞는지:</b> {{s8_valid}}</div>
+        <div class="bx r" style="margin-top:auto">{{s8_gov}}</div>
       </div></div>
     </div>
     <div class="note">{{s8_note}}</div>
@@ -333,26 +354,25 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
   <div class="ft"><span class="pg"></span></div>
 </section>
 
-<!-- ===================== 참고 2. 시나리오 결과 ===================== -->
+<!-- ===================== 참고 3. 시나리오 결과 ===================== -->
 <section class="slide">
-  <div class="hd"><span class="pno">참고 2</span><span class="pt">중장기 시나리오 결과<small>{{s9_sub}}</small></span>
+  <div class="hd"><span class="pno">참고 3</span><span class="pt">중장기 시나리오 결과<small>{{s9_sub}}</small></span>
     <div class="opts" id="scOpt" role="group" aria-label="시나리오 선택">
       <label><input type="checkbox" value="lin" checked>기본 (+{{add}}GW/년)</label>
       <label><input type="checkbox" value="cg" checked>상단 (+{{cagr}}%/년)</label></div></div>
   <div class="msg">{{s9_msg}}</div>
   <div class="bd">
+    <div class="kpis" id="scK"></div>
     <div class="row f1">
       <div class="card f1"><div class="cb">
-        <div class="sh"><span>태양광 설비와 SMP</span><small>위: 누적 설비(연말, GW) · 아래: SMP(원/kWh)</small></div>
+        <div class="sh"><span>연도별 태양광 설비와 SMP</span><small>위: 연말 설비(GW) · 아래: SMP(원/kWh) · 마우스를 올리면 값</small></div>
         <div class="cv"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 SMP 시나리오"></canvas></div>
       </div></div>
-      <div class="card" style="width:490px"><div class="cb">
-        <div class="sh"><span>연도별 결과</span><small>SMP 원/kWh · 제어 = 출력제어 TWh</small></div>
-        <table class="t c" id="tScen"></table>
-        <ul class="d">{{s9_bullets}}</ul>
+      <div class="card" style="width:470px"><div class="cb">
+        <div class="sh"><span>결과를 읽는 법</span></div>
+        <ul class="d">{{s9_read}}</ul>
       </div></div>
     </div>
-    <ul class="d">{{s9_bullets2}}</ul>
     <div class="note">{{s9_note}}</div>
   </div>
   <div class="ft"><span class="pg"></span></div>
@@ -513,11 +533,19 @@ const SC=D.scen, P=SC.res, Y0=SC.year, TG=SC.target, YR=Object.keys(P.lin).map(N
 const lastA=Math.max(...Object.keys(SC.end).map(Number));
 const capY=Object.keys(SC.lin_end).map(Number).sort((a,b)=>a-b);
 $('tCap').innerHTML='<thead><tr><th>연말</th><th class="r">누적(GW)</th><th class="r">증가(GW)</th><th class="r">증가율</th></tr></thead><tbody>'+capY.filter(y=>y<=lastA).map((y,i,a)=>{const v=SC.end[y],p=i?SC.end[a[i-1]]:null;return `<tr><td class="rh">${y}</td><td class="r">${f1(v)}</td><td class="r">${p!=null?'+'+f1(v-p):'-'}</td><td class="r">${p!=null?'+'+f1((v/p-1)*100)+'%':'-'}</td></tr>`}).join('')+'</tbody>';
+mkS('cNL',{type:'bar',data:{labels:SC.nlb.map(b=>b[0]),datasets:[{label:'평균 SMP',data:SC.nlb.map(b=>b[1]),backgroundColor:SC.nlb.map(b=>+b[0].split('~')[0]<50?C.ci:C.slate)}]},
+ options:{layout:{padding:{top:22}},plugins:{legend:{display:false},vLabel:{on:true,size:13,fmt:v=>Math.round(v)},tooltip:{callbacks:{title:c=>`순부하 ${c[0].label}GW`,label:c=>`평균 SMP ${f1(c.raw)}원 · ${SC.nlb[c.dataIndex][2].toLocaleString()}시간`}}},
+  scales:{x:{grid:noGrid,ticks:{color:C.ink},title:{display:true,text:'순부하(GW)'}},y:{min:0,grid,border:{display:false},title:{display:true,text:'원/kWh'}}}}});
 const picked=()=>[...document.querySelectorAll('#scOpt input:checked')].map(x=>x.value);
 const SCN={lin:['기본',C.ci],cg:['상단',C.slateD]};
-const tScen=()=>{const s=picked();
-  $('tScen').innerHTML=`<thead><tr><th rowspan="2">연도</th>${s.map(k=>`<th colspan="3" class="c">${SCN[k][0]}</th>`).join('')}</tr><tr>${s.map(()=>'<th class="r">연평균</th><th class="r">낮</th><th class="r">제어</th>').join('')}</tr></thead><tbody>`+
-   (s.length?YR.map(y=>`<tr class="${y===TG?'hl':''}"><td class="rh">${y===Y0?'올해 기준':y}</td>${s.map(k=>{const r=P[k][y];return `<td class="r">${f1(r.all)}</td><td class="r">${f1(r.day)}</td><td class="r">${f1(r.curTWh)}</td>`}).join('')}</tr>`).join(''):'<tr><td>시나리오를 하나 이상 고르세요</td></tr>')+'</tbody>'};
+const rg=(a,fmt)=>{const v=[...new Set(a.map(fmt))];return v.length>1?v.join('~'):v[0]};
+const tScen=()=>{const s=picked();if(!s.length){$('scK').innerHTML='<div class="note">시나리오를 하나 이상 고르세요</div>';return}
+  const b=P.lin[Y0],r=s.map(k=>P[k][TG]),cap=s.map(k=>(k==='lin'?SC.lin_end:SC.cg_end)[TG]);
+  const K=[[`${TG}년 말 태양광 설비`,rg(cap,f1),'GW',`올해 초 ${f1(SC.end[lastA])}GW`,'b'],
+   ['연평균 SMP','▼'+rg(r,x=>Math.round(b.all-x.all)),'원',`올해 ${f1(b.all)} → ${rg(r,x=>f1(x.all))}원`,''],
+   ['낮(10~17시) SMP','▼'+rg(r,x=>Math.round(b.day-x.day)),'원',`올해 ${f1(b.day)} → ${rg(r,x=>f1(x.day))}원`,''],
+   ['태양광 출력제어',rg(r,x=>f1(x.curTWh)),'TWh',`연간 태양광 발전의 ${rg(r,x=>f1(x.curPct))}% · ${rg(r,x=>x.curH)}시간`,'']];
+  $('scK').innerHTML=K.map(([l,v,u,s3,c],i)=>`<div class="card kpi"${i===3?' style="border-top-color:var(--red)"':''}><div class="k1">${l}</div><div class="k2 ${c}"${i===3?' style="color:var(--red)"':''}>${v}<small>${u}</small></div><div class="k3">${s3}</div></div>`).join('')};
 const ds=[{key:'act',type:'bar',label:'설비 실적',data:capY.map(y=>y<=lastA?SC.end[y]??null:null),backgroundColor:C.navy,yAxisID:'yCap',order:3}];
 ['lin','cg'].forEach(k=>{const end=k==='lin'?SC.lin_end:SC.cg_end;
   ds.push({key:k,type:'bar',label:`설비 ${SCN[k][0]}`,data:capY.map(y=>y>lastA?end[y]:null),backgroundColor:SCN[k][1]+'B3',yAxisID:'yCap',order:3});

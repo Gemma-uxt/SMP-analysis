@@ -413,8 +413,15 @@ def scenario(year, b):
                              all0=round(mean(0 if cu > 0 else p for r, p, cu in out), 1),
                              curH=sum(1 for r, p, cu in out if cu > 0), curTWh=round(sum(cu for r, p, cu in out) / 1e6, 2),
                              hiH=sum(1 for r, p, cu in out if p >= 150),
+                             solTWh=round(sum(k * r["sol"] for r in R) / 1e6, 1),
+                             curPct=round(sum(cu for r, p, cu in out) / max(1, sum(k * r["sol"] for r in R)) * 100, 1),
                              mon={m: round(mean(p for r, p, cu in out if r["m"] == m), 1) for m in sorted(bym)},
                              prof=[round(mean(p for r, p, cu in out if r["h"] == h), 1) for h in range(24)])
+    # 순부하 구간별 올해 실제 SMP (계산 방법 설명용)
+    bands = defaultdict(list)
+    for r in R:
+        bands[int(r["nl"] // 5000) * 5].append(r["smp"])
+    nlb = [[f"{g}~{g+5}", round(mean(v), 1), len(v)] for g, v in sorted(bands.items()) if len(v) >= 20]
     low = sorted(R, key=lambda r: r["nl"])[:30]
     lowp = sorted(r["smp"] for r in low)
     return dict(year=year, b=b, NMIN=round(NMIN / 1000, 1), err=round(err, 1), add=round(add, 2), cagr=round(cagr * 100, 1),
@@ -422,7 +429,7 @@ def scenario(year, b):
                 lin_end={str(y): round(lin_end(y), 1) for y in range(ys[0], target + 1)}, cg_end={str(y): round(cg_end(y), 1) for y in range(ys[0], target + 1)},
                 target=target, res=res, low_nl=[round(low[0]["nl"] / 1000, 1), round(low[-1]["nl"] / 1000, 1)],
                 low_smp=[round(lowp[len(lowp) // 4]), round(lowp[len(lowp) * 3 // 4])],
-                act=round(mean(r["smp"] for r in R), 1))
+                act=round(mean(r["smp"] for r in R), 1), nlb=nlb)
 
 
 # ---------------- 보고서 한 개 만들기 ----------------
@@ -624,7 +631,13 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     L, G = sc["res"]["lin"], sc["res"]["cg"]
     base = L[y0]
     lo_e, hi_e = sc["lin_end"][str(tg)], sc["cg_end"][str(tg)]
-    T["s8_msg"] = (f"최근 3년 태양광은 연 {' → '.join(f1(x) for x in sc['adds'])}GW 증가(평균 <span class=\"em\">+{f1(sc['add'])}GW</span>, 연 {f1(sc['cagr'])}%) "
+    T["s8_msg"] = (f"올해 실적에서 <span class=\"em\">태양광만 {tg}년 수준({round(sc['lin_end'][str(tg)])}~{round(sc['cg_end'][str(tg)])}GW)</span>으로 늘렸을 때 "
+                   "SMP와 출력제어가 어떻게 바뀌는지 계산")
+    lowb = [b_ for b_ in sc["nlb"] if int(b_[0].split("~")[0]) < 50]
+    T["s8_how"] = ("<li>늘어난 태양광만큼 순부하를 낮추고, <b>같은 달에 순부하가 비슷했던 올해 40개 시간의 평균 SMP</b>를 그 시간 SMP로 봄</li>"
+                   + (f"<li>순부하 50GW 아래(파란 막대)에선 SMP가 <b>{round(min(x[1] for x in lowb))}~{round(max(x[1] for x in lowb))}원</b>에서 더 내려가지 않음 "
+                      "— 태양광이 늘어도 SMP 하락 폭이 작은 이유</li>" if lowb else ""))
+    T["s8b_msg"] = (f"최근 3년 태양광은 연 {' → '.join(f1(x) for x in sc['adds'])}GW 증가(평균 <span class=\"em\">+{f1(sc['add'])}GW</span>, 연 {f1(sc['cagr'])}%) "
                    f"— 이 속도면 {tg}년 말 <span class=\"em\">{round(lo_e)}~{round(hi_e)}GW</span>")
     T["s8_sub"] = f"GW · {sc['ys'][0]}~{sc['ys'][-1]} 실적, {sc['ys'][-1]+1}~{tg} 시나리오"
     T["s8_rows"] = (f"<tr><td>날씨</td><td class=\"tl\">올해(1.1~{per.split('~')[1]}) 시간별 일사·기온이 매년 반복</td></tr>"
@@ -636,12 +649,16 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
                     f"<tr><td>{tg}년 말</td><td class=\"tl\">기본 <b>{f1(sc['lin_end'][str(tg)])}GW</b> · 상단 <b>{f1(sc['cg_end'][str(tg)])}GW</b> (올해 초 {f1(sc['end'][str(sc['ys'][-1])])}GW)</td></tr>")
     T["nmin"], T["add"], T["cagr"] = f1(sc["NMIN"]), f1(sc["add"]), f1(sc["cagr"])
     T["s8_valid"] = f"같은 방법으로 올해 실적을 재현하면 월평균 SMP 오차 ±{f1(sc['err'])}원 이내"
-    T["s8_note"] = ("※ 설비: " + CAP.get("_출처", "") +
-                    (f" · 정부의 2030년 목표({f1(CAP['gov_target_2030'])}GW)는 이 시나리오보다 훨씬 큼" if CAP.get("gov_target_2030") else ""))
+    T["s8_note"] = "※ 설비: " + CAP.get("_출처", "")
+    T["s8_gov"] = ((f"<b class=\"rd\">비교:</b> 정부의 2030년 목표는 <b>{f1(CAP['gov_target_2030'])}GW</b> — 상단 시나리오({f1(sc['cg_end'][str(tg)])}GW)보다 훨씬 커서, "
+                    "목표대로 늘면 SMP 하락과 출력제어 모두 이 결과보다 커짐") if CAP.get("gov_target_2030") else
+                   "<b class=\"rd\">한계:</b> 수요 증가·연료비 변화·ESS 확대는 반영하지 않음")
     a1, a2 = base["all"] - L[tg]["all"], base["all"] - G[tg]["all"]
     d1, d2 = base["day"] - L[tg]["day"], base["day"] - G[tg]["day"]
     T["s9_sub"] = f"올해 연료비·수요 기준 · 1.1~{per.split('~')[1]} 시간 평균"
-    T["s9_msg"] = (f"{tg}년 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원"
+    T["s9_msg"] = (f"{tg}년 태양광 {round(lo_e)}~{round(hi_e)}GW: 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원 하락</span>에 그치고, "
+                   f"<span class=\"rd\">태양광 출력제어 {f1(L[tg]['curTWh'])}~{f1(G[tg]['curTWh'])}TWh</span>")
+    T["s9_msg_old"] = (f"{tg}년 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원"
                    f"(▼{f1(min(a1, a2) / base['all'] * 100)}~{f1(max(a1, a2) / base['all'] * 100)}%) 하락</span> — "
                    f"낮 SMP {round(min(d1, d2))}~{round(max(d1, d2))}원 하락, 대신 <span class=\"rd\">출력제어 {f1(L[tg]['curTWh'])}~{f1(G[tg]['curTWh'])}TWh</span> 필요")
     T["s9_bullets"] = (f"<li>SMP 150원 이상: 올해 {base['hiH']}시간 → {tg}년 {min(L[tg]['hiH'], G[tg]['hiH'])}~{max(L[tg]['hiH'], G[tg]['hiH'])}시간</li>"
@@ -653,6 +670,12 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["s9_bullets2"] = (f"<li><b>하락 폭이 작은 이유</b>: 낮 가격은 석탄·열병합 수준까지만 내려옴 — 올해 순부하 최저 시간({f1(sc['low_nl'][0])}~{f1(sc['low_nl'][1])}GW)에도 SMP {sc['low_smp'][0]}~{sc['low_smp'][1]}원</li>"
                         f"<li><b>영향이 큰 달</b>: {top_s}({tg}년 ▼{t_lo}~{t_hi}원) · {M_}은 ▼{round(min(drops[m]))}~{round(max(drops[m]))}원</li>"
                         f"<li><b>남는 위험</b>: 남는 태양광을 줄여야 하는 시간이 {tg}년 {L[tg]['curH']}~{G[tg]['curH']}시간 — SMP 하락보다 출력제어 확대가 더 큰 변화</li>")
+    lo_s = [x[1] for x in sc["nlb"] if int(x[0].split("~")[0]) < 50]
+    T["s9_read"] = ((f"<li><b>하락 폭이 작은 이유</b>: 순부하가 낮아져도 SMP는 석탄·열병합 가격대({round(min(lo_s))}~{round(max(lo_s))}원)에서 멈춤 (참고 1 그래프)</li>" if lo_s else "")
+                    + f"<li><b>영향이 큰 달</b>: {top_s} ▼{t_lo}~{t_hi}원 · {M_}은 ▼{round(min(drops[m]))}~{round(max(drops[m]))}원</li>"
+                    + f"<li><b>비싼 시간 감소</b>: SMP 150원 이상 시간이 올해 {base['hiH']}시간 → {tg}년 {min(L[tg]['hiH'], G[tg]['hiH'])}~{max(L[tg]['hiH'], G[tg]['hiH'])}시간</li>"
+                    + f"<li><b>출력제어</b>는 상한값(참고 1) — 원전 감발·ESS 충전이 나눠 맡으면 태양광 몫은 줄어듦</li>"
+                    + f"<li><b>극단 가정</b>: 출력제어 시간 SMP를 0원으로 보면 {tg}년 연평균 {f1(min(L[tg]['all0'], G[tg]['all0']))}~{f1(max(L[tg]['all0'], G[tg]['all0']))}원</li>")
     T["s9_note"] = (f"※ 연도별 값은 해당 연도에도 올해(1.1~{per.split('~')[1]})와 같은 날씨·수요가 반복된다고 본 값"
                     + ("" if m.endswith("12") and final else " · 남은 달 미포함") + " · 저장장치(ESS)·양수 확대, 원전 신규·석탄 폐지, LMP 도입은 미반영")
     # 6 종합
