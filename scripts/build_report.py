@@ -557,6 +557,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     mv = (msc or {}).get("movers") or []
     if msc and msp and mv:
         fl = Counter(r[1] for r in mv).most_common(1)[0][0]
+        fl = {"LNG 직도입": "직도입 LNG", "LNG 개별": "개별요금 LNG", "LNG 평균": "평균요금 LNG"}.get(fl, fl)
         s4 = (f"{fl} 등 <span class=\"rd\">{len(mv)}기({sum(r[4] for r in mv) / 1000:.1f}GW)</span>의 발전가격이 160원 이상으로 뛰어 "
               f"160원 미만 공급 {f1(msp['below160'])} → <span class=\"em\">{f1(msc['below160'])}GW</span>")
     elif msc and msp:

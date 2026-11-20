@@ -132,7 +132,7 @@ ol.b li{margin:4px 0}
   <div class="msg">{{s4_msg}}</div>
   <div class="g2">
     <div class="box"><div class="bt">발전가격 stack (공급곡선)<small>가로 = 싼 발전기부터 쌓은 입찰량(GW) · 세로 = 발전가격(원/kWh)</small></div>
-      <div class="fig" style="height:300px"><canvas id="cStack" role="img" aria-label="전월과 이번 달 발전가격 stack 비교"></canvas></div></div>
+      <div class="fig" style="height:400px"><canvas id="cStack" role="img" aria-label="전월과 이번 달 발전가격 stack 비교"></canvas></div></div>
     <div class="box"><div class="bt">160원 선을 넘어 올라간 발전기<small>{{prevM}} → {{curM}} 발전가격(원/kWh)</small></div>
       <div class="scroll"><table id="tMov"></table></div>
       <ul class="b">{{s4_bullets}}</ul>
@@ -228,6 +228,9 @@ Chart.defaults.plugins.legend.labels.boxWidth=12;Chart.defaults.maintainAspectRa
 Chart.defaults.interaction={mode:'index',intersect:false};
 Chart.register({id:'lbl',afterDatasetsDraw(ch,a,o){if(!o||!o.on)return;const x=ch.ctx;x.save();x.font='700 12px "Noto Sans KR"';x.textAlign='center';
   ch.data.datasets.forEach((ds,i)=>{const meta=ch.getDatasetMeta(i);if(meta.hidden||!ch.isDatasetVisible(i))return;meta.data.forEach((p,j)=>{const raw=ds.data[j],v=raw&&typeof raw==='object'?raw.y:raw;if(v==null||!o.pick(i,j,v))return;x.fillStyle='#1A2230';x.fillText(o.fmt(v,i,j),p.x,p.y-8)})});x.restore()}});
+Chart.register({id:'ptl',afterDatasetsDraw(ch,a,o){if(!o||!o.on)return;const x=ch.ctx;x.save();x.font='700 12.5px "Noto Sans KR"';x.textBaseline='middle';
+  [[2,'left',12],[3,'right',-12]].forEach(([i,al,dx])=>{const m=ch.getDatasetMeta(i);if(!m||!m.data[0])return;const p=m.data[0],v=ch.data.datasets[i].data[0].x;
+   x.textAlign=al;x.fillStyle=i===2?'#0B3D66':'#0086C0';x.fillText(`${f1(v)}GW`,p.x+dx,p.y-12)});x.restore()}});
 Chart.register({id:'band',beforeDatasetsDraw(ch,a,o){if(!o||!o.on)return;const {ctx,chartArea:c,scales}=ch,y=scales.y;const y1=y.getPixelForValue(o.to),y0=y.getPixelForValue(o.from);
   ctx.save();ctx.fillStyle='rgba(217,58,63,.07)';ctx.fillRect(c.left,y1,c.right-c.left,y0-y1);ctx.strokeStyle='rgba(217,58,63,.55)';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(c.left,y1);ctx.lineTo(c.right,y1);ctx.stroke();
   ctx.fillStyle='#B3262B';ctx.font='700 12px "Noto Sans KR"';ctx.textAlign='left';ctx.fillText(o.text,c.left+6,y1+15);ctx.restore()}});}
@@ -278,11 +281,11 @@ if(MS&&MS.cur&&MS.prev){
     mark(MS.prev,C.navy),mark(MS.cur,C.ci)]},
    options:{interaction:{mode:'nearest',intersect:false,axis:'xy'},layout:{padding:{top:20}},
     plugins:{legend:{labels:{filter:i=>i.text!==''}},band:{on:true,from:110,to:160,text:'110~160원 구간'},
-      lbl:{on:true,fmt:(v,i)=>`${f1(i===2?MS.prev.below160:MS.cur.below160)}GW`,pick:i=>i>=2},
+      ptl:{on:true},
       tooltip:{callbacks:{title:c=>`발전가격 ${c[0].raw.y}원 미만`,label:c=>c.datasetIndex>=2?`${c.datasetIndex===2?L.prevM:L.curM} 160원 미만 공급 ${f1(c.raw.x)}GW`:`${c.dataset.label}: 누적 ${f1(c.raw.x)}GW`}}},
-    scales:{x:{type:'linear',min:40,max:110,grid,title:{display:true,text:'누적 입찰량(GW)'}},y:{min:60,max:260,grid,title:{display:true,text:'원/kWh'}}}}});
+    scales:{x:{type:'linear',min:55,max:100,grid,title:{display:true,text:'누적 입찰량(GW)'}},y:{min:80,max:220,grid,title:{display:true,text:'원/kWh'}}}}});
   const mv=MS.cur.movers||[];
-  $('tMov').innerHTML='<tr><th>발전기</th><th>연료</th><th>'+L.prevM+'</th><th>'+L.curM+'</th><th>입찰량(MW)</th></tr>'+
+  $('tMov').innerHTML='<tr><th>발전기</th><th>연료</th><th>'+L.prevM+'</th><th>'+L.curM+'</th><th>MW</th></tr>'+
     (mv.length?mv.map(r=>`<tr><td>${esc(r[0])}</td><td style="text-align:left">${esc(r[1])}</td><td>${typeof r[2]==='number'?r[2]+'원':esc(r[2])}</td><td class="up">${typeof r[3]==='number'?r[3]+'원':esc(r[3])}</td><td>${r[4].toLocaleString()}</td></tr>`).join('')
       +`<tr class="hl"><td colspan="4">합계 ${mv.length}기</td><td>${mv.reduce((s,r)=>s+r[4],0).toLocaleString()}</td></tr>`:'<tr><td colspan="5">해당 발전기 없음</td></tr>');
 } else {$('tMov').innerHTML='<tr><td>발전가격 순위표 요약이 없어 표시할 수 없음</td></tr>'}
