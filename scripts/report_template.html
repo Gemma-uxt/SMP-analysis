@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{title}} 전력시장 검토 결과</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 본부장 보고용 정식 보고서, 결론 먼저
+   IDEA: 기존 'SMP-analysis' 슬라이드 덱의 11월 잠정판 (같은 양식)
+   PICTURE: 평일 시간대별 SMP — 낮에만 솟은 11월 곡선
+   COLOUR and TYPE: 기존 덱 네이비 #0B3D66 · CI 블루 #00A6ED · 회색 비교, Noto Sans KR
+   LAYOUT: 16:9 흰 슬라이드를 세로로 쌓고, 인쇄 시 장당 1쪽 */
+:root{color-scheme:light;--navy:#0B3D66;--ci:#00A6ED;--slate:#B4BECB;--slateD:#6F7D90;--red:#D93A3F;--amber:#F2A33A;--ink:#1A2230;--ink2:#3F4856;--ink3:#6B7585;--line:#D9DFE7;--tint:#F2F6FA}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:#E4E7EC;color:var(--ink);font:15px/1.5 "Noto Sans KR","Malgun Gothic",sans-serif;overflow-x:clip}
+.toc{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px max(3vw,12px)}
+.toc a{flex:none;font-size:13px;color:var(--ink2);text-decoration:none;padding:6px 10px;border-radius:4px;border:1px solid var(--line)}
+.toc a:hover,.toc a:focus-visible{border-color:var(--ci);color:var(--navy);outline:none}
+.slide{background:#fff;max-width:1080px;margin:22px auto;padding:30px 40px 22px;box-shadow:0 2px 10px rgba(20,30,50,.08);display:flex;flex-direction:column;gap:14px;scroll-margin-top:60px}
+.hd{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--navy);padding-bottom:10px}
+.pno{background:var(--navy);color:#fff;font-weight:800;font-size:17px;padding:3px 10px;border-radius:2px}
+.pt{font-size:24px;font-weight:800;color:var(--navy);letter-spacing:-.5px}
+.pt small{font-size:14px;font-weight:500;color:var(--ink3);margin-left:8px}
+.msg{background:var(--tint);border-left:5px solid var(--ci);padding:10px 16px;font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-.3px;text-wrap:balance}
+.em{color:var(--ci)}.rd{color:var(--red)}
+.g2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px}
+.g2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.k4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.box{border:1px solid var(--line);padding:12px 14px}
+.bt{font-weight:700;color:var(--navy);border-left:4px solid var(--ci);padding-left:8px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bt small{font-weight:400;color:var(--ink3);font-size:12px}
+.kpi{border-top:3px solid var(--ci);background:var(--tint);padding:10px 12px}
+.kpi .l{font-size:13px;font-weight:700;color:var(--ink2)}
+.kpi .v{font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-1px;line-height:1.2}
+.kpi .s{font-size:13px;color:var(--ink2);white-space:nowrap}
+.fig{position:relative;height:270px}.fig.t{height:230px}.fig.s{height:190px}
+ul.b{margin:6px 0 0;padding-left:18px;font-size:14px;color:var(--ink2)}ul.b li{margin:3px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{background:var(--navy);color:#fff;font-weight:700;padding:6px 8px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+tr.hl td{background:#EAF7FD;font-weight:700}
+.up{color:var(--red)}.dn{color:#0072B5}
+.note{font-size:12px;color:var(--ink3)}
+td.tl{text-align:left;white-space:normal}
+.toc select{flex:none;font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink2)}
+.pg{text-align:right;font-size:12px;color:var(--ink3);font-weight:700}
+.cover{min-height:480px;justify-content:center;padding:56px 64px;background:linear-gradient(90deg,#fff 58%,var(--tint) 58%)}
+.cover .k{font-size:15px;color:var(--ink2);font-weight:500}
+.cover h1{font-size:46px;line-height:1.12;margin:10px 0 8px;letter-spacing:-1.5px;color:var(--ink)}
+.cover h1 span{color:var(--ci)}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.tags span{border:1px solid var(--line);background:#fff;padding:6px 12px;font-size:13px}
+.concl{display:grid;gap:10px}
+.cl{display:grid;grid-template-columns:120px minmax(0,1fr);border:1px solid var(--line)}
+.cl b{background:var(--navy);color:#fff;padding:12px;font-size:15px;display:flex;align-items:center}
+.cl div{padding:10px 14px;font-size:14.5px;color:var(--ink2)}
+.cl div strong{color:var(--ink)}
+@media(max-width:760px){.g2,.g2e{grid-template-columns:minmax(0,1fr)}.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.slide{padding:20px 16px;margin:12px 6px}.pt{font-size:20px}.msg{font-size:16px}.cover{padding:30px 20px;background:#fff}.cover h1{font-size:32px}.cl{grid-template-columns:minmax(0,1fr)}.scroll{overflow-x:auto}}
+@media print{body{background:#fff}.toc{display:none}.slide{box-shadow:none;margin:0;max-width:none;break-after:page;min-height:180mm}@page{size:A4 landscape;margin:10mm}}
+</style>
+</head>
+<body>
+<nav class="toc" aria-label="장 이동">
+<a href="index.html" style="background:var(--navy);color:#fff;border-color:var(--navy)">◀ 월간 검토 결과</a><select id="repSel" aria-label="다른 달 보고서"></select><a href="#s0">표지</a><a href="#s1">1. 실적 요약</a><a href="#s2">2. 시간대별 SMP</a><a href="#s3">3-1. 수요 변화</a><a href="#s4">3-2. 공급곡선 변화</a><a href="#s5">3-3. 원별 발전량</a><a href="#s6">4. 일별 추이·특이사항</a><a href="#s8">5-1. 중장기 시나리오 전제</a><a href="#s9">5-2. 중장기 시나리오 결과</a><a href="#s7">6. 종합</a>
+</nav>
+
+<section class="slide cover" id="s0">
+  <div class="k">사업기획팀 보고 · 전력시장 가격 모니터링</div>
+  <h1>{{title}}<br><span>전력시장 검토 결과</span></h1>
+  <div style="color:var(--ink2)">평일 SMP·LNG 단가 · 시간대별 SMP · 계통수요 · 공급곡선 · 원별 발전량 · 중장기 시나리오</div>
+  <div class="tags">{{cover_tags}}</div>
+  <div class="note" style="margin-top:14px">자동 작성 {{updated}}</div>
+</section>
+
+<section class="slide" id="s1">
+  <div class="hd"><span class="pno">1</span><span class="pt"><span class="mT"></span> 실적 요약<small>{{per_note}}</small></span></div>
+  <div class="msg">{{s1_msg}}</div>
+  <div class="k4" id="kpis"></div>
+  <div class="g2">
+    <div class="box"><div class="bt">월별 SMP/LNG 비율<small>{{ratio_sub}}</small></div><div class="fig t"><canvas id="cRatio" role="img" aria-label="월별 SMP/LNG 비율"></canvas></div></div>
+    <div class="box"><div class="bt">월별 전년 대비 증감률<small>%</small></div>
+      <div class="scroll"><table id="tMon"></table></div>
+    </div>
+  </div>
+  <div class="note">{{s1_note}}</div>
+  <div class="pg">2 / 10</div>
+</section>
+
+<section class="slide" id="s2">
+  <div class="hd"><span class="pno">2</span><span class="pt">{{s2_title}}<small>평일 시간대별 SMP</small></span></div>
+  <div class="msg">{{s2_msg}}</div>
+  <div class="g2">
+    <div class="box"><div class="bt">평일 시간대별 평균 SMP<small>원/kWh</small></div><div class="fig"><canvas id="cProf" role="img" aria-label="평일 시간대별 SMP 비교"></canvas></div></div>
+    <div class="box"><div class="bt">평일 SMP 가격대별 시간 비중<small>% · 전체 평일 시간</small></div>
+      <div id="bands"></div>
+      <ul class="b">{{s2_bullets}}</ul>
+    </div>
+  </div>
+  <div class="note">※ 낮 = 9~17시(10~17시 SMP 8개 시간) · 새벽 = 1~7시</div>
+  <div class="pg">3 / 10</div>
+</section>
+
+<section class="slide" id="s3">
+  <div class="hd"><span class="pno">3-1</span><span class="pt">원인 ① 수요 변화<small>{{sub_31}}</small></span></div>
+  <div class="msg">{{s3_msg}}</div>
+  <div class="g2">
+    <div class="box"><div class="bt">평일 시간대별 계통수요<small>GW · 시장 외 태양광 제외(계통에서 본 수요)</small></div><div class="fig"><canvas id="cDem" role="img" aria-label="평일 시간대별 계통수요"></canvas></div></div>
+    <div class="box"><div class="bt">낮(10~16시) 수요·태양광·날씨<small>평일 평균</small></div>
+      <table id="tDem"></table>
+      <ul class="b">{{s3_bullets}}</ul>
+    </div>
+  </div>
+  <div class="note">{{s3_note}}</div>
+  <div class="pg">4 / 10</div>
+</section>
+
+<section class="slide" id="s4">
+  <div class="hd"><span class="pno">3-2</span><span class="pt">원인 ② 공급곡선 변화<small>같은 수요에서의 SMP</small></span></div>
+  <div class="msg">{{s4_msg}}</div>
+  <div class="g2">
+    <div class="box"><div class="bt">계통수요 구간별 평균 SMP<small>원/kWh · 평일 시간 기준</small></div><div class="fig"><canvas id="cBin" role="img" aria-label="계통수요 구간별 평균 SMP"></canvas></div></div>
+    <div class="box"><div class="bt">연료별 SMP 결정 비중<small>% · 육지 · 주말 포함</small></div>
+      <div id="fuelBars"></div>
+      <ul class="b">{{s4_bullets}}</ul>
+    </div>
+  </div>
+  <div class="note">{{s4_note}}</div>
+  <div class="pg">5 / 10</div>
+</section>
+
+<section class="slide" id="s5">
+  <div class="hd"><span class="pno">3-3</span><span class="pt">원별 발전량<small>평일 평균 출력 · GW</small></span></div>
+  <div class="msg">{{s5_msg}}</div>
+  <div class="g2e">
+    <div class="box"><div class="bt">원별 평균 출력 (하루 전체)<small>GW · 평일</small></div><div class="scroll"><table id="tGen"></table></div></div>
+    <div class="box"><div class="bt">원별 평균 출력 (낮 10~16시)<small>GW · 평일</small></div><div class="scroll"><table id="tGenD"></table></div></div>
+  </div>
+  <ul class="b">{{s5_bullets}}</ul>
+  <div class="note">※ KPX 실시간 수급현황(5분) 시간 평균 · 빠진 시간은 공공데이터포털 발전원별 발전량(5분)으로 보완 · 태양광 계 = 시장 + 시장 외</div>
+  <div class="pg">6 / 10</div>
+</section>
+
+<section class="slide" id="s6">
+  <div class="hd"><span class="pno">4</span><span class="pt">일별 추이 및 특이사항<small>{{s6_sub}}</small></span></div>
+  <div class="msg">{{s6_msg}}</div>
+  <div class="box"><div class="bt">일별 낮(9~17시) 평균 SMP<small>원/kWh · 진한 막대 = 평일, 연한 막대 = 주말·공휴일</small></div><div class="fig t"><canvas id="cDaily" role="img" aria-label="일별 낮 평균 SMP"></canvas></div></div>
+  <div class="g2e">
+    <div class="box"><div class="bt">{{s6_box1_t}}</div><ul class="b" style="margin:0">{{s6_box1}}</ul></div>
+    <div class="box"><div class="bt">{{s6_box2_t}}</div><ul class="b" style="margin:0">{{s6_box2}}</ul></div>
+  </div>
+  <div class="note">※ 날씨: Open-Meteo(서울 평균기온)</div>
+  <div class="pg">7 / 10</div>
+</section>
+
+<section class="slide" id="s8">
+  <div class="hd"><span class="pno">5-1</span><span class="pt">중장기 시나리오 ① 전제<small>태양광 설비 증가 속도 지속 시</small></span></div>
+  <div class="msg">{{s8_msg}}</div>
+  <div class="g2">
+    <div class="box"><div class="bt">사업용 태양광 누적 설비(연말)<small>{{s8_sub}}</small></div><div class="fig"><canvas id="cCap" role="img" aria-label="태양광 누적 설비 실적과 시나리오"></canvas></div></div>
+    <div class="box"><div class="bt">시나리오 설정</div>
+      <table><tr><th>항목</th><th style="text-align:left">가정</th></tr>{{s8_rows}}</table>
+    </div>
+  </div>
+  <ul class="b"><li><b>계산 방법</b>: 올해 시간별 실적에서 '순부하(계통수요 − 시장 태양광·풍력) → SMP' 관계를 월별로 구함(같은 달, 순부하가 비슷한 40개 시간의 평균 SMP). 태양광이 늘어난 만큼 순부하를 낮춰 SMP를 다시 계산</li>
+  <li><b>검증</b>: {{s8_valid}}</li></ul>
+  <div class="note">{{s8_note}}</div>
+  <div class="pg">8 / 10</div>
+</section>
+
+<section class="slide" id="s9">
+  <div class="hd"><span class="pno">5-2</span><span class="pt">중장기 시나리오 ② SMP 영향<small>{{s9_sub}}</small></span></div>
+  <div class="msg">{{s9_msg}}</div>
+  <div class="g2">
+    <div class="box"><div class="bt">시간대별 평균 SMP<small>원/kWh · 모든 날</small></div><div class="fig"><canvas id="cScen" role="img" aria-label="시간대별 SMP 시나리오 비교"></canvas></div></div>
+    <div class="box"><div class="bt">연도별 결과<small>원/kWh</small></div><div class="scroll"><table id="tScen"></table></div>
+      <ul class="b">{{s9_bullets}}</ul>
+    </div>
+  </div>
+  <ul class="b">{{s9_bullets2}}</ul>
+  <div class="note">{{s9_note}}</div>
+  <div class="pg">9 / 10</div>
+</section>
+
+<section class="slide" id="s7">
+  <div class="hd"><span class="pno">6</span><span class="pt">종합 및 향후 점검 사항</span></div>
+  <div class="msg">{{s7_msg}}</div>
+  <div class="concl">{{s7_rows}}</div>
+  <div class="note">{{s7_note}}</div>
+  <div class="pg">10 / 10</div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+{
+const D=__DATA__;
+const C={navy:'#0B3D66',ci:'#00A6ED',slate:'#A9B4C2',slateD:'#6F7D90',red:'#D93A3F',amber:'#F2A33A',ink:'#1A2230',grid:'#EEF1F5'};
+const $=id=>document.getElementById(id);
+const f1=v=>v==null?'-':(+v).toLocaleString('ko-KR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const sg=v=>(v>0?'+':v<0?'▼':'')+f1(Math.abs(v));
+const pc=(a,b)=>(a/b-1)*100;
+const cls=v=>v>0?'up':v<0?'dn':'';
+const L=D.lab, M=D.monthly, N=M[M.length-1], Pm=M.length>1?M[M.length-2]:null;
+document.querySelectorAll('.mT').forEach(e=>e.textContent=L.curM);
+
+/* 다른 달 보고서 */
+fetch('data/reports.json?'+Date.now()).then(r=>r.ok?r.json():[]).then(a=>{const s=$('repSel');if(!a.length){s.remove();return}
+  a.slice().reverse().forEach(r=>s.add(new Option(r.title+(r.final?'':' (잠정)'),r.m+'.html')));
+  const me=location.pathname.split('/').pop();s.value=[...s.options].some(o=>o.value===me)?me:s.options[0].value;
+  s.onchange=()=>{location.href=s.value}}).catch(()=>$('repSel').remove());
+
+/* KPI */
+const peakTxt=D.peak.curD?` (${+D.peak.curD.slice(5,7)}/${+D.peak.curD.slice(8)})`:'';
+const k=[['LNG 단가',sg(N.lngYoY)+'%',`${f1(N.gas0)} → ${f1(N.gas)}원/㎥`,C.amber],
+ ['평일 SMP',sg(N.smpYoY)+'%',`${f1(N.smp0)} → ${f1(N.smp)}원/kWh`,C.navy],
+ ['SMP/LNG 비율',sg(N.ratio-N.ratio0)+'p',`전년 ${f1(N.ratio0)} → ${f1(N.ratio)}`+(Pm?` (${L.prevM} ${f1(Pm.ratio)})`:''),C.slateD],
+ ['계통수요 피크',sg(pc(D.peak.cur,D.peak.ly))+'%',`${f1(D.peak.ly)} → ${f1(D.peak.cur)}GW${peakTxt}`,C.ci]];
+$('kpis').innerHTML=k.map(([l,v,s,c])=>`<div class="kpi" style="border-top-color:${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+
+/* 월별 표 */
+$('tMon').innerHTML='<tr><th>월</th><th>LNG 단가</th><th>평일 SMP</th><th>비율</th></tr>'+
+ M.slice(-6).map((m,i,a)=>`<tr class="${i===a.length-1?'hl':''}"><td>${m.m}월${m.partial?'*':''}</td><td class="${cls(m.lngYoY)}">${sg(m.lngYoY)}%</td><td class="${cls(m.smpYoY)}">${sg(m.smpYoY)}%</td><td>${f1(m.ratio)}</td></tr>`).join('')+
+ (N.partial?`<tr><td colspan="4" class="note" style="text-align:left;white-space:normal">* ${N.m}월은 잠정, 전년도 같은 날짜까지 비교</td></tr>`:'');
+
+const grid={color:C.grid},noGrid={display:false};const OK=!!window.Chart;const mk=(el,cfg)=>{if(!OK)return;try{new Chart(el,cfg)}catch(e){console.error(e)}};
+if(OK){Chart.defaults.font.family='"Noto Sans KR","Malgun Gothic",sans-serif';Chart.defaults.font.size=12;Chart.defaults.color='#5A6474';
+Chart.defaults.plugins.legend.labels.boxWidth=12;Chart.defaults.maintainAspectRatio=false;
+Chart.defaults.interaction={mode:'index',intersect:false};
+const lbl={id:'lbl',afterDatasetsDraw(ch,a,o){if(!o||!o.on)return;const x=ch.ctx;x.save();x.font='700 12px "Noto Sans KR"';x.textAlign='center';
+  ch.data.datasets.forEach((ds,i)=>{const meta=ch.getDatasetMeta(i);if(meta.hidden)return;meta.data.forEach((p,j)=>{const v=ds.data[j];if(v==null||!o.pick(i,j,v))return;x.fillStyle='#1A2230';x.fillText(o.fmt(v),p.x,p.y-8)})});x.restore()}};
+Chart.register(lbl);}
+
+const yr=L.cur.slice(0,4), yr0=String(+yr-1);
+mk($('cRatio'),{type:'line',data:{labels:M.map(m=>m.m+'월'+(m.partial?'*':'')),datasets:[
+ {label:yr0+'년',data:M.map(m=>m.ratio0),borderColor:C.slate,backgroundColor:C.slate,borderWidth:2,pointRadius:3},
+ {label:yr+'년',data:M.map(m=>m.ratio),borderColor:C.ci,backgroundColor:C.ci,borderWidth:2,pointRadius:4}]},
+ options:{layout:{padding:{top:16}},plugins:{lbl:{on:true,fmt:f1,pick:(i,j)=>i===1&&j>=M.length-3}},scales:{x:{grid:noGrid},y:{grid,grace:'10%'}}}});
+
+const H=[...Array(24)].map((_,i)=>(i+1)+'시');
+mk($('cProf'),{type:'line',data:{labels:H,datasets:[
+ {label:L.ly,data:D.prof.ly,borderColor:C.slate,backgroundColor:C.slate,borderWidth:2,pointRadius:0},
+ {label:L.prev,data:D.prof.prev,borderColor:C.navy,backgroundColor:C.navy,borderWidth:2,pointRadius:0},
+ {label:L.cur,data:D.prof.cur,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0}]},
+ options:{layout:{padding:{top:16}},plugins:{lbl:{on:true,fmt:f1,pick:(i,j)=>i>0&&j===13}},scales:{x:{grid:noGrid,ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid,grace:'8%',title:{display:true,text:'원/kWh'}}}}});
+
+const BN=[['110원 미만',C.slate],['110~160원',C.navy],['160원 이상',C.red]];
+const row=(name,a)=>`<div style="display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:8px;margin:7px 0"><span style="font-size:13px;font-weight:700">${name}</span><div style="display:flex;height:24px;gap:2px">${a.map((v,i)=>v>0?`<div title="${BN[i][0]} ${f1(v)}%" style="width:${v}%;background:${BN[i][1]};color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden">${v>=8?f1(v):''}</div>`:'').join('')}</div></div>`;
+$('bands').innerHTML=row(L.lyS,D.band.ly)+row(L.prevS,D.band.prev)+row(L.curS,D.band.cur)+
+ `<div style="display:flex;gap:12px;font-size:12px;margin-top:4px;flex-wrap:wrap">${BN.map(b=>`<span><i style="display:inline-block;width:10px;height:10px;background:${b[1]};margin-right:4px"></i>${b[0]}</span>`).join('')}</div>`;
+
+mk($('cDem'),{type:'line',data:{labels:H,datasets:[
+ {label:L.prev,data:D.dprof.prev,borderColor:C.navy,backgroundColor:C.navy,borderWidth:2,pointRadius:0},
+ {label:L.cur,data:D.dprof.cur,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0}]},
+ options:{scales:{x:{grid:noGrid,ticks:{maxRotation:0,maxTicksLimit:12}},y:{grid,grace:'8%',title:{display:true,text:'GW'}}}}});
+
+const G=D.gen, W=D.wx;
+const dr=(n,a,b)=>`<tr><td>${n}</td><td>${f1(a)}</td><td>${f1(b)}</td><td class="${cls(b-a)}">${sg(b-a)}</td></tr>`;
+$('tDem').innerHTML=`<tr><th>항목</th><th>${L.prevM}</th><th>${L.curM}</th><th>증감</th></tr>`+
+ dr('계통수요(GW)',G.prev.day.dem,G.cur.day.dem)+dr('시장 외 태양광(GW)',G.prev.day.hid,G.cur.day.hid)+dr('시장 태양광(GW)',G.prev.day.sunM,G.cur.day.sunM)+
+ dr('서울 평균기온(℃)',W.prev.tmp,W.cur.tmp)+dr('일사량(MJ/㎡·일)',W.prev.rad,W.cur.rad)+dr('일조시간(h/일)',W.prev.sun,W.cur.sun);
+
+const bk=Object.keys(D.bins.cur).filter(b=>D.bins.prev[b]).sort((a,b)=>a-b);
+mk($('cBin'),{type:'bar',data:{labels:bk.map(b=>`${b}~${+b+5}GW`),datasets:[
+ {label:L.ly,data:bk.map(b=>D.bins.ly[b]?.[0]??null),backgroundColor:C.slate,borderRadius:4,borderSkipped:'bottom'},
+ {label:L.prev,data:bk.map(b=>D.bins.prev[b][0]),backgroundColor:C.navy,borderRadius:4,borderSkipped:'bottom'},
+ {label:L.cur,data:bk.map(b=>D.bins.cur[b][0]),backgroundColor:C.ci,borderRadius:4,borderSkipped:'bottom'}]},
+ options:{layout:{padding:{top:18}},datasets:{bar:{categoryPercentage:.72,barPercentage:.9}},plugins:{lbl:{on:true,fmt:v=>Math.round(v),pick:i=>i>0}},scales:{x:{grid:noGrid},y:{grid,min:60,title:{display:true,text:'원/kWh'}}}}});
+
+const FB=[['석탄',C.slateD],['LNG',C.ci]];
+const fr=(n,o)=>{const t=Object.values(o).reduce((s,v)=>s+v,0)||1,a=[(o['석탄']||0)/t*100,(o.LNG||0)/t*100];return `<div style="display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:8px;margin:7px 0"><span style="font-size:13px;font-weight:700">${n}</span><div style="display:flex;height:24px;gap:2px">${a.map((v,i)=>`<div style="width:${v}%;background:${FB[i][1]};color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden">${v>=25?FB[i][0]+' ':''}${v>=8?f1(v)+'%':''}</div>`).join('')}</div></div>`};
+$('fuelBars').innerHTML=fr(L.lyS,D.fuel.ly)+fr(L.prevS,D.fuel.prev)+fr(L.curS,D.fuel.cur);
+
+const GK=[['원자력','nuc'],['석탄','coal'],['LNG','lng'],['신재생(태양광 외)',['renew','wind']],['태양광 계',['sunM','hid']],['계통수요','dem']];
+const gv=(o,k)=>Array.isArray(k)?k.reduce((s,x)=>s+o[x],0):o[k];
+const gt=p=>`<tr><th>원별</th><th>${L.lyT}</th><th>${L.prevT}</th><th>${L.curT}</th><th>전년비</th><th>전월비</th></tr>`+GK.map(([n,kk])=>{const a=gv(G.ly[p],kk),b=gv(G.prev[p],kk),c=gv(G.cur[p],kk);
+ return `<tr class="${n==='계통수요'?'hl':''}"><td>${n}</td><td>${f1(a)}</td><td>${f1(b)}</td><td><b>${f1(c)}</b></td><td class="${cls(c-a)}">${sg(c-a)}</td><td class="${cls(c-b)}">${sg(c-b)}</td></tr>`}).join('');
+$('tGen').innerHTML=gt('all');$('tGenD').innerHTML=gt('day');
+
+const dl=D.daily;
+mk($('cDaily'),{type:'bar',data:{labels:dl.map(d=>+d[0].slice(5,7)+'/'+ +d[0].slice(8)),datasets:[
+ {label:'낮 평균 SMP',data:dl.map(d=>d[1]),backgroundColor:dl.map(d=>d[2]?(d[0]>=D.monthStart?C.ci:C.navy):'#D5DBE3'),borderRadius:3,borderSkipped:'bottom'}]},
+ options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`낮 평균 ${f1(c.raw)}원 · ${dl[c.dataIndex][2]?'평일':'주말·공휴일'} · 서울 ${f1(dl[c.dataIndex][3])}℃`}}},
+ scales:{x:{grid:noGrid,ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:14}},y:{grid,min:60,title:{display:true,text:'원/kWh'}}}}});
+
+/* 중장기 시나리오 */
+const SC=D.scen, P=SC.res, Y0=SC.year, TG=SC.target, YR=Object.keys(P.lin).map(Number);
+const tr=y=>{const a=P.lin[y],b=P.cg[y];return `<tr class="${y===TG?'hl':''}"><td>${y===Y0?'올해 기준':y}</td><td>${f1(a.all)}</td><td>${f1(b.all)}</td><td>${f1(a.day)}</td><td>${f1(b.day)}</td><td>${f1(a.curTWh)}</td><td>${f1(b.curTWh)}</td></tr>`};
+$('tScen').innerHTML='<tr><th rowspan="2">연도</th><th colspan="2" style="text-align:center">연평균 SMP</th><th colspan="2" style="text-align:center">낮(10~17시) SMP</th><th colspan="2" style="text-align:center">출력제어(TWh)</th></tr><tr><th>기본</th><th>상단</th><th>기본</th><th>상단</th><th>기본</th><th>상단</th></tr>'+YR.map(tr).join('');
+const capY=Object.keys(SC.lin_end).map(Number).sort((a,b)=>a-b), lastA=Math.max(...Object.keys(SC.end).map(Number));
+mk($('cCap'),{type:'bar',data:{labels:capY.map(String),datasets:[
+ {type:'bar',label:'실적',data:capY.map(y=>y<=lastA?SC.end[y]??null:null),backgroundColor:C.navy,borderRadius:4,borderSkipped:'bottom'},
+ {type:'line',label:`기본 (+${f1(SC.add)}GW/년)`,data:capY.map(y=>y>=lastA?SC.lin_end[y]:null),borderColor:C.ci,backgroundColor:C.ci,borderWidth:2,pointRadius:3},
+ {type:'line',label:`상단 (+${f1(SC.cagr)}%/년)`,data:capY.map(y=>y>=lastA?SC.cg_end[y]:null),borderColor:C.slateD,backgroundColor:C.slateD,borderWidth:2,borderDash:[5,4],pointRadius:3}]},
+ options:{layout:{padding:{top:18}},plugins:{lbl:{on:true,fmt:f1,pick:(i,j)=>(i===0&&capY[j]<=lastA)||(i>0&&j===capY.length-1)}},scales:{x:{grid:noGrid},y:{grid,min:0,grace:'12%',title:{display:true,text:'GW'}}}}});
+mk($('cScen'),{type:'line',data:{labels:H,datasets:[
+ {label:'올해 실적 기준',data:P.lin[Y0].prof,borderColor:C.navy,backgroundColor:C.navy,borderWidth:2,pointRadius:0},
+ {label:TG+'년 기본',data:P.lin[TG].prof,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0},
+ {label:TG+'년 상단',data:P.cg[TG].prof,borderColor:C.slateD,backgroundColor:C.slateD,borderWidth:2,borderDash:[5,4],pointRadius:0}]},
+ options:{layout:{padding:{top:16}},plugins:{lbl:{on:true,fmt:f1,pick:(i,j)=>j===12}},scales:{x:{grid:noGrid,ticks:{maxRotation:0,maxTicksLimit:12}},y:{grid,grace:'8%',title:{display:true,text:'원/kWh'}}}}});
+}
+</script>
+</body>
+</html>

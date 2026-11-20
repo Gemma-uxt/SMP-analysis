@@ -5,7 +5,7 @@ on:
     - cron: "40 17 * * *"          # 한국시간 02:40 (일일 수집 후)
     - cron: "30 0,3,6,9,12 * * *"  # 한국시간 09:30·12:30·15:30·18:30·21:30
   push:
-    paths: ["docs/index.html", "scripts/build_site.py", "data/manual/**"]
+    paths: ["docs/index.html", "scripts/build_site.py", "scripts/build_report.py", "scripts/report_template.html", "data/manual/**"]
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,8 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             python scripts/build_site.py
-            git add docs/data
+            python scripts/build_report.py
+            git add docs
             if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
             git commit -m "대시보드 데이터 $(date -u +%F)"
             if git push; then exit 0; fi
