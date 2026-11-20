@@ -80,7 +80,7 @@ const ORDER=['coal','ind','avg','etc'];
 const f1=v=>v==null?'-':(+v).toLocaleString('ko-KR',{minimumFractionDigits:1,maximumFractionDigits:1});
 const DOW='일월화수목금토';
 $('lg').innerHTML=ORDER.map(k=>`<span><i style="background:${CAT[k][1]}"></i>${CAT[k][0]}</span>`).join('');
-let D=null,chL=null,chS=null;
+let D=null,chL=null,chS=null,YMAX=200;
 const OK=!!window.Chart;
 if(OK){Chart.defaults.font.family='"Noto Sans KR","Malgun Gothic",sans-serif';Chart.defaults.font.size=12;Chart.defaults.color='#5A6474';Chart.defaults.maintainAspectRatio=false;Chart.defaults.animation=false}
 const YW=52; /* 두 그래프 왼쪽 축 폭을 맞춰 시간축 정렬 */
@@ -111,13 +111,15 @@ function render(){
   const tick={autoSkip:false,maxRotation:0,callback:(v,i)=>{const p=out[i];if(p.h!==0)return null;const day=+p.d.slice(8);const step=out.length>24*40?7:out.length>24*20?3:1;return (day-1)%step===0&&!(step>1&&day>=28)?labels[i]:null}};
   chL=new Chart($('cL'),{type:'line',data:{labels,datasets:[{data:out.map(p=>p.smp),borderColor:'#0B3D66',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:out.map(p=>CAT[p.c][1]),tension:0}]},
     options:{interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{...tipStyle,callbacks:{title:c=>title(out[c[0].dataIndex]),label:c=>body(out[c.dataIndex])}}},
-      scales:{x:{grid:{color:c=>out[c.index]&&out[c.index].h===0?'#E3E8EE':'transparent'},ticks:tick},y:{afterFit:a=>{a.width=YW},grid:{color:'#EEF1F5'},title:{display:true,text:'원/kWh'}}}}});
+      scales:{x:{grid:{color:c=>out[c.index]&&out[c.index].h===0?'#E3E8EE':'transparent'},ticks:tick},y:{min:0,max:YMAX,afterFit:a=>{a.width=YW},grid:{color:'#EEF1F5'},ticks:{stepSize:20},title:{display:true,text:'원/kWh'}}}}});
   chS=new Chart($('cS'),{type:'bar',data:{labels,datasets:[{data:out.map(()=>1),backgroundColor:out.map(p=>CAT[p.c][1]),barPercentage:1,categoryPercentage:1,borderWidth:0}]},
     options:{interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{...tipStyle,callbacks:{title:c=>title(out[c[0].dataIndex]),label:c=>body(out[c.dataIndex])}}},
       scales:{x:{grid:{display:false},ticks:tick},y:{display:true,min:0,max:1,afterFit:a=>{a.width=YW},ticks:{display:false},grid:{display:false},border:{display:false}}}}});
 }
 
 fetch('data/hourly_est.json?'+Date.now()).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{D=j;
+  /* 세로축은 달 선택과 상관없이 전체 기간 최댓값 기준으로 고정 */
+  YMAX=Math.max(200,Math.ceil(Math.max(...Object.values(D.days).flatMap(r=>r.smp))/20)*20);
   const ms=[...new Set(Object.keys(D.days).map(d=>d.slice(0,7)))].sort();
   const lastM=ms[ms.length-1];
   $('months').innerHTML=ms.map(m=>{const ds=Object.keys(D.days).filter(d=>d.startsWith(m)).sort(),e=+ds[ds.length-1].slice(8),full=new Date(+m.slice(0,4),+m.slice(5),0).getDate();
