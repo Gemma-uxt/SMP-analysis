@@ -136,6 +136,132 @@ def fuel_counts(a, b):
     return dict(c)
 
 
+# ---------------- 가격결정 발전기 추정 ----------------
+# 발전가격 순위표(data/manual/merit_order.json)로 시간별 가격결정 발전기를 추정
+# 후보: SMP와 발전가격 차이 5원 이내 → 점수 = 가격 차이(원) + 순위 위치 차이(GW)
+#  (순위 위치: 정비 중 발전기를 뺀 순위표에서 그 시간 원전·석탄·LNG·유류 발전량이 닿는 지점)
+# SMP에는 무부하·기동가격이 포함돼 순위표 단가와 정확히 같지 않으므로 '추정'임
+# 순위표 자체는 저장소에 올리지 않음(.gitignore). 순위표가 있는 PC에서 돌리면 추정 결과만
+# data/manual/price_setting_est.json 에 저장하고, 자동 작업은 그 결과 파일만 읽음
+MERIT = json.loads((MAN / "merit_order.json").read_text(encoding="utf-8")).get("months", {}) if (MAN / "merit_order.json").exists() else {}
+EST_P = MAN / "price_setting_est.json"
+EST = json.loads(EST_P.read_text(encoding="utf-8")).get("days", {}) if EST_P.exists() else {}
+
+
+def flabel(f):
+    f = str(f)
+    if "핵" in f or "원자" in f:
+        return "원자력"
+    if "탄" in f:
+        return "석탄"
+    if "LNG" in f:
+        for k, v in (("도시가스", "LNG 도시가스"), ("평균", "LNG 평균"), ("직도입", "LNG 직도입"), ("개별", "LNG 개별"), ("집단", "LNG 집단"), ("발전", "LNG 발전")):
+            if k in f:
+                return v
+        return "LNG"
+    return f
+
+
+def fgroup(lb):
+    return "LNG" if lb.startswith("LNG") else lb if lb in ("석탄", "원자력") else "기타"
+
+
+_FD = None
+
+
+def fuel_daily():
+    global _FD
+    if _FD is None:
+        _FD = defaultdict(Counter)
+        p = RAW / "fuel" / "smp_dec_by_fuel.json"
+        if p.exists():
+            for r in json.loads(p.read_text(encoding="utf-8")):
+                if r.get("areaNm") != "육지":
+                    continue
+                td = str(r.get("tradeDay", ""))
+                t = str(r.get("fuelType", ""))
+                g = "LNG" if "LNG" in t else "석탄" if "탄" in t else "원자력" if "원자" in t else "기타"
+                _FD[f"{td[:4]}-{td[4:6]}-{td[6:8]}"][g] += int(num(r.get("cnt")) or 0)
+    return _FD
+
+
+def est_hours(d, hours, fit=True):
+    """시간별 (시, 발전기, 연료표기). fit=True면 그날 전력거래소 연료별 결정 시간 수에 맞춰 연료 배분을 조정"""
+    L = MERIT.get(d[:7])
+    if not L or d not in SMP:
+        return None
+    t = d + "T12:00"
+    out = {u[0] for u in MAINT.get("units", []) if u[3] <= t < u[4]}
+    A = sorted((r for r in L if r[0] not in out), key=lambda r: r[2])
+    cum, c = [], 0.0
+    for r in A:
+        c += r[3] or 0; cum.append(c - (r[3] or 0) / 2)
+    H = hourly(d)
+    cand = {}
+    for h in range(24):
+        v = SMP[d][h]; hv = H.get(h)
+        nl = (hv["nuc"] + hv["coal"] + hv["lng"] + hv["oil"]) if hv and A[0][3] else None
+        best = {}
+        for i, r in enumerate(A):
+            dp = abs(r[2] - v)
+            if dp > 15:
+                continue
+            s = dp + (abs(cum[i] - nl) / 1000 if nl else 0) + (0 if dp <= 5 else 10)
+            g = fgroup(flabel(r[1]))
+            if g not in best or s < best[g][0]:
+                best[g] = (s, r)
+        if not best:
+            r = min(A, key=lambda r: abs(r[2] - v)); best = {fgroup(flabel(r[1])): (0, r)}
+        cand[h] = best
+    pick = {h: min(b.values(), key=lambda x: x[0]) for h, b in cand.items()}
+    act = fuel_daily().get(d) if fit else None
+    if act and sum(act.values()) == 24:
+        for _ in range(48):
+            cnt = Counter(fgroup(flabel(pick[h][1][1])) for h in pick)
+            over = [g for g in cnt if cnt[g] > act.get(g, 0)]
+            under = [g for g in act if act[g] > cnt.get(g, 0)]
+            if not over or not under:
+                break
+            moves = [(cand[h][g][0] - pick[h][0], h, g) for h in pick if fgroup(flabel(pick[h][1][1])) in over
+                     for g in under if g in cand[h]]
+            if not moves:
+                break
+            _, h, g = min(moves); pick[h] = cand[h][g]
+    return [(h, pick[h][1][0], flabel(pick[h][1][1])) for h in hours]
+
+
+def est_day(d):
+    """그날 낮(10~17시 SMP 8개 시간) 추정 가격결정 발전기·연료. 순위표가 없으면 저장된 결과 사용"""
+    act = dict(fuel_daily().get(d, {}))
+    if d[:7] in MERIT and d in SMP:
+        e = est_hours(d, range(9, 17))
+        cu = Counter((n, lb) for h, n, lb in e)
+        fg = Counter(fgroup(lb) for h, n, lb in e)
+        rec = {"u": [[n, lb, k] for (n, lb), k in cu.most_common(3)], "f": dict(fg.most_common())}
+        raw, a24 = est_hours(d, range(24), fit=False), fuel_daily().get(d)
+        if raw and a24:
+            pr = Counter(fgroup(lb) for h, n, lb in raw)
+            rec["ag"] = sum(min(pr[k], a24[k]) for k in set(pr) | set(a24)); rec["tot"] = sum(a24.values())
+        EST[d] = rec
+    rec = EST.get(d)
+    if not rec:
+        return None
+    return {"u": rec["u"], "f": rec["f"], "a": act}
+
+
+def est_accuracy(days):
+    ag = sum(EST[d].get("ag", 0) for d in days if d in EST)
+    tot = sum(EST[d].get("tot", 0) for d in days if d in EST and "ag" in EST[d])
+    return round(ag / tot * 100) if tot else None
+
+
+def save_est():
+    if MERIT:
+        EST_P.write_text(json.dumps({"_설명": "발전가격 순위표로 추정한 날짜별 낮 시간 가격결정 발전기(상위 3)·연료 시간 수. "
+                                              "ag/tot = 일별 집계 보정 없이 추정한 연료가 전력거래소 일별 연료별 결정 횟수와 일치한 시간/전체 시간",
+                                     "days": dict(sorted(EST.items()))}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
 # ---------------- 한 달 분석 ----------------
 K = ["nuc", "coal", "lng", "oil", "hydro", "pump", "renew", "wind", "sunM", "hid", "ess", "dem"]
 
@@ -299,7 +425,8 @@ def build(m, today):
 
     # 일별(이번 달 시작 60일 전부터)
     st_d = (date.fromisoformat(a) - timedelta(days=61)).isoformat()
-    daily = [[d, round(mean(SMP[d][9:17]), 1), is_wd(d), (WX.get(d) or {}).get("tmp")] for d in rng(st_d, b) if d in SMP]
+    daily = [[d, round(mean(SMP[d][9:17]), 1), is_wd(d), (WX.get(d) or {}).get("tmp"), est_day(d)] for d in rng(st_d, b) if d in SMP]
+    acc = est_accuracy([d for d in rng(st_d, b) if d in SMP])
 
     # 특이 시간
     allh = [(SMP[d][h], d, h) for d in rng(a, b) if d in SMP for h in range(24)]
@@ -311,6 +438,11 @@ def build(m, today):
 
     sc = scenario(yr, b)
     T = text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, sc)
+    T["s6_note"] = ("※ 막대에 마우스를 올리면 그날 낮(10~17시 SMP 8개 시간)의 추정 가격결정 발전기·연료 표시 — "
+                    "발전가격 순위표의 단가·순위 위치로 후보를 고르고, 연료별 시간 수는 전력거래소 일별 연료별 결정 횟수에 맞춤"
+                    + (f"(일별 집계 없이 추정만 했을 때 연료 일치율 {acc}%)" if acc else "")
+                    + " · SMP에는 무부하·기동가격이 포함돼 순위표 단가와 정확히 같지 않으므로 발전기는 추정치"
+                    + " · 날씨: Open-Meteo(서울 평균기온)")
     D = dict(lab=lab, monthly=monthly, prof=dict(cur=cur["prof"], prev=prv["prof"], ly=lyr["prof"]),
              band=dict(cur=cur["band"], prev=prv["band"], ly=lyr["band"]), dprof=dict(cur=cur["dprof"], prev=prv["dprof"]),
              gen=dict(cur=cur["gen"], prev=prv["gen"], ly=lyr["gen"]), wx=dict(cur=cur["wx"], prev=prv["wx"]),
@@ -522,6 +654,12 @@ def main():
         if r:
             reps[m] = r
             print(m, "작성", "확정" if r["final"] else "잠정", r["period"])
+    if MERIT:  # 순위표가 있으면 순위표 기간 전체를 추정해 결과 파일 갱신
+        for m in sorted(MERIT):
+            for d in rng(f"{m}-01", f"{m}-{mlen(m):02d}"):
+                if d in SMP and d < tdy:
+                    est_day(d)
+        save_est()
     lst = sorted(reps.values(), key=lambda r: r["m"])
     STATE.parent.mkdir(parents=True, exist_ok=True)
     STATE.write_text(json.dumps(lst, ensure_ascii=False, indent=1), encoding="utf-8")
