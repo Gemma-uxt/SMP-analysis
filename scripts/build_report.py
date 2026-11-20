@@ -656,8 +656,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     a1, a2 = base["all"] - L[tg]["all"], base["all"] - G[tg]["all"]
     d1, d2 = base["day"] - L[tg]["day"], base["day"] - G[tg]["day"]
     T["s9_sub"] = f"올해 연료비·수요 기준 · 1.1~{per.split('~')[1]} 시간 평균"
-    T["s9_msg"] = (f"{tg}년 태양광 {round(lo_e)}~{round(hi_e)}GW: 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원 하락</span>에 그치고, "
-                   f"<span class=\"rd\">태양광 출력제어 {f1(L[tg]['curTWh'])}~{f1(G[tg]['curTWh'])}TWh</span>")
+    T["s9_msg"] = (f"태양광이 {tg}년 {round(lo_e)}~{round(hi_e)}GW로 늘어도 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원 하락</span>에 그침")
     T["s9_msg_old"] = (f"{tg}년 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원"
                    f"(▼{f1(min(a1, a2) / base['all'] * 100)}~{f1(max(a1, a2) / base['all'] * 100)}%) 하락</span> — "
                    f"낮 SMP {round(min(d1, d2))}~{round(max(d1, d2))}원 하락, 대신 <span class=\"rd\">출력제어 {f1(L[tg]['curTWh'])}~{f1(G[tg]['curTWh'])}TWh</span> 필요")
@@ -671,13 +670,26 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
                         f"<li><b>영향이 큰 달</b>: {top_s}({tg}년 ▼{t_lo}~{t_hi}원) · {M_}은 ▼{round(min(drops[m]))}~{round(max(drops[m]))}원</li>"
                         f"<li><b>남는 위험</b>: 남는 태양광을 줄여야 하는 시간이 {tg}년 {L[tg]['curH']}~{G[tg]['curH']}시간 — SMP 하락보다 출력제어 확대가 더 큰 변화</li>")
     lo_s = [x[1] for x in sc["nlb"] if int(x[0].split("~")[0]) < 50]
-    T["s9_read"] = ((f"<li><b>하락 폭이 작은 이유</b>: 순부하가 낮아져도 SMP는 석탄·열병합 가격대({round(min(lo_s))}~{round(max(lo_s))}원)에서 멈춤 (참고 1 그래프)</li>" if lo_s else "")
-                    + f"<li><b>영향이 큰 달</b>: {top_s} ▼{t_lo}~{t_hi}원 · {M_}은 ▼{round(min(drops[m]))}~{round(max(drops[m]))}원</li>"
-                    + f"<li><b>비싼 시간 감소</b>: SMP 150원 이상 시간이 올해 {base['hiH']}시간 → {tg}년 {min(L[tg]['hiH'], G[tg]['hiH'])}~{max(L[tg]['hiH'], G[tg]['hiH'])}시간</li>"
-                    + f"<li><b>출력제어</b>는 상한값(참고 1) — 원전 감발·ESS 충전이 나눠 맡으면 태양광 몫은 줄어듦</li>"
-                    + f"<li><b>극단 가정</b>: 출력제어 시간 SMP를 0원으로 보면 {tg}년 연평균 {f1(min(L[tg]['all0'], G[tg]['all0']))}~{f1(max(L[tg]['all0'], G[tg]['all0']))}원</li>")
-    T["s9_note"] = (f"※ 연도별 값은 해당 연도에도 올해(1.1~{per.split('~')[1]})와 같은 날씨·수요가 반복된다고 본 값"
-                    + ("" if m.endswith("12") and final else " · 남은 달 미포함") + " · 저장장치(ESS)·양수 확대, 원전 신규·석탄 폐지, LMP 도입은 미반영")
+    lo_s = [x[1] for x in sc["nlb"] if int(x[0].split("~")[0]) < 50] or [0]
+    fl_lo, fl_hi = round(min(lo_s)), round(max(lo_s))
+    imp = [("1", "", f"SMP 하락 효과는 <b>제한적</b> — 주로 낮 시간"),
+           ("2", "", f"SMP <b>바닥 {fl_lo}~{fl_hi}원</b> (석탄·열병합 가격대)"),
+           ("3", " r", f"더 큰 변화는 <b>출력제어 증가</b> — 연 {L[tg]['curH']}~{G[tg]['curH']}시간")]
+    T["s9_imp"] = "".join(f'<div class="imp"><span class="num{c}">{n}</span><div class="tx">{x}</div></div>' for n, c, x in imp)
+    T["s8_msg"] = f"순부하가 50GW 아래로 내려가도 SMP는 <span class=\"em\">{fl_lo}~{fl_hi}원</span>에서 멈춤 — 석탄·열병합이 바닥을 받침"
+    T["s8b_msg"] = (f"최근 3년 태양광 증가 속도(연 +{f1(sc['add'])}GW, {f1(sc['cagr'])}%)가 {tg}년까지 이어지고, 나머지는 올해와 같다고 가정")
+    caps = " → ".join(f"{f1(sc['end'][str(y)])}" for y in sc["ys"])
+    rows = [("시나리오", f"<b>기본</b> 매년 +{f1(sc['add'])}GW → {tg}년 말 <b>{f1(sc['lin_end'][str(tg)])}GW</b> &nbsp;·&nbsp; "
+                       f"<b>상단</b> 매년 +{f1(sc['cagr'])}% → <b>{f1(sc['cg_end'][str(tg)])}GW</b>"),
+            ("근거", f"사업용 태양광 연말 설비 {sc['ys'][0]}~{sc['ys'][-1]}년 {caps}GW"),
+            ("SMP 계산", "올해 시간별 실적에서 <b>순부하가 비슷한 시간의 SMP</b>를 그대로 적용"),
+            ("출력제어", f"순부하가 올해 최저({f1(sc['NMIN'])}GW)보다 낮아지는 만큼 — 모두 태양광 몫으로 계산(상한값)"),
+            ("고정 조건", f"날씨·수요·연료비·발전설비는 올해(1.1~{per.split('~')[1]})와 동일"),
+            ("검증", f"같은 방법으로 올해 실적 재현 시 월평균 SMP 오차 ±{f1(sc['err'])}원")]
+    if CAP.get("gov_target_2030"):
+        rows.append(("참고", f"정부 2030년 목표 <b>{f1(CAP['gov_target_2030'])}GW</b> — 상단보다 커서 목표대로면 영향이 더 큼"))
+    T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
+    T["s9_note"] = (f"※ 올해(1.1~{per.split('~')[1]})의 날씨·수요·연료비가 반복된다고 가정 · 출력제어는 상한값(참고 2) · ESS·원전·석탄 설비 변화 미반영")
     # 6 종합
     T["s7_msg"] = note.get("s7_msg") or T["s1_msg"]
     rows = list(note.get("s7_rows_before", []))

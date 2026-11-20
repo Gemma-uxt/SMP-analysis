@@ -156,7 +156,9 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 .band .bar div{color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .blg{display:flex;gap:14px;font-size:14.5px;color:var(--ink2);margin-top:2px}
 .blg i{display:inline-block;width:11px;height:11px;margin-right:5px}
-#scK .kpi{padding:8px 16px} #scK .kpi .k2{font-size:32px}
+#scK .kpi{padding:8px 16px} #scK .kpi .k2{font-size:34px}
+.t.pre td{font-size:17px;padding:11px 14px;white-space:normal} .t.pre td.rh{width:150px;color:var(--navy)}
+.imp{display:flex;gap:10px;align-items:flex-start} .imp .tx{font-size:17px}
 .nav select{min-width:300px}
 </style>
 </head>
@@ -171,7 +173,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
     <h1>2026년 11월(1~19일)<br><span class="b">전력시장 검토 결과</span></h1>
     <div class="sub">핵심 요약 · 시간대별 SMP · 수요 변화 · 발전가격 stack 변화 · 원별 발전량 · 참고: 중장기 태양광 시나리오</div>
     <div class="pills"><span>잠정 · 11.1~11.19 실적</span><span>비교: 전년 11.1~11.19 · 2026년 10월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-20 13:50</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-20 14:23</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="발전가격 stack과 SMP 결정 일러스트">
@@ -305,75 +307,59 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
   <div class="ft"><span class="pg"></span></div>
 </section>
 
-<!-- ===================== 참고 1. 시나리오 개요 ===================== -->
+<!-- ===================== 참고 1. 결론 ===================== -->
 <section class="slide">
-  <div class="hd"><span class="pno">참고 1</span><span class="pt">중장기 시나리오: 무엇을, 어떻게 봤나</span></div>
-  <div class="msg">올해 실적에서 <span class="em">태양광만 2030년 수준(47~58GW)</span>으로 늘렸을 때 SMP와 출력제어가 어떻게 바뀌는지 계산</div>
-  <div class="bd">
-    <div class="chips" style="margin-top:4px"><span class="chip s">태양광 설비 증가</span><span class="arw">→</span><span class="chip">낮 태양광 발전 증가</span><span class="arw">→</span><span class="chip">순부하 감소</span><span class="arw">→</span><span class="chip">더 싼 발전기가 가격 결정</span><span class="arw">→</span><span class="chip">SMP 하락</span><span class="arw">+</span><span class="chip e">남는 태양광은 출력제어</span></div>
-    <div class="row f1">
-      <div class="card f1"><div class="cb">
-        <div class="sh"><span>계산 방법: 순부하가 같으면 SMP도 비슷하다고 봄</span><small>올해 실적 · 5GW 구간별 평균</small></div>
-        <div class="cv"><canvas id="cNL" role="img" aria-label="순부하 구간별 올해 평균 SMP"></canvas></div>
-        <ul class="d"><li>늘어난 태양광만큼 순부하를 낮추고, <b>같은 달에 순부하가 비슷했던 올해 40개 시간의 평균 SMP</b>를 그 시간 SMP로 봄</li><li>순부하 50GW 아래(파란 막대)에선 SMP가 <b>93~102원</b>에서 더 내려가지 않음 — 태양광이 늘어도 SMP 하락 폭이 작은 이유</li></ul>
-      </div></div>
-      <div class="card" style="width:520px"><div class="ch">출력제어란?</div><div class="cb">
-        <div class="tx">발전이 수요보다 많아 계통이 불안해질 때 <b>전력거래소가 발전을 강제로 줄이는 것</b></div>
-        <div style="display:flex;gap:10px;align-items:flex-start"><span class="num g">1</span><div class="tx">먼저 <b>석탄·LNG·양수</b>를 최대한 줄이거나 세움 (평소 급전 운영)</div></div>
-        <div style="display:flex;gap:10px;align-items:flex-start"><span class="num r">2</span><div class="tx">그래도 남으면 <b>원전·태양광·풍력</b>을 줄임 = '출력제어'</div></div>
-        <div class="tx">태양광은 대부분 <b>보상 없음</b> (2026년부터 호남권 준중앙제도 참여 발전소만 정산금)</div>
-        <div class="bx r" style="margin-top:auto"><b class="rd">이 분석의 가정:</b> 순부하가 올해 최저(26.1GW)보다 낮아지는 만큼을 <b>모두 태양광 출력제어</b>로 계산 — 원전 감발·ESS 충전 등이 나눠 맡으면 실제로는 이보다 작음(상한값)</div>
-      </div></div>
-    </div>
-    <div class="note">※ 순부하 = 계통수요 − 시장 태양광·풍력 = 석탄·LNG·원전 등이 채워야 하는 몫 · 육지 출력제어는 2023년부터(제주 2015년~) · 순서: 산업통상자원부 '가을철 전력계통 안정화 대책'(2023.9.14) · 준중앙제도 = 재생에너지형 준중앙급전 발전제도</div>
-  </div>
-  <div class="ft"><span class="pg"></span></div>
-</section>
-
-<!-- ===================== 참고 2. 시나리오 설정과 근거 ===================== -->
-<section class="slide">
-  <div class="hd"><span class="pno">참고 2</span><span class="pt">시나리오 설정과 근거<small>태양광이 얼마나 늘어난다고 봤나</small></span></div>
-  <div class="msg">최근 3년 태양광은 연 2.9 → 3.2 → 3.7GW 증가(평균 <span class="em">+3.3GW</span>, 연 13.6%) — 이 속도면 2030년 말 <span class="em">47~58GW</span></div>
-  <div class="bd">
-    <div class="row f1">
-      <div class="card f1"><div class="cb">
-        <div class="sh"><span>① 두 가지 시나리오</span></div>
-        <table class="t c"><thead><tr><th style="width:110px">구분</th><th>가정</th></tr></thead><tbody><tr><td>기본<br>(정량 증가)</td><td class="tl">매년 <b>+3.3GW</b> — 2023~2025년 연간 증가량 평균(2.9 · 3.2 · 3.7GW)이 그대로 이어짐</td></tr><tr><td>상단<br>(비율 증가)</td><td class="tl">매년 <b>+13.6%</b> — 2022→2025년 연평균 증가율이 이어짐(설비가 늘수록 증가량도 커짐)</td></tr><tr><td>2030년 말</td><td class="tl">기본 <b>47.1GW</b> · 상단 <b>58.3GW</b> (올해 초 30.8GW)</td></tr></tbody></table>
-        <div class="sh" style="margin-top:6px"><span>② 근거: 사업용 태양광 설비 실적</span><small>연말 누적</small></div>
-        <table class="t c" id="tCap"></table>
-      </div></div>
-      <div class="card f1"><div class="cb">
-        <div class="sh"><span>③ 태양광 말고는 올해와 같다고 봄</span></div>
-        <table class="t c"><thead><tr><th style="width:110px">항목</th><th>가정</th></tr></thead><tbody><tr><td>날씨</td><td class="tl">올해(1.1~11.19) 시간별 일사·기온이 매년 반복</td></tr><tr><td>수요·연료비</td><td class="tl">올해와 동일(가스요금·석탄가격·전력수요 변화 미반영)</td></tr><tr><td>발전설비</td><td class="tl">원전·석탄·LNG 설비와 입찰 행태 올해와 동일</td></tr></tbody></table>
-        <div class="bx"><b class="em">계산이 맞는지:</b> 같은 방법으로 올해 실적을 재현하면 월평균 SMP 오차 ±0.9원 이내</div>
-        <div class="bx r" style="margin-top:auto"><b class="rd">비교:</b> 정부의 2030년 목표는 <b>86.7GW</b> — 상단 시나리오(58.3GW)보다 훨씬 커서, 목표대로 늘면 SMP 하락과 출력제어 모두 이 결과보다 커짐</div>
-      </div></div>
-    </div>
-    <div class="note">※ 설비: 2023년 말 23.9GW(한국에너지공단 보급통계), 2024년 말 27.1GW(산업통상자원부 2025.1.31 보도자료, 잠정), 2025년 말 30.8GW(기후에너지환경부 12차 전기본 재생에너지 보급전망 토론회 2026.8.26), 2022년 말은 2023·2024년 신규 설치량(2.9·3.16GW)으로 역산</div>
-  </div>
-  <div class="ft"><span class="pg"></span></div>
-</section>
-
-<!-- ===================== 참고 3. 시나리오 결과 ===================== -->
-<section class="slide">
-  <div class="hd"><span class="pno">참고 3</span><span class="pt">중장기 시나리오 결과<small>올해 연료비·수요 기준 · 1.1~11.19 시간 평균</small></span>
+  <div class="hd"><span class="pno">참고 1</span><span class="pt">태양광 확대 시 SMP 전망<small>2030년</small></span>
     <div class="opts" id="scOpt" role="group" aria-label="시나리오 선택">
       <label><input type="checkbox" value="lin" checked>기본 (+3.3GW/년)</label>
       <label><input type="checkbox" value="cg" checked>상단 (+13.6%/년)</label></div></div>
-  <div class="msg">2030년 태양광 47~58GW: 연평균 SMP는 <span class="em">3~5원 하락</span>에 그치고, <span class="rd">태양광 출력제어 0.4~1.7TWh</span></div>
+  <div class="msg">태양광이 2030년 47~58GW로 늘어도 연평균 SMP는 <span class="em">3~5원 하락</span>에 그침</div>
   <div class="bd">
     <div class="kpis" id="scK"></div>
     <div class="row f1">
       <div class="card f1"><div class="cb">
-        <div class="sh"><span>연도별 태양광 설비와 SMP</span><small>위: 연말 설비(GW) · 아래: SMP(원/kWh) · 마우스를 올리면 값</small></div>
+        <div class="sh"><span>태양광 설비와 SMP</span><small>위: 연말 설비(GW) · 아래: SMP(원/kWh)</small></div>
         <div class="cv"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 SMP 시나리오"></canvas></div>
       </div></div>
-      <div class="card" style="width:470px"><div class="cb">
-        <div class="sh"><span>결과를 읽는 법</span></div>
-        <ul class="d"><li><b>하락 폭이 작은 이유</b>: 순부하가 낮아져도 SMP는 석탄·열병합 가격대(93~102원)에서 멈춤 (참고 1 그래프)</li><li><b>영향이 큰 달</b>: 7월·8월 ▼5~10원 · 11월은 ▼3~4원</li><li><b>비싼 시간 감소</b>: SMP 150원 이상 시간이 올해 761시간 → 2030년 505~572시간</li><li><b>출력제어</b>는 상한값(참고 1) — 원전 감발·ESS 충전이 나눠 맡으면 태양광 몫은 줄어듦</li><li><b>극단 가정</b>: 출력제어 시간 SMP를 0원으로 보면 2030년 연평균 109.6~113.1원</li></ul>
+      <div class="card" style="width:400px"><div class="ch">시사점</div><div class="cb" style="gap:14px;padding-top:16px">
+        <div class="imp"><span class="num">1</span><div class="tx">SMP 하락 효과는 <b>제한적</b> — 주로 낮 시간</div></div><div class="imp"><span class="num">2</span><div class="tx">SMP <b>바닥 93~102원</b> (석탄·열병합 가격대)</div></div><div class="imp"><span class="num r">3</span><div class="tx">더 큰 변화는 <b>출력제어 증가</b> — 연 115~284시간</div></div>
       </div></div>
     </div>
-    <div class="note">※ 연도별 값은 해당 연도에도 올해(1.1~11.19)와 같은 날씨·수요가 반복된다고 본 값 · 남은 달 미포함 · 저장장치(ESS)·양수 확대, 원전 신규·석탄 폐지, LMP 도입은 미반영</div>
+    <div class="note">※ 올해(1.1~11.19)의 날씨·수요·연료비가 반복된다고 가정 · 출력제어는 상한값(참고 2) · ESS·원전·석탄 설비 변화 미반영</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 참고 2. 이유 ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">참고 2</span><span class="pt">SMP가 조금만 내려가는 이유</span></div>
+  <div class="msg">순부하가 50GW 아래로 내려가도 SMP는 <span class="em">93~102원</span>에서 멈춤 — 석탄·열병합이 바닥을 받침</div>
+  <div class="bd">
+    <div class="chips" style="margin-top:4px"><span class="chip s">태양광 증가</span><span class="arw">→</span><span class="chip">순부하 감소</span><span class="arw">→</span><span class="chip">더 싼 발전기가 가격 결정</span><span class="arw">→</span><span class="chip">SMP 하락 (바닥 있음)</span><span class="arw">+</span><span class="chip e">남는 태양광은 출력제어</span></div>
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>순부하별 SMP</span><small>올해 실적 · 5GW 구간 평균 · 원/kWh</small></div>
+        <div class="cv"><canvas id="cNL" role="img" aria-label="순부하 구간별 올해 평균 SMP"></canvas></div>
+      </div></div>
+      <div class="card" style="width:430px"><div class="ch">출력제어란?</div><div class="cb" style="gap:12px;padding-top:14px">
+        <ul class="d"><li>발전이 수요보다 많을 때 <b>발전을 강제로 줄이는 것</b></li><li>순서: 석탄·LNG 감발 → <b>원전·태양광·풍력</b></li><li>태양광은 대부분 <b>보상 없음</b></li></ul>
+        <div class="bx r" style="margin-top:auto">이 분석은 남는 전력을 <b>모두 태양광이 줄인다고</b> 계산 → 출력제어는 <b>상한값</b></div>
+      </div></div>
+    </div>
+    <div class="note">※ 순부하 = 계통수요 − 시장 태양광·풍력(석탄·LNG·원전 등이 채울 몫) · 출력제어 순서: 산업통상자원부 '가을철 전력계통 안정화 대책'(2023.9.14)</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 참고 3. 전제 ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">참고 3</span><span class="pt">전제와 방법</span></div>
+  <div class="msg">최근 3년 태양광 증가 속도(연 +3.3GW, 13.6%)가 2030년까지 이어지고, 나머지는 올해와 같다고 가정</div>
+  <div class="bd">
+    <div class="card f1"><div class="cb">
+      <table class="t pre"><tbody><tr><td class="rh">시나리오</td><td><b>기본</b> 매년 +3.3GW → 2030년 말 <b>47.1GW</b> &nbsp;·&nbsp; <b>상단</b> 매년 +13.6% → <b>58.3GW</b></td></tr><tr><td class="rh">근거</td><td>사업용 태양광 연말 설비 2022~2025년 21.0 → 23.9 → 27.1 → 30.8GW</td></tr><tr><td class="rh">SMP 계산</td><td>올해 시간별 실적에서 <b>순부하가 비슷한 시간의 SMP</b>를 그대로 적용</td></tr><tr><td class="rh">출력제어</td><td>순부하가 올해 최저(26.1GW)보다 낮아지는 만큼 — 모두 태양광 몫으로 계산(상한값)</td></tr><tr><td class="rh">고정 조건</td><td>날씨·수요·연료비·발전설비는 올해(1.1~11.19)와 동일</td></tr><tr><td class="rh">검증</td><td>같은 방법으로 올해 실적 재현 시 월평균 SMP 오차 ±0.9원</td></tr><tr><td class="rh">참고</td><td>정부 2030년 목표 <b>86.7GW</b> — 상단보다 커서 목표대로면 영향이 더 큼</td></tr></tbody></table>
+    </div></div>
+    <div class="note">※ 설비: 2023년 말 23.9GW(한국에너지공단 보급통계), 2024년 말 27.1GW(산업통상자원부 2025.1.31 보도자료, 잠정), 2025년 말 30.8GW(기후에너지환경부 12차 전기본 재생에너지 보급전망 토론회 2026.8.26), 2022년 말은 2023·2024년 신규 설치량(2.9·3.16GW)으로 역산</div>
   </div>
   <div class="ft"><span class="pg"></span></div>
 </section>
@@ -532,7 +518,6 @@ $('tGen').innerHTML=gt('all');$('tGenD').innerHTML=gt('day');
 const SC=D.scen, P=SC.res, Y0=SC.year, TG=SC.target, YR=Object.keys(P.lin).map(Number);
 const lastA=Math.max(...Object.keys(SC.end).map(Number));
 const capY=Object.keys(SC.lin_end).map(Number).sort((a,b)=>a-b);
-$('tCap').innerHTML='<thead><tr><th>연말</th><th class="r">누적(GW)</th><th class="r">증가(GW)</th><th class="r">증가율</th></tr></thead><tbody>'+capY.filter(y=>y<=lastA).map((y,i,a)=>{const v=SC.end[y],p=i?SC.end[a[i-1]]:null;return `<tr><td class="rh">${y}</td><td class="r">${f1(v)}</td><td class="r">${p!=null?'+'+f1(v-p):'-'}</td><td class="r">${p!=null?'+'+f1((v/p-1)*100)+'%':'-'}</td></tr>`}).join('')+'</tbody>';
 mkS('cNL',{type:'bar',data:{labels:SC.nlb.map(b=>b[0]),datasets:[{label:'평균 SMP',data:SC.nlb.map(b=>b[1]),backgroundColor:SC.nlb.map(b=>+b[0].split('~')[0]<50?C.ci:C.slate)}]},
  options:{layout:{padding:{top:22}},plugins:{legend:{display:false},vLabel:{on:true,size:13,fmt:v=>Math.round(v)},tooltip:{callbacks:{title:c=>`순부하 ${c[0].label}GW`,label:c=>`평균 SMP ${f1(c.raw)}원 · ${SC.nlb[c.dataIndex][2].toLocaleString()}시간`}}},
   scales:{x:{grid:noGrid,ticks:{color:C.ink},title:{display:true,text:'순부하(GW)'}},y:{min:0,grid,border:{display:false},title:{display:true,text:'원/kWh'}}}}});
@@ -544,7 +529,7 @@ const tScen=()=>{const s=picked();if(!s.length){$('scK').innerHTML='<div class="
   const K=[[`${TG}년 말 태양광 설비`,rg(cap,f1),'GW',`올해 초 ${f1(SC.end[lastA])}GW`,'b'],
    ['연평균 SMP','▼'+rg(r,x=>Math.round(b.all-x.all)),'원',`올해 ${f1(b.all)} → ${rg(r,x=>f1(x.all))}원`,''],
    ['낮(10~17시) SMP','▼'+rg(r,x=>Math.round(b.day-x.day)),'원',`올해 ${f1(b.day)} → ${rg(r,x=>f1(x.day))}원`,''],
-   ['태양광 출력제어',rg(r,x=>f1(x.curTWh)),'TWh',`연간 태양광 발전의 ${rg(r,x=>f1(x.curPct))}% · ${rg(r,x=>x.curH)}시간`,'']];
+   ['태양광 출력제어',rg(r,x=>f1(x.curTWh)),'TWh',`연간 태양광 발전의 ${rg(r,x=>f1(x.curPct))}%`,'']];
   $('scK').innerHTML=K.map(([l,v,u,s3,c],i)=>`<div class="card kpi"${i===3?' style="border-top-color:var(--red)"':''}><div class="k1">${l}</div><div class="k2 ${c}"${i===3?' style="color:var(--red)"':''}>${v}<small>${u}</small></div><div class="k3">${s3}</div></div>`).join('')};
 const ds=[{key:'act',type:'bar',label:'설비 실적',data:capY.map(y=>y<=lastA?SC.end[y]??null:null),backgroundColor:C.navy,yAxisID:'yCap',order:3}];
 ['lin','cg'].forEach(k=>{const end=k==='lin'?SC.lin_end:SC.cg_end;
