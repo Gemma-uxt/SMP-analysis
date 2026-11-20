@@ -86,7 +86,7 @@ function rows(){const ms=[...document.querySelectorAll('#months input:checked')]
   const out=[];Object.keys(D.days).sort().forEach(d=>{if(!ms.includes(d.slice(0,7)))return;const r=D.days[d];
     for(let h=0;h<24;h++)out.push({d,h,smp:r.smp[h],u:r.u[h],lb:r.lb[h],c:r.c[h],wd:r.wd,a:r.a})});return {ms,out}}
 function title(p){const dt=new Date(p.d+'T00:00:00');return `${+p.d.slice(5,7)}/${+p.d.slice(8)}(${DOW[dt.getDay()]}) ${p.h+1}시 · ${p.wd?'평일':'주말·공휴일'}`}
-function body(p){const o=[`SMP ${f1(p.smp)}원/kWh`,'',`추정 가격결정 발전기: ${p.u}`,`연료: ${p.lb} → ${CAT[p.c][0]}`];
+function body(p){const o=[`SMP ${f1(p.smp)}원/kWh`,'',`추정 가격결정 발전기: ${p.u}`,(p.lb===CAT[p.c][0]?`연료: ${p.lb}`:`연료: ${p.lb} (${CAT[p.c][0]})`)];
   const a=Object.entries(p.a||{});if(a.length)o.push('',`그날 공식 연료별 결정(24시간): ${a.map(([k,v])=>k+' '+v).join(' · ')}`);return o}
 
 function render(){
@@ -98,7 +98,7 @@ function render(){
   const n=out.length,mean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
   $('sum').innerHTML=ORDER.map(k=>`<div class="chip" style="border-top-color:${CAT[k][1]}"><div class="l">${CAT[k][0]}</div><div class="v">${(cnt[k]/n*100).toFixed(1)}%</div><div class="s">${cnt[k]}시간 · 평균 SMP ${f1(mean(sm[k]))}원</div></div>`).join('');
   const top=ORDER.slice().sort((a,b)=>cnt[b]-cnt[a])[0];
-  $('msg').innerHTML=`선택 기간 ${n.toLocaleString()}시간 중 <span style="color:${CAT[top][1]}">${CAT[top][0]}</span>이 가장 많이 가격을 결정(${(cnt[top]/n*100).toFixed(0)}%) · 평균연료비 LNG가 정한 시간의 평균 SMP ${f1(mean(sm.avg))}원`;
+  $('msg').innerHTML=`선택 기간 ${n.toLocaleString()}시간 중 가격을 가장 많이 정한 연료: <span style="color:${CAT[top][1]}">${CAT[top][0]}</span>(${(cnt[top]/n*100).toFixed(0)}%) · 평균연료비 LNG가 정한 시간의 평균 SMP ${f1(mean(sm.avg))}원`;
   const labels=out.map(p=>p.h===0?`${+p.d.slice(5,7)}/${+p.d.slice(8)}`:'');
   if(!OK)return;
   if(chL){chL.destroy();chS.destroy()}
