@@ -124,6 +124,8 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
 .nav button,.nav select{background:#fff;color:#14202e;border:1px solid #AEB6C2;padding:6px 14px;font:inherit;font-size:14px;cursor:pointer}
 .nav select{min-width:330px}
 .nav button:hover{background:var(--ci);color:#fff}
+.nav .navlink{background:var(--navy);color:#fff;border:1px solid var(--navy);padding:6px 14px;font-size:14px;text-decoration:none}
+.nav .navlink:hover{background:var(--ci);border-color:var(--ci)}
 #print{background:var(--ci);color:#fff;border-color:var(--ci);font-weight:700}
 
 /* ---------- 인쇄 / PDF (1280 x 720) ---------- */
@@ -338,7 +340,7 @@ table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:
         <div class="ch blue">발전가격 순위 변화 (10월 → 11월)</div>
         <div class="cb">
           <div class="sh">가격대별 공급 가능량<small>누적 입찰량 · GW</small></div>
-          <div style="height:150px;position:relative"><canvas id="cRefB"></canvas></div>
+          <div style="height:200px;position:relative"><canvas id="cRefB"></canvas></div>
           <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:1.3">
             <thead><tr style="background:var(--navy);color:#fff">
               <th style="padding:4px 8px;text-align:left">발전기(LNG 직도입)</th><th style="padding:4px 8px">입찰량</th>
@@ -461,8 +463,8 @@ function build(){
   ch.push(new Chart(document.getElementById('cRefB'),{type:'bar',plugins:[barLbl],
     data:{labels:['100원↓','120원↓','160원↓','170원↓','180원↓'],
       datasets:[{label:'10월',data:o,backgroundColor:'#B4BECB'},{label:'11월',data:n,backgroundColor:'#00A6ED'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:14},boxWidth:18}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:14}}},y:{min:50,max:110,title:{display:true,text:'GW'}}}}}));
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},plugins:{legend:{position:'top',align:'end',labels:{font:{size:12},boxWidth:12}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:12},maxRotation:0,minRotation:0}},y:{min:50,max:110,ticks:{font:{size:11}},title:{display:false}}}}}));
 }
 new MutationObserver(()=>{if(sec.classList.contains('active'))requestAnimationFrame(build)}).observe(sec,{attributes:true,attributeFilter:['class']});
 window.addEventListener('beforeprint',()=>{if(!ch.length)build()});
@@ -479,6 +481,7 @@ setTimeout(()=>{const p=sec.querySelector('.pg');if(p&&!p.textContent)p.textCont
   <select id="sel" aria-label="슬라이드 선택"></select>
   <button id="next" type="button">다음 ▶</button>
   <button id="print" type="button">PDF 만들기</button>
+  <a class="navlink" href="2026-11.html">11월(1~19일) 분석 ▶</a>
 </nav>
 
 <script>
@@ -776,7 +779,7 @@ function r3(){if(!D||!D.smp)return;const d=EVT;if(!d||!D.smp[d]){$('h3').textCon
 
 /* --- 시작 --- */
 function safe(f){try{f()}catch(e){console.error(f.name,e)}}
-function refreshNav(){slides.forEach((s,i)=>{if(!i||!sel.options[i])return;const no=s.querySelector('.pno'),pt=s.querySelector('.pt');sel.options[i].text=((no?no.textContent+'. ':'')+(pt?pt.textContent:'')).trim()})}
+function refreshNav(){slides.forEach((s,i)=>{if(!i||!sel.options[i])return;const no=s.querySelector('.pno'),pt=s.querySelector('.pt');let tt='';if(pt){const c=pt.cloneNode(true);c.querySelectorAll('small').forEach(x=>x.remove());tt=c.textContent}sel.options[i].text=((no?no.textContent+'. ':'')+tt).trim()})}
 function renderAll(){document.querySelectorAll('.moT,.msT').forEach(e=>e.textContent=moN(M));
   document.querySelectorAll('.per').forEach(e=>e.textContent=per(M,cutOf(D.smp,M)));[r0,r1,r11,r21,r22,r23,r3].forEach(safe);refreshNav()}
 $('dSel').onchange=()=>{DMODE=$('dSel').value;safe(r21b)};
@@ -807,7 +810,7 @@ const HL={
     "1-1":"SMP/LNG 비율 10.4로 올해 최저치",
     "2-1":"10월 계통수요는 43.3TWh에서 43.8TWh로 상승하였으나, 평일 낮 태양광 제외 전력수요는 최대 5.8GW 감소",
     "2-2":"10월 태양광 발전량은 +44.2% 증가하였으며, LNG 발전량은 ▼23.6% 감소",
-    "2-3":"전년 동월 대비 석탄 및 평균요금제 발전기의 SMP 결정 횟수 증가 ",
+    "2-3":"전년 동월 대비 석탄의 SMP 결정 비중 증가(28.9% → 35.5%)",
     "3":"10월 13일 낮 SMP 171.6원/kWh로 일시 상승. 강수 영향으로 추정"
   }
 };
@@ -869,6 +872,7 @@ function add(){
     const prev=tr.previousElementSibling;
     if(prev&&/^운량/.test(prev.cells[0].textContent.trim()))prev.remove();
     const tb=tr.closest('table'),hr=tb.rows[0],sl=tr.closest('.slide');
+    if(![...hr.cells].some(c=>/\d{1,2}\/\d{1,2}/.test(c.textContent)))return; // 날짜 열이 있는 표(3장)에만 추가
     const sel=sl&&[...sl.querySelectorAll('select')].find(s=>/^\d{4}-\d{2}-\d{2}$/.test(s.value));
     const yr=sel?sel.value.slice(0,4):String(new Date().getFullYear());
     const nr=tr.cloneNode(true);nr.cells[0].textContent='운량(%)';

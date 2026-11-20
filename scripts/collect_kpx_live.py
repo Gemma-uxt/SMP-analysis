@@ -31,7 +31,8 @@ def row_count(d):
     if not p.exists():
         return 0
     with p.open(encoding="utf-8-sig", newline="") as f:
-        return sum(1 for _ in csv.DictReader(f))
+        # 아직 값이 안 들어온 빈 줄(regDate가 '0')은 세지 않음 → 저녁 시간이 빠진 날도 다시 채우게
+        return sum(1 for r in csv.DictReader(f) if len((r.get("regDate") or "").strip()) >= 13)
 
 def save(rows):
     by_day = {}

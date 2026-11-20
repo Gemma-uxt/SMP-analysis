@@ -154,6 +154,32 @@ for fp in glob.glob(str(RAW / "kpx_live" / "*" / "*.csv")):
             acc[d][h]["coal"] += tc if tc is not None else (num(r.get("coal")) or 0.0) + (num(r.get("localCoal")) or 0.0)
             cnt[d][h] += 1
 
+# 실시간 수급현황에 빠진 시간은 공공데이터포털 5분 발전량(data/raw/gen5m)으로 보완
+# (시장 외 태양광·ESS 값은 없음 → 0. 빠지는 시간은 주로 저녁이라 영향 작음)
+G5 = {"nuc": ["nuclear"], "coal": ["coal", "domestic_coal"], "lng": ["gas"], "oil": ["oil"], "hydro": ["hydro"],
+      "pump": ["pumped"], "renew": ["renewable"], "sunM": ["solar"]}  # renewable에 풍력 포함
+for fp in glob.glob(str(RAW / "gen5m" / "*" / "*.csv")):
+    ds = Path(fp).stem
+    if len(ds) != 8:
+        continue
+    d = f"{ds[:4]}-{ds[4:6]}-{ds[6:]}"
+    if d < FIRST:
+        continue
+    a2, c2 = defaultdict(lambda: defaultdict(float)), defaultdict(int)
+    with open(fp, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            t = str(r.get("datetime", ""))
+            if len(t) < 10:
+                continue
+            h = int(t[8:10])
+            for k, cols in G5.items():
+                a2[h][k] += sum(num(r.get(c)) or 0.0 for c in cols)
+            c2[h] += 1
+    for h in a2:
+        if cnt[d].get(h, 0) < 6 and c2[h] >= 6:  # 실시간 자료가 30분 미만인 시간만 대체
+            acc[d][h] = defaultdict(float, {k: v * 1.0 for k, v in a2[h].items()})
+            cnt[d][h] = c2[h]
+
 gen, dem, hid, lng, sun = {}, {}, {}, {}, {}
 for d in sorted(acc):
     hrs = {h: {k: v / cnt[d][h] for k, v in acc[d][h].items()} for h in acc[d] if cnt[d][h]}

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>11월 전력시장 검토 결과</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 본부장 보고용 정식 보고서, 결론 먼저
+   IDEA: 기존 'SMP-analysis' 슬라이드 덱의 11월 잠정판 (같은 양식)
+   PICTURE: 평일 시간대별 SMP — 낮에만 솟은 11월 곡선
+   COLOUR and TYPE: 기존 덱 네이비 #0B3D66 · CI 블루 #00A6ED · 회색 비교, Noto Sans KR
+   LAYOUT: 16:9 흰 슬라이드를 세로로 쌓고, 인쇄 시 장당 1쪽 */
+:root{color-scheme:light;--navy:#0B3D66;--ci:#00A6ED;--slate:#B4BECB;--slateD:#6F7D90;--red:#D93A3F;--amber:#F2A33A;--ink:#1A2230;--ink2:#3F4856;--ink3:#6B7585;--line:#D9DFE7;--tint:#F2F6FA}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:#E4E7EC;color:var(--ink);font:15px/1.5 "Noto Sans KR","Malgun Gothic",sans-serif;overflow-x:clip}
+.toc{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px max(3vw,12px)}
+.toc a{flex:none;font-size:13px;color:var(--ink2);text-decoration:none;padding:6px 10px;border-radius:4px;border:1px solid var(--line)}
+.toc a:hover,.toc a:focus-visible{border-color:var(--ci);color:var(--navy);outline:none}
+.slide{background:#fff;max-width:1080px;margin:22px auto;padding:30px 40px 22px;box-shadow:0 2px 10px rgba(20,30,50,.08);display:flex;flex-direction:column;gap:14px;scroll-margin-top:60px}
+.hd{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--navy);padding-bottom:10px}
+.pno{background:var(--navy);color:#fff;font-weight:800;font-size:17px;padding:3px 10px;border-radius:2px}
+.pt{font-size:24px;font-weight:800;color:var(--navy);letter-spacing:-.5px}
+.pt small{font-size:14px;font-weight:500;color:var(--ink3);margin-left:8px}
+.msg{background:var(--tint);border-left:5px solid var(--ci);padding:10px 16px;font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-.3px;text-wrap:balance}
+.em{color:var(--ci)}.rd{color:var(--red)}
+.g2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px}
+.g2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.k4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.box{border:1px solid var(--line);padding:12px 14px}
+.bt{font-weight:700;color:var(--navy);border-left:4px solid var(--ci);padding-left:8px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bt small{font-weight:400;color:var(--ink3);font-size:12px}
+.kpi{border-top:3px solid var(--ci);background:var(--tint);padding:10px 12px}
+.kpi .l{font-size:13px;font-weight:700;color:var(--ink2)}
+.kpi .v{font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-1px;line-height:1.2}
+.kpi .s{font-size:13px;color:var(--ink2);white-space:nowrap}
+.fig{position:relative;height:270px}.fig.t{height:230px}.fig.s{height:190px}
+ul.b{margin:6px 0 0;padding-left:18px;font-size:14px;color:var(--ink2)}ul.b li{margin:3px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{background:var(--navy);color:#fff;font-weight:700;padding:6px 8px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+tr.hl td{background:#EAF7FD;font-weight:700}
+.up{color:var(--red)}.dn{color:#0072B5}
+.note{font-size:12px;color:var(--ink3)}
+.pg{text-align:right;font-size:12px;color:var(--ink3);font-weight:700}
+.cover{min-height:480px;justify-content:center;padding:56px 64px;background:linear-gradient(90deg,#fff 58%,var(--tint) 58%)}
+.cover .k{font-size:15px;color:var(--ink2);font-weight:500}
+.cover h1{font-size:46px;line-height:1.12;margin:10px 0 8px;letter-spacing:-1.5px;color:var(--ink)}
+.cover h1 span{color:var(--ci)}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.tags span{border:1px solid var(--line);background:#fff;padding:6px 12px;font-size:13px}
+.concl{display:grid;gap:10px}
+.cl{display:grid;grid-template-columns:120px minmax(0,1fr);border:1px solid var(--line)}
+.cl b{background:var(--navy);color:#fff;padding:12px;font-size:15px;display:flex;align-items:center}
+.cl div{padding:10px 14px;font-size:14.5px;color:var(--ink2)}
+.cl div strong{color:var(--ink)}
+@media(max-width:760px){.g2,.g2e{grid-template-columns:minmax(0,1fr)}.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.slide{padding:20px 16px;margin:12px 6px}.pt{font-size:20px}.msg{font-size:16px}.cover{padding:30px 20px;background:#fff}.cover h1{font-size:32px}.cl{grid-template-columns:minmax(0,1fr)}.scroll{overflow-x:auto}}
+@media print{body{background:#fff}.toc{display:none}.slide{box-shadow:none;margin:0;max-width:none;break-after:page;min-height:180mm}@page{size:A4 landscape;margin:10mm}}
+</style>
+</head>
+<body>
+<nav class="toc" aria-label="장 이동">
+<a href="index.html" style="background:var(--navy);color:#fff;border-color:var(--navy)">◀ 월간 검토 결과</a><a href="#s0">표지</a><a href="#s1">1. 실적 요약</a><a href="#s2">2. 시간대별 SMP</a><a href="#s3">3-1. 수요 변화</a><a href="#s4">3-2. 공급곡선 변화</a><a href="#s5">3-3. 원별 발전량</a><a href="#s6">4. 일별 추이·특이사항</a><a href="#s7">5. 종합</a>
+</nav>
+
+<section class="slide cover" id="s0">
+  <div class="k">사업기획팀 보고 · 전력시장 가격 모니터링</div>
+  <h1>2026년 11월(1~19일)<br><span>전력시장 검토 결과</span></h1>
+  <div style="color:var(--ink2)">평일 SMP·LNG 단가 · 시간대별 SMP · 계통수요 · 공급곡선 · 원별 발전량</div>
+  <div class="tags"><span>잠정 · 11.1~11.19 실적</span><span>비교: 전년 11.1~11.19 · 2026년 10월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
+</section>
+
+<section class="slide" id="s1">
+  <div class="hd"><span class="pno">1</span><span class="pt">11월 실적 요약<small>11.1~11.19 잠정 · 전년 같은 기간 대비</small></span></div>
+  <div class="msg">11월 평일 SMP <span class="em">137.3원</span>(전년 +33.7%, 10월 대비 +23.5%) — 가스요금 상승이 SMP에 다시 반영되기 시작, SMP/LNG 비율 10.4 → 12.5</div>
+  <div class="k4" id="kpis"></div>
+  <div class="g2">
+    <div class="box"><div class="bt">월별 SMP/LNG 비율<small>평일 SMP(원/kWh) ÷ LNG(원/㎥) × 100 · 11월은 1~19일</small></div><div class="fig t"><canvas id="cRatio" role="img" aria-label="월별 SMP/LNG 비율"></canvas></div></div>
+    <div class="box"><div class="bt">월별 전년 대비 증감률<small>%</small></div>
+      <div class="scroll"><table id="tMon"></table></div>
+    </div>
+  </div>
+  <div class="note">※ 평일 = 주말·공휴일 제외(11월 14일, 전년 13일) · SMP: KPX 육지 시간별 · LNG: 한국가스공사 발전용(일반발전) · 계통수요 피크는 평일 시간 평균 최대</div>
+  <div class="pg">2 / 8</div>
+</section>
+
+<section class="slide" id="s2">
+  <div class="hd"><span class="pno">2</span><span class="pt">11월 SMP 상승은 어디서 왔나<small>평일 시간대별 SMP</small></span></div>
+  <div class="msg">상승은 <span class="em">평일 낮(9~17시)</span>에 집중 — 낮 SMP 112.9 → <span class="rd">166.9원</span>, 새벽(1~7시)은 101원으로 10월과 같음</div>
+  <div class="g2">
+    <div class="box"><div class="bt">평일 시간대별 평균 SMP<small>원/kWh</small></div><div class="fig"><canvas id="cProf" role="img" aria-label="평일 시간대별 SMP 비교"></canvas></div></div>
+    <div class="box"><div class="bt">평일 SMP 가격대별 시간 비중<small>% · 전체 평일 시간</small></div>
+      <div id="bands"></div>
+      <ul class="b">
+        <li>160원 이상 시간: 10월 <b>2.7%</b> → 11월 <b class="rd">42.3%</b> (전년 11월 0%)</li>
+        <li>11월 평일 9~17시 SMP는 날짜의 79~100%에서 160원 이상</li>
+        <li>160~180원 = LNG 평균요금제 복합 발전가격대(11월 기준 164~180원)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">※ 낮 = 9~17시(10~17시 SMP 8개 시간) · 새벽 = 1~7시 · 가격대 해석은 사업기획팀 발전가격 순위표(10·11월) 기준</div>
+  <div class="pg">3 / 8</div>
+</section>
+
+<section class="slide" id="s3">
+  <div class="hd"><span class="pno">3-1</span><span class="pt">원인 ① 수요 변화<small>평일 · 10월 → 11월</small></span></div>
+  <div class="msg">해가 짧아져 태양광이 줄고 기온이 내려가 <span class="em">평일 낮 계통수요 +4.9GW</span> (60.2 → 65.0GW)</div>
+  <div class="g2">
+    <div class="box"><div class="bt">평일 시간대별 계통수요<small>GW · 시장 외 태양광 제외(계통에서 본 수요)</small></div><div class="fig"><canvas id="cDem" role="img" aria-label="평일 시간대별 계통수요"></canvas></div></div>
+    <div class="box"><div class="bt">낮(10~16시) 수요·태양광·날씨<small>평일 평균</small></div>
+      <table id="tDem"></table>
+      <ul class="b"><li>낮 시간 태양광(시장+시장 외) <b>17.0 → 12.0GW</b>, 그만큼 계통이 더 공급</li><li>저녁 피크(17~19시)는 72GW로 10월과 비슷</li></ul>
+    </div>
+  </div>
+  <div class="note">※ 계통수요 = KPX 실시간 수급현황 발전원 합 · 시장 외 태양광 = 한전 PPA·자가용(BTM, KPX 추정) · 날씨: Open-Meteo, 기온은 서울, 일사량은 목포·전주·서산·안동 평균 · 11/19 18시 이후 발전량 미수집분 제외</div>
+  <div class="pg">4 / 8</div>
+</section>
+
+<section class="slide" id="s4">
+  <div class="hd"><span class="pno">3-2</span><span class="pt">원인 ② 공급곡선 변화<small>같은 수요에서의 SMP</small></span></div>
+  <div class="msg">수요가 같아도 11월 SMP가 <span class="rd">25~35원 높음</span> — 110~160원대 LNG가 빠져 석탄 다음이 곧바로 160원대</div>
+  <div class="g2">
+    <div class="box"><div class="bt">계통수요 구간별 평균 SMP<small>원/kWh · 평일 시간 기준</small></div><div class="fig"><canvas id="cBin" role="img" aria-label="계통수요 구간별 평균 SMP"></canvas></div></div>
+    <div class="box"><div class="bt">연료별 SMP 결정 비중<small>% · 육지 · 주말 포함</small></div>
+      <div id="fuelBars"></div>
+      <ul class="b">
+        <li>LNG가 가격을 정한 비중은 10월과 비슷(64.5 → 62.1%)</li>
+        <li>달라진 것은 <b>어떤 LNG인가</b>: 10월엔 105~113원대 직도입 LNG, 11월엔 164~180원대 평균요금제 LNG</li>
+        <li>160원 이하 공급 가능량 <b>79.4 → 73.7GW (−5.7GW)</b> · 파주문산 105→172원, 여주 106→164원, 신평택 139→248원</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">※ 수요 구간: 5GW 단위(예: 65 = 65~70GW), 10시간 이상 구간만 표시 · 연료별 결정: EPSIS 연료원별 SMP 결정 횟수(11.1~11.19) · 공급 가능량: 기존 참고장(발전가격 순위 누적 입찰량, 정비 미반영)</div>
+  <div class="pg">5 / 8</div>
+</section>
+
+<section class="slide" id="s5">
+  <div class="hd"><span class="pno">3-3</span><span class="pt">원별 발전량<small>평일 평균 출력 · GW</small></span></div>
+  <div class="msg">전년보다 원전·석탄이 <span class="em">+6.8GW</span> 더 돌고 LNG는 <span class="dn">▼4.4GW</span> 줄었지만, 낮 시간 가격은 LNG가 결정</div>
+  <div class="g2e">
+    <div class="box"><div class="bt">원별 평균 출력 (하루 전체)<small>GW · 평일</small></div><div class="scroll"><table id="tGen"></table></div></div>
+    <div class="box"><div class="bt">원별 평균 출력 (낮 10~16시)<small>GW · 평일</small></div><div class="scroll"><table id="tGenD"></table></div></div>
+  </div>
+  <ul class="b">
+    <li>10월 → 11월: 낮 LNG 출력 14.0 → 16.3GW(+2.3), 석탄 19.6 → 23.5GW(+4.0) — 줄어든 태양광을 석탄·LNG가 채움</li>
+    <li>전년 11월 → 올해 11월: LNG 출력은 줄었으나 LNG 단가 +64.7%로 LNG가 결정하는 시간의 가격 자체가 높아짐</li>
+  </ul>
+  <div class="note">※ KPX 실시간 수급현황(5분) 시간 평균 · 11월 일부 시간은 공공데이터포털 발전원별 발전량(5분)으로 보완 · 태양광 계 = 시장 + 시장 외</div>
+  <div class="pg">6 / 8</div>
+</section>
+
+<section class="slide" id="s6">
+  <div class="hd"><span class="pno">4</span><span class="pt">일별 추이 및 특이사항<small>9.1~11.19</small></span></div>
+  <div class="msg">11월 2일(월)부터 평일 낮 SMP 160~180원대 고착 · 주말은 100원대 유지</div>
+  <div class="box"><div class="bt">일별 낮(9~17시) 평균 SMP<small>원/kWh · 진한 막대 = 평일, 연한 막대 = 주말·공휴일</small></div><div class="fig t"><canvas id="cDaily" role="img" aria-label="일별 낮 평균 SMP"></canvas></div></div>
+  <div class="g2e">
+    <div class="box"><div class="bt">11/19(목) 올해 11월 최고 188.6원</div><ul class="b" style="margin:0"><li>서울 평균기온 0.8℃, 첫 영하권 아침 → 9~10시 SMP 188.6원</li><li>평일 계통수요 최대 78.0GW (11월 중 최고, 전년 11월 76.2GW)</li></ul></div>
+    <div class="box"><div class="bt">11/15(일) 13시 SMP 6.0원</div><ul class="b" style="margin:0"><li>주말 낮 수요 감소 + 태양광 출력으로 일시적 저가 입찰 발전기가 결정</li><li>11월에도 주말·저수요 시간은 낮은 가격 유지 → 상승은 평일 낮 현상</li></ul></div>
+  </div>
+  <div class="note">※ 9월 낮 SMP가 높은 날(추석 전후 제외)은 늦더위 냉방수요 영향 · 날씨: Open-Meteo</div>
+  <div class="pg">7 / 8</div>
+</section>
+
+<section class="slide" id="s7">
+  <div class="hd"><span class="pno">5</span><span class="pt">종합 및 향후 점검 사항</span></div>
+  <div class="msg">9~10월 'LNG 단가↑ 대비 SMP 저조'는 낮 태양광이 만든 계절 현상 — 11월부터는 LNG 단가가 SMP에 반영</div>
+  <div class="concl">
+    <div class="cl"><b>9~10월</b><div>낮 태양광이 많아 <strong>석탄·저가 직도입 LNG가 낮 가격 결정</strong> → LNG 단가 +48%에도 평일 SMP +0.5%, SMP/LNG 비율 <strong>10.4(올해 최저)</strong></div></div>
+    <div class="cl"><b>11월</b><div>① 태양광 감소·기온 하락으로 <strong>평일 낮 계통수요 +4.9GW</strong>, ② 직도입 LNG 단가 상승으로 <strong>160원 이하 공급 −5.7GW</strong> → 낮 시간이 석탄 구간을 넘어 <strong>평균요금제 LNG(164~180원)</strong>에서 결정, 평일 SMP 137.3원(비율 12.5)</div></div>
+    <div class="cl"><b>판단</b><div>같은 수요에서도 SMP가 25~35원 높아진 점에서 <strong>공급곡선 변화(②)가 주된 요인</strong>, 수요 증가(①)가 이를 드러낸 것으로 판단. 새벽·주말은 여전히 석탄이 결정해 100원 안팎</div></div>
+    <div class="cl"><b>점검 사항</b><div>· 12월 발전용 가스요금·발전가격 순위(직도입 LNG 단가 유지 여부)<br>· 난방수요 본격화에 따른 낮·저녁 계통수요(11/19 78.0GW)<br>· 원전 정비 복귀 일정(KPX 예방정비계획: 한울#6 12/31, 한울#1 1/5 예정)</div></div>
+  </div>
+  <div class="note">※ 11월은 1~19일 잠정 실적 · 판단은 공개 자료 기반 추정이며, 개별 발전기 가격결정 여부는 KPX 확정 자료로 확인 필요</div>
+  <div class="pg">8 / 8</div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+{
+const D={"monthly": [{"m": 1, "smp": 107.1, "smp0": 123.9, "gas": 696.42, "gas0": 855.08, "lngYoY": -18.6, "smpYoY": -13.6, "ratio": 15.4, "ratio0": 14.5}, {"m": 2, "smp": 111.5, "smp0": 119.3, "gas": 707.38, "gas0": 818.03, "lngYoY": -13.5, "smpYoY": -6.5, "ratio": 15.8, "ratio0": 14.6}, {"m": 3, "smp": 110.0, "smp0": 115.8, "gas": 684.67, "gas0": 807.81, "lngYoY": -15.2, "smpYoY": -5.0, "ratio": 16.1, "ratio0": 14.3}, {"m": 4, "smp": 119.2, "smp0": 129.3, "gas": 712.77, "gas0": 849.61, "lngYoY": -16.1, "smpYoY": -7.8, "ratio": 16.7, "ratio0": 15.2}, {"m": 5, "smp": 124.0, "smp0": 127.1, "gas": 766.3, "gas0": 796.83, "lngYoY": -3.8, "smpYoY": -2.5, "ratio": 16.2, "ratio0": 16.0}, {"m": 6, "smp": 117.0, "smp0": 119.9, "gas": 826.81, "gas0": 771.91, "lngYoY": 7.1, "smpYoY": -2.4, "ratio": 14.2, "ratio0": 15.5}, {"m": 7, "smp": 134.0, "smp0": 120.0, "gas": 875.56, "gas0": 727.59, "lngYoY": 20.3, "smpYoY": 11.7, "ratio": 15.3, "ratio0": 16.5}, {"m": 8, "smp": 148.5, "smp0": 116.5, "gas": 969.61, "gas0": 719.31, "lngYoY": 34.8, "smpYoY": 27.5, "ratio": 15.3, "ratio0": 16.2}, {"m": 9, "smp": 123.4, "smp0": 113.4, "gas": 1058.34, "gas0": 762.78, "lngYoY": 38.7, "smpYoY": 8.9, "ratio": 11.7, "ratio0": 14.9}, {"m": 10, "smp": 111.2, "smp0": 110.5, "gas": 1070.33, "gas0": 722.53, "lngYoY": 48.1, "smpYoY": 0.5, "ratio": 10.4, "ratio0": 15.3}, {"m": 11, "smp": 137.3, "smp0": 102.6, "gas": 1097.46, "gas0": 666.39, "lngYoY": 64.7, "smpYoY": 33.7, "ratio": 12.5, "ratio0": 15.4}], "prof": {"N26": [105.3, 97.9, 96.5, 96.3, 97.0, 100.4, 115.5, 129.9, 165.3, 169.8, 168.1, 166.5, 154.6, 171.9, 172.5, 167.7, 164.0, 155.7, 153.6, 146.8, 137.2, 126.2, 119.3, 116.7], "N25": [97.1, 80.7, 78.9, 77.4, 77.8, 82.4, 97.9, 107.0, 117.4, 112.2, 114.5, 109.8, 107.3, 108.0, 109.2, 114.5, 111.2, 112.8, 113.5, 110.2, 108.4, 106.3, 104.7, 103.9], "O26": [104.9, 99.2, 98.7, 98.2, 99.7, 102.6, 106.9, 109.5, 110.4, 108.6, 113.0, 113.0, 109.5, 112.9, 113.0, 114.1, 119.3, 121.3, 124.6, 122.8, 120.1, 118.0, 114.7, 112.8]}, "p160": {"N26": [0, 0, 0, 0, 0, 0, 0, 0, 86, 93, 93, 93, 79, 100, 100, 93, 86, 57, 57, 43, 29, 7, 0, 0], "N25": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "O26": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 5, 10, 10, 10, 5, 0, 5, 0, 0, 0, 0, 0]}, "gen": {"N26": {"all": {"nuc": 19.74, "coal": 24.76, "lng": 14.59, "oil": 0.2, "hydro": 0.21, "pump": -0.21, "renew": 3.22, "wind": 0.58, "sunM": 1.24, "hid": 2.83, "ess": -0.08, "dem": 64.25}, "day": {"nuc": 19.74, "coal": 23.53, "lng": 16.3, "oil": 0.19, "hydro": 0.27, "pump": -1.65, "renew": 2.76, "wind": 0.64, "sunM": 3.64, "hid": 8.36, "ess": -0.4, "dem": 65.02}}, "N25": {"all": {"nuc": 17.52, "coal": 20.23, "lng": 19.01, "oil": 0.22, "hydro": 0.32, "pump": -0.16, "renew": 3.41, "wind": 0.52, "sunM": 1.47, "hid": 3.52, "ess": 0.0, "dem": 62.53}, "day": {"nuc": 17.51, "coal": 19.15, "lng": 18.36, "oil": 0.18, "hydro": 0.31, "pump": -1.05, "renew": 3.07, "wind": 0.41, "sunM": 4.38, "hid": 10.55, "ess": 0.0, "dem": 62.32}}, "O26": {"all": {"nuc": 20.04, "coal": 22.12, "lng": 13.58, "oil": 0.17, "hydro": 0.22, "pump": -0.16, "renew": 2.94, "wind": 0.61, "sunM": 1.74, "hid": 4.14, "ess": -0.0, "dem": 61.26}, "day": {"nuc": 20.01, "coal": 19.55, "lng": 14.01, "oil": 0.16, "hydro": 0.24, "pump": -1.34, "renew": 2.5, "wind": 0.47, "sunM": 5.03, "hid": 12.0, "ess": -0.46, "dem": 60.15}}}, "dprof": {"N26": [59.4, 57.0, 55.7, 55.1, 55.5, 57.4, 61.2, 66.1, 69.4, 68.4, 66.0, 62.9, 59.0, 62.4, 65.2, 68.2, 71.5, 72.8, 72.4, 71.3, 69.2, 66.9, 66.2, 64.6], "N25": [57.9, 55.6, 54.4, 53.9, 54.4, 56.3, 60.1, 64.9, 67.7, 65.7, 62.7, 59.7, 56.1, 59.7, 62.6, 65.8, 69.6, 70.9, 71.0, 69.9, 67.9, 65.8, 64.8, 63.2], "O26": [57.5, 55.4, 54.2, 53.5, 53.7, 55.3, 58.5, 61.9, 63.1, 62.0, 59.6, 56.9, 53.5, 57.4, 60.9, 64.1, 68.6, 71.0, 72.0, 70.6, 68.2, 65.7, 64.3, 62.1]}, "peak": {"N26": 78.0, "N25": 76.2, "O26": 76.1}, "bins": {"N26": {"50": [110.3, 24], "55": [113.1, 75], "60": [137.7, 56], "65": [144.8, 89], "70": [161.1, 80]}, "N25": {"50": [86.4, 30], "55": [92.3, 75], "60": [108.9, 85], "65": [109.7, 81], "70": [113.9, 30]}, "O26": {"45": [99.5, 12], "50": [101.7, 86], "55": [104.4, 124], "60": [112.2, 107], "65": [119.6, 83], "70": [126.0, 65]}}, "fuel": {"N26": {"LNG": 283, "석탄": 172, "기타": 1}, "N25": {"LNG": 376, "석탄": 78}, "O26": {"LNG": 480, "석탄": 264}}, "wx": {"N26": {"tmp": 8.2, "rad": 8.6, "sun": 5.5}, "N25": {"tmp": 7.9, "rad": 11.5, "sun": 8.6}, "O26": {"tmp": 15.4, "rad": 13.9, "sun": 8.5}}, "daily": [["2026-09-01", 160.9, 190.8, true, 23.1], ["2026-09-02", 164.3, 191.4, true, 24.3], ["2026-09-03", 158.6, 191.0, true, 25.2], ["2026-09-04", 156.7, 188.6, true, 23.7], ["2026-09-05", 104.7, 95.5, false, 22.8], ["2026-09-06", 95.8, 79.2, false, 22.9], ["2026-09-07", 145.7, 170.2, true, 23.3], ["2026-09-08", 138.3, 163.3, true, 24.1], ["2026-09-09", 109.2, 105.8, true, 21.4], ["2026-09-10", 115.3, 114.5, true, 18.8], ["2026-09-11", 124.6, 137.6, true, 20.0], ["2026-09-12", 103.7, 102.5, false, 20.6], ["2026-09-13", 104.2, 103.5, false, 21.3], ["2026-09-14", 108.4, 107.2, true, 22.1], ["2026-09-15", 101.0, 96.2, true, 20.7], ["2026-09-16", 103.6, 97.2, true, 21.7], ["2026-09-17", 102.9, 101.0, true, 22.6], ["2026-09-18", 104.7, 103.9, true, 23.5], ["2026-09-19", 103.2, 98.8, false, 24.0], ["2026-09-20", 97.2, 84.2, false, 23.6], ["2026-09-21", 122.2, 114.8, true, 24.2], ["2026-09-22", 107.1, 103.6, true, 24.1], ["2026-09-23", 102.2, 103.4, true, 23.9], ["2026-09-24", 101.2, 95.5, false, 22.7], ["2026-09-25", 91.3, 69.3, false, 20.2], ["2026-09-26", 96.9, 85.6, false, 21.1], ["2026-09-27", 93.1, 72.5, false, 21.4], ["2026-09-28", 112.0, 110.8, false, 20.3], ["2026-09-29", 109.7, 107.6, true, 20.5], ["2026-09-30", 109.6, 108.5, true, 21.4], ["2026-10-01", 108.6, 106.6, true, 17.7], ["2026-10-02", 105.4, 107.3, true, 16.1], ["2026-10-03", 106.8, 105.5, false, 16.9], ["2026-10-04", 103.8, 101.5, false, 19.1], ["2026-10-05", 106.4, 106.9, false, 16.4], ["2026-10-06", 107.0, 104.7, true, 15.8], ["2026-10-07", 108.7, 107.8, true, 16.9], ["2026-10-08", 108.8, 107.7, true, 17.4], ["2026-10-09", 107.7, 106.4, false, 18.4], ["2026-10-10", 105.0, 106.5, false, 19.2], ["2026-10-11", 106.0, 107.0, false, 21.5], ["2026-10-12", 107.8, 109.3, true, 22.7], ["2026-10-13", 132.9, 168.7, true, 18.2], ["2026-10-14", 113.9, 107.3, true, 14.2], ["2026-10-15", 116.5, 109.2, true, 15.7], ["2026-10-16", 108.9, 108.0, true, 17.6], ["2026-10-17", 106.6, 106.7, false, 18.4], ["2026-10-18", 106.0, 107.6, false, 18.0], ["2026-10-19", 110.7, 107.8, true, 13.8], ["2026-10-20", 109.9, 107.8, true, 15.5], ["2026-10-21", 106.1, 106.2, true, 12.5], ["2026-10-22", 117.5, 109.9, true, 8.8], ["2026-10-23", 106.9, 107.2, true, 12.5], ["2026-10-24", 105.9, 107.0, false, 14.7], ["2026-10-25", 103.3, 105.2, false, 16.6], ["2026-10-26", 109.7, 111.4, true, 15.6], ["2026-10-27", 108.4, 107.8, true, 11.2], ["2026-10-28", 106.9, 106.8, true, 6.9], ["2026-10-29", 119.4, 152.2, true, 7.4], ["2026-10-30", 109.0, 104.9, true, 11.3], ["2026-10-31", 105.6, 104.6, false, 10.9], ["2026-11-01", 108.5, 118.4, false, 7.9], ["2026-11-02", 124.7, 139.0, true, 9.7], ["2026-11-03", 132.9, 151.8, true, 9.6], ["2026-11-04", 137.9, 174.1, true, 10.9], ["2026-11-05", 132.5, 173.2, true, 12.2], ["2026-11-06", 141.5, 162.4, true, 6.9], ["2026-11-07", 127.3, 122.6, false, 3.8], ["2026-11-08", 110.0, 119.4, false, 4.1], ["2026-11-09", 143.1, 175.7, true, 7.2], ["2026-11-10", 141.9, 158.6, true, 5.4], ["2026-11-11", 140.8, 165.0, true, 7.9], ["2026-11-12", 150.0, 179.6, true, 9.1], ["2026-11-13", 140.9, 177.8, true, 11.5], ["2026-11-14", 100.6, 105.1, false, 10.3], ["2026-11-15", 94.5, 82.9, false, 11.3], ["2026-11-16", 130.1, 166.8, true, 10.8], ["2026-11-17", 129.9, 165.5, true, 10.8], ["2026-11-18", 134.1, 172.6, true, 5.7], ["2026-11-19", 141.5, 174.5, true, 0.8]], "band": {"N26": [28.0, 29.8, 42.3], "N25": [73.7, 26.3, 0.0], "O26": [68.5, 28.7, 2.7]}, "ndays": {"N26": 14, "N25": 13, "O26": 20}, "smpwd": {"N26": 137.3, "N25": 102.6, "O26": 111.2}, "smpday": {"N26": 166.9, "N25": 110.8, "O26": 112.9}, "smpnight": {"N26": 101.3, "N25": 84.6, "O26": 101.4}};
+const C={navy:'#0B3D66',ci:'#00A6ED',slate:'#A9B4C2',slateD:'#6F7D90',red:'#D93A3F',amber:'#F2A33A',ink:'#1A2230',grid:'#EEF1F5'};
+const $=id=>document.getElementById(id);
+const f1=v=>v==null?'-':(+v).toLocaleString('ko-KR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const sg=v=>(v>0?'+':v<0?'▼':'')+f1(Math.abs(v));
+const pc=(a,b)=>(a/b-1)*100;
+const cls=v=>v>0?'up':v<0?'dn':'';
+const M=D.monthly, N=M[10];
+
+/* KPI */
+const k=[['LNG 단가',sg(N.lngYoY)+'%',`${f1(N.gas0)} → ${f1(N.gas)}원/㎥`,C.amber],
+ ['평일 SMP',sg(N.smpYoY)+'%',`${f1(N.smp0)} → ${f1(N.smp)}원/kWh`,C.navy],
+ ['SMP/LNG 비율',sg(N.ratio-N.ratio0)+'p',`전년 ${f1(N.ratio0)} → ${f1(N.ratio)} (10월 ${f1(M[9].ratio)})`,C.slateD],
+ ['계통수요 피크',sg(pc(D.peak.N26,D.peak.N25))+'%',`${f1(D.peak.N25)} → ${f1(D.peak.N26)}GW (11/19)`,C.ci]];
+$('kpis').innerHTML=k.map(([l,v,s,c])=>`<div class="kpi" style="border-top-color:${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+
+/* monthly table */
+$('tMon').innerHTML='<tr><th>월</th><th>LNG 단가</th><th>평일 SMP</th><th>비율</th></tr>'+
+ M.slice(5).map(m=>`<tr class="${m.m===11?'hl':''}"><td>${m.m}월${m.m===11?'*':''}</td><td class="${cls(m.lngYoY)}">${sg(m.lngYoY)}%</td><td class="${cls(m.smpYoY)}">${sg(m.smpYoY)}%</td><td>${f1(m.ratio)}</td></tr>`).join('')+
+ '<tr><td colspan="4" class="note" style="text-align:left;white-space:normal">* 11월은 1~19일, 전년도 같은 날짜까지 비교</td></tr>';
+
+const grid={color:C.grid},noGrid={display:false};const OK=!!window.Chart;const mk=(el,cfg)=>{if(!OK)return;try{new Chart(el,cfg)}catch(e){console.error(e)}};
+if(OK){Chart.defaults.font.family='"Noto Sans KR","Malgun Gothic",sans-serif';Chart.defaults.font.size=12;Chart.defaults.color='#5A6474';
+Chart.defaults.plugins.legend.labels.boxWidth=12;Chart.defaults.maintainAspectRatio=false;
+Chart.defaults.interaction={mode:'index',intersect:false};
+/* end-of-line / selected value labels */
+const lbl={id:'lbl',afterDatasetsDraw(ch,a,o){if(!o||!o.on)return;const x=ch.ctx;x.save();x.font='700 12px "Noto Sans KR"';x.textAlign='center';
+  ch.data.datasets.forEach((ds,i)=>{const meta=ch.getDatasetMeta(i);if(meta.hidden)return;meta.data.forEach((p,j)=>{const v=ds.data[j];if(v==null||!o.pick(i,j,v))return;x.fillStyle='#1A2230';x.fillText(o.fmt(v),p.x,p.y-8)})});x.restore()}};
+Chart.register(lbl);}
+
+mk($('cRatio'),{type:'line',data:{labels:M.map(m=>m.m+'월'+(m.m===11?'*':'')),datasets:[
+ {label:'2025년',data:M.map(m=>m.ratio0),borderColor:C.slate,backgroundColor:C.slate,borderWidth:2,pointRadius:3},
+ {label:'2026년',data:M.map(m=>m.ratio),borderColor:C.ci,backgroundColor:C.ci,borderWidth:2,pointRadius:4}]},
+ options:{layout:{padding:{top:16}},plugins:{lbl:{on:true,fmt:f1,pick:(i,j)=>i===1&&j>=8}},scales:{x:{grid:noGrid},y:{grid,min:8,max:18}}}});
+
+const H=[...Array(24)].map((_,i)=>(i+1)+'시');
+mk($('cProf'),{type:'line',data:{labels:H,datasets:[
+ {label:'2025년 11월',data:D.prof.N25,borderColor:C.slate,backgroundColor:C.slate,borderWidth:2,pointRadius:0},
+ {label:'2026년 10월',data:D.prof.O26,borderColor:C.navy,backgroundColor:C.navy,borderWidth:2,pointRadius:0},
+ {label:'2026년 11월',data:D.prof.N26,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0}]},
+ options:{layout:{padding:{top:16}},plugins:{lbl:{on:true,fmt:f1,pick:(i,j)=>(i===2&&(j===13))||(i===1&&j===13)}},scales:{x:{grid:noGrid,ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid,min:60,max:190,title:{display:true,text:'원/kWh'}}}}});
+
+/* band bars (HTML) */
+const BN=[['110원 미만',C.slate],['110~160원',C.navy],['160원 이상',C.red]];
+const row=(name,a)=>`<div style="display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:8px;margin:7px 0"><span style="font-size:13px;font-weight:700">${name}</span><div style="display:flex;height:24px;gap:2px">${a.map((v,i)=>v>0?`<div title="${BN[i][0]} ${f1(v)}%" style="width:${v}%;background:${BN[i][1]};border-radius:${i===0?'4px 0 0 4px':''};color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden">${v>=8?f1(v):''}</div>`:'').join('')}</div></div>`;
+$('bands').innerHTML=row('25년 11월',D.band.N25)+row('26년 10월',D.band.O26)+row('26년 11월',D.band.N26)+
+ `<div style="display:flex;gap:12px;font-size:12px;margin-top:4px;flex-wrap:wrap">${BN.map(b=>`<span><i style="display:inline-block;width:10px;height:10px;background:${b[1]};margin-right:4px"></i>${b[0]}</span>`).join('')}</div>`;
+
+mk($('cDem'),{type:'line',data:{labels:H,datasets:[
+ {label:'2026년 10월',data:D.dprof.O26,borderColor:C.navy,backgroundColor:C.navy,borderWidth:2,pointRadius:0},
+ {label:'2026년 11월',data:D.dprof.N26,borderColor:C.ci,backgroundColor:'rgba(0,166,237,.08)',borderWidth:3,pointRadius:0}]},
+ options:{scales:{x:{grid:noGrid,ticks:{maxRotation:0,maxTicksLimit:12}},y:{grid,min:45,max:80,title:{display:true,text:'GW'}}}}});
+
+const G=D.gen, W=D.wx;
+const dr=(n,a,b,u,dig=1)=>`<tr><td>${n}</td><td>${f1(a)}</td><td>${f1(b)}</td><td class="${cls(b-a)}">${sg(b-a)}${u}</td></tr>`;
+$('tDem').innerHTML='<tr><th>항목</th><th>10월</th><th>11월</th><th>증감</th></tr>'+
+ dr('계통수요(GW)',G.O26.day.dem,G.N26.day.dem,'')+dr('시장 외 태양광(GW)',G.O26.day.hid,G.N26.day.hid,'')+dr('시장 태양광(GW)',G.O26.day.sunM,G.N26.day.sunM,'')+
+ dr('서울 평균기온(℃)',W.O26.tmp,W.N26.tmp,'')+dr('일사량(MJ/㎡·일)',W.O26.rad,W.N26.rad,'')+dr('일조시간(h/일)',W.O26.sun,W.N26.sun,'');
+
+const bk=[...new Set([...Object.keys(D.bins.O26),...Object.keys(D.bins.N26)])].sort((a,b)=>a-b).filter(b=>D.bins.O26[b]&&D.bins.N26[b]);
+mk($('cBin'),{type:'bar',data:{labels:bk.map(b=>`${b}~${+b+5}GW`),datasets:[
+ {label:'2025년 11월',data:bk.map(b=>D.bins.N25[b]?.[0]??null),backgroundColor:C.slate,borderRadius:4,borderSkipped:'bottom'},
+ {label:'2026년 10월',data:bk.map(b=>D.bins.O26[b][0]),backgroundColor:C.navy,borderRadius:4,borderSkipped:'bottom'},
+ {label:'2026년 11월',data:bk.map(b=>D.bins.N26[b][0]),backgroundColor:C.ci,borderRadius:4,borderSkipped:'bottom'}]},
+ options:{layout:{padding:{top:18}},datasets:{bar:{categoryPercentage:.72,barPercentage:.9}},plugins:{lbl:{on:true,fmt:v=>Math.round(v),pick:i=>i>0}},scales:{x:{grid:noGrid},y:{grid,min:60,title:{display:true,text:'원/kWh'}}}}});
+
+const FB=[['석탄',C.slateD],['LNG',C.ci]];
+const fr=(n,o)=>{const t=Object.values(o).reduce((s,v)=>s+v,0),a=[(o['석탄']||0)/t*100,(o.LNG||0)/t*100];return `<div style="display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:8px;margin:7px 0"><span style="font-size:13px;font-weight:700">${n}</span><div style="display:flex;height:24px;gap:2px">${a.map((v,i)=>`<div style="width:${v}%;background:${FB[i][1]};color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center">${FB[i][0]} ${f1(v)}%</div>`).join('')}</div></div>`};
+$('fuelBars').innerHTML=fr('25년 11월',D.fuel.N25)+fr('26년 10월',D.fuel.O26)+fr('26년 11월',D.fuel.N26);
+
+const GK=[['원자력','nuc'],['석탄','coal'],['LNG','lng'],['신재생(태양광 외)',['renew','wind']],['태양광 계',['sunM','hid']],['계통수요','dem']];
+const gv=(o,k)=>Array.isArray(k)?k.reduce((s,x)=>s+o[x],0):o[k];
+const gt=p=>'<tr><th>원별</th><th>25.11</th><th>26.10</th><th>26.11</th><th>전년비</th><th>전월비</th></tr>'+GK.map(([n,kk])=>{const a=gv(G.N25[p],kk),b=gv(G.O26[p],kk),c=gv(G.N26[p],kk);
+ return `<tr class="${n==='계통수요'?'hl':''}"><td>${n}</td><td>${f1(a)}</td><td>${f1(b)}</td><td><b>${f1(c)}</b></td><td class="${cls(c-a)}">${sg(c-a)}</td><td class="${cls(c-b)}">${sg(c-b)}</td></tr>`}).join('');
+$('tGen').innerHTML=gt('all');$('tGenD').innerHTML=gt('day');
+
+const dl=D.daily;
+mk($('cDaily'),{type:'bar',data:{labels:dl.map(d=>+d[0].slice(5,7)+'/'+ +d[0].slice(8)),datasets:[
+ {label:'낮 평균 SMP',data:dl.map(d=>d[2]),backgroundColor:dl.map(d=>d[3]?(d[0]>='2026-11'?C.ci:C.navy):'#D5DBE3'),borderRadius:3,borderSkipped:'bottom'}]},
+ options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`낮 평균 ${f1(c.raw)}원 · ${dl[c.dataIndex][3]?'평일':'주말·공휴일'} · 서울 ${f1(dl[c.dataIndex][4])}℃`}}},
+ scales:{x:{grid:noGrid,ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:14}},y:{grid,min:60,title:{display:true,text:'원/kWh'}}}}});
+}
+</script>
+</body>
+</html>

@@ -109,7 +109,18 @@ def build():
                 if "제주" in x["name"]:
                     continue
                 units[(x["name"], x["start"])] = [x["name"], x["fuel"], float(x["mw"]), x["start"], x["end"]]
-    lst = sorted((u for u in units.values() if u[4] >= "2024-12-01"), key=lambda u: u[3])
+    # 같은 발전기가 여러 주차 글에 시작일만 달리해 반복 등장 → 기간이 겹치면 하나로 합침(중복 합산 방지)
+    by_name = {}
+    for u in sorted(units.values(), key=lambda u: (u[0], u[3])):
+        lst_n = by_name.setdefault(u[0], [])
+        if lst_n and u[3] <= lst_n[-1][4]:
+            prev = lst_n[-1]
+            prev[4] = max(prev[4], u[4])
+            prev[1], prev[2] = u[1], u[2]  # 연료·용량은 나중 글 기준
+        else:
+            lst_n.append(list(u))
+    merged = [u for v in by_name.values() for u in v]
+    lst = sorted((u for u in merged if u[4] >= "2024-12-01"), key=lambda u: u[3])
     daily, d = {}, date(2025, 1, 1)
     last = datetime.now(KST).date() + timedelta(days=14)
     while d <= last:
