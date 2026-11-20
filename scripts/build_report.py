@@ -644,8 +644,8 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["s9_msg"] = (f"{tg}년 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원"
                    f"(▼{f1(min(a1, a2) / base['all'] * 100)}~{f1(max(a1, a2) / base['all'] * 100)}%) 하락</span> — "
                    f"낮 SMP {round(min(d1, d2))}~{round(max(d1, d2))}원 하락, 대신 <span class=\"rd\">출력제어 {f1(L[tg]['curTWh'])}~{f1(G[tg]['curTWh'])}TWh</span> 필요")
-    T["s9_bullets"] = (f"<li>SMP 150원 이상 시간: 올해 {base['hiH']}시간 → {tg}년 {min(L[tg]['hiH'], G[tg]['hiH'])}~{max(L[tg]['hiH'], G[tg]['hiH'])}시간</li>"
-                       f"<li>출력제어 시간 SMP 0원 가정 시 {tg}년 연평균 {f1(min(L[tg]['all0'], G[tg]['all0']))}~{f1(max(L[tg]['all0'], G[tg]['all0']))}원</li>")
+    T["s9_bullets"] = (f"<li>SMP 150원 이상: 올해 {base['hiH']}시간 → {tg}년 {min(L[tg]['hiH'], G[tg]['hiH'])}~{max(L[tg]['hiH'], G[tg]['hiH'])}시간</li>"
+                       f"<li>출력제어 시간 0원 가정 시 {tg}년 연평균 {f1(min(L[tg]['all0'], G[tg]['all0']))}~{f1(max(L[tg]['all0'], G[tg]['all0']))}원</li>")
     drops = {mm: (L[y0]["mon"][mm] - L[tg]["mon"][mm], G[y0]["mon"][mm] - G[tg]["mon"][mm]) for mm in L[y0]["mon"]}
     top = sorted(drops, key=lambda k: -drops[k][1])[:2]
     top_s = "·".join(f"{mo_n(x)}월" for x in sorted(top))
