@@ -718,15 +718,19 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["sc_end"] = per.split("~")[1]
     T["sc1_msg"] = f"전력수요 2개 × 태양광 설비 2개 = <span class=\"em\">시나리오 4개</span>로 {tg}년까지 계산"
     DGs, mi = sc["dg"], sc["mins"]
-    mrows = [("① 전력수요", "총수요 × 연 증가율", f"<b>추세</b> +{f1(DGs['t']['rate'])}%/년", f"<b>전기본</b> +{f1(DGs['p']['rate'])}%/년"),
-             ("② 설비", "최근 3년 증가 속도", f"<b>Base</b> +{f1(sc['add'])}GW/년 → {round(sc['lin_end'][str(tg)])}GW",
-              f"<b>Upside</b> +{f1(sc['cagr'])}%/년 → {round(sc['cg_end'][str(tg)])}GW"),
+    bs = lambda s: f'<span class="bs">{s}</span>'
+    mrows = [("① 전력수요", "총수요 × 연 증가율",
+              f"<b>추세</b> +{f1(DGs['t']['rate'])}%/년" + bs("한전 판매량 '22~'25 연평균<br>(547.9 → 549.4TWh)"),
+              f"<b>전기본</b> +{f1(DGs['p']['rate'])}%/년" + bs("11차 전기본 최대수요 '23~'38 연평균<br>(98.3 → 129.3GW)")),
+             ("② 설비", "최근 3년 증가 속도",
+              f"<b>Base</b> +{f1(sc['add'])}GW/년 → {round(sc['lin_end'][str(tg)])}GW" + bs(f"'23~'25 연간 증가량 평균<br>({' · '.join(f1(x) for x in sc['adds'])}GW)"),
+              f"<b>Upside</b> +{f1(sc['cagr'])}%/년 → {round(sc['cg_end'][str(tg)])}GW" + bs(f"'22~'25 연평균 증가율<br>({f1(endv[0])} → {f1(endv[-1])}GW)")),
              ("③ 발전량", "올해 시간별 출력 × 설비 배율", f"올해의 <b>{f1(kl)}배</b>", f"올해의 <b>{f1(kc)}배</b>"),
-             ("④ 최소발전량", "올해 순부하 최저 30시간 실출력", f"원전 {f1(mi['nuc'])} · 석탄 {f1(mi['coal'])} · LNG {f1(mi['lng'])}GW <span class=\"mut\">(근거 별도 장)</span>", None),
+             ("④ 최소발전량", "올해 순부하 최저 30시간 실출력", f"원전 {f1(mi['nuc'])} · 석탄 {f1(mi['coal'])} · LNG {f1(mi['lng'])}GW <span class=\"mut\">(근거 다음 장)</span>", None),
              ("⑤ SMP", "순부하가 비슷한 올해 시간의 SMP", f"올해 재현 오차 <b>±{f1(sc['err'])}원</b>", None)]
     T["sc1_tbl"] = "".join(f'<tr><td class="rh">{a_}</td><td>{b_}</td>' + (f'<td>{c_}</td><td>{d_}</td>' if d_ else f'<td colspan="2">{c_}</td>') + "</tr>"
                            for a_, b_, c_, d_ in mrows)
-    T["sc1_note"] = "※ 수요: 한전 판매량('22~'25 CAGR), 11차 전기본('23→'38 최대수요) · 설비: 에너지공단·산업부·기후부 실적 · 날씨는 올해와 동일"
+    T["sc1_note"] = "※ 한전 판매량은 자가용 태양광 소비 제외 · 설비: 에너지공단·산업부·기후부 · 날씨는 올해와 동일"
     def sc0(h, lines, cls=""):
         return (f'<div class="card f1"><div class="ch"{' style="background:#6B7585"' if cls else ''}>{h}</div><div class="cb" style="gap:6px;padding-top:12px"><ul class="d">'
                 + "".join(f"<li>{x}</li>" for x in lines) + "</ul></div></div>")
