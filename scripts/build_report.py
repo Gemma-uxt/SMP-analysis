@@ -17,6 +17,7 @@ RAW, MAN, DOCS = Path("data/raw"), Path("data/manual"), Path("docs")
 TPL = Path("scripts/report_template.html")
 MINI_HTML = {}
 DGR = json.loads(Path("data/manual/demand_growth.json").read_text(encoding="utf-8"))
+SMPY = json.loads(Path("data/manual/smp_annual.json").read_text(encoding="utf-8"))
 STATE = DOCS / "data" / "reports.json"
 mean = st.mean
 DOW = "월화수목금토일"
@@ -437,7 +438,7 @@ def scenario(year, b):
     return dict(year=year, b=b, NMIN=round(NMIN / 1000, 1), err=round(err, 1), add=round(add, 2), cagr=round(cagr * 100, 1),
                 adds=[round(end[ys[i]] - end[ys[i - 1]], 1) for i in range(1, len(ys))], ys=ys, end={str(k): v for k, v in end.items()},
                 lin_end={str(y): round(lin_end(y), 1) for y in range(ys[0], target + 1)}, cg_end={str(y): round(cg_end(y), 1) for y in range(ys[0], target + 1)},
-                target=target, res=res, mins=mins, minr=minr, lowinfo=lowinfo, dg={k: dict(v, rate=round(v["rate"] * 100, 1)) for k, v in DGR.items() if not k.startswith("_")}, low_nl=[round(low[0]["nl"] / 1000, 1), round(low[-1]["nl"] / 1000, 1)],
+                target=target, res=res, mins=mins, minr=minr, lowinfo=lowinfo, smpy=SMPY["values"], dg={k: dict(v, rate=round(v["rate"] * 100, 1)) for k, v in DGR.items() if not k.startswith("_")}, low_nl=[round(low[0]["nl"] / 1000, 1), round(low[-1]["nl"] / 1000, 1)],
                 low_smp=[round(lowp[len(lowp) // 4]), round(lowp[len(lowp) * 3 // 4])],
                 act=round(mean(r["smp"] for r in R), 1), nlb=nlb)
 
@@ -759,7 +760,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["sc2_note"] = (f"※ 올해 순부하 최저 {li['n']}시간 평균(주말·공휴일 {li['hol']}시간, {li['h0']}~{li['h1']}시 · {tops} 등) · "
                      "석탄: 경부하기에도 비수도권 필수운전 약 13대 운전(산업부 2025 가을 대책)")
     T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
-    T["s9_note"] = "※ 연료비·원전·석탄·LNG 설비는 올해와 동일 · 출력제어는 상한값 · ESS 확대 미반영"
+    T["s9_note"] = (f"※ 2022~2025년: 한전 결산 연평균 SMP · {y0}년: 1.1~{per.split('~')[1]} 실적 · 이후: 시나리오(연료비·원전·석탄·LNG 설비는 올해와 동일)")
     # 6 종합
     T["s7_msg"] = note.get("s7_msg") or T["s1_msg"]
     rows = list(note.get("s7_rows_before", []))
