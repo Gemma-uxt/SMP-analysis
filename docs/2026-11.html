@@ -186,7 +186,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <h1>2026년 11월(1~22일)<br><span class="b">전력시장 검토 결과</span></h1>
     <div class="sub">핵심 요약 · 시간대별 SMP · 수요 변화 · 발전가격 stack 변화 · 원별 발전량 · 참고: 중장기 태양광 시나리오</div>
     <div class="pills"><span>잠정 · 11.1~11.22 실적</span><span>비교: 전년 11.1~11.22 · 2026년 10월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:02</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:04</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="발전가격 stack과 SMP 결정 일러스트">
@@ -220,7 +220,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
     <div class="sub">① 발전량 추정 방법 · ② SMP 영향 · ③ SMP가 조금만 내려가는 이유</div>
     <div class="pills"><span>기준: 올해 1.1~11.22 실적</span><span>2030년까지 · 시나리오 4개(수요 2 × 설비 2)</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:02</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:04</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="태양광 설비 증가와 SMP 일러스트">
@@ -601,7 +601,7 @@ ds.push({key:'act',type:'line',label:'SMP 실적',data:capY.map(y=>SC.smpy[y]??(
   ['t','p'].forEach(d=>{const k=c+'_'+d;
     ds.push({key:k,cap:c,dem:d,type:'line',label:`${CN[c][0]}·${DN2[d]} ${f1(P[k][TG].all)}`,data:capY.map(y=>y>Y0&&P[k][y]?P[k][y].all:(y===Y0?P[k][Y0].all:null)),borderColor:CN[c][1],backgroundColor:d==='p'?'#fff':CN[c][1],borderDash:d==='p'?[6,4]:[],borderWidth:2.5,pointRadius:4,yAxisID:'ySmp',order:1,spanGaps:true})})});
 const smpAll=Object.values(P).flatMap(o=>Object.values(o).map(x=>x.all)).concat(Object.values(SC.smpy));
-const sMin=Math.floor((Math.min(...smpAll)-2)/10)*10,sMax=Math.ceil((Math.max(...smpAll)+2)/10)*10;
+const sMin=Math.floor((Math.min(...smpAll)-2)/20)*20,sMax=Math.ceil((Math.max(...smpAll)+2)/20)*20;
 Chart.register({id:'capLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const x=ch.ctx,n=capY.length-1;x.save();x.font=F20;x.textBaseline='bottom';
   const vis=ch.data.datasets.map((d,i)=>d.type==='bar'&&ch.isDatasetVisible(i)?i:-1).filter(i=>i>0);
   ch.data.datasets.forEach((d,i)=>{if(d.type!=='bar'||!ch.isDatasetVisible(i))return;const m=ch.getDatasetMeta(i);
