@@ -168,6 +168,7 @@ section[data-sc] .t.mt td,section[data-sc] .t.mt th,section[data-sc] .note,secti
 section[data-sc] .k1,section[data-sc] .k3,section[data-sc] .k2 small,section[data-sc] .opts label,section[data-sc] .opts .og,section[data-sc] .pg,section[data-sc] .mut,
 .slide[data-mini] .kick,.slide[data-mini] .sub,.slide[data-mini] .pills span,.slide[data-mini] .note{font-size:20px!important;line-height:1.4}
 section[data-sc] .msg{font-size:26px}
+section[data-sc] .cb:has(.cnote){position:relative} .cnote{position:absolute;right:40px;top:40%;width:500px;font-size:20px;line-height:1.4;color:var(--ink2);background:rgba(255,255,255,.92);border-left:4px solid var(--ci);padding:8px 14px}
 section.appx{display:none} section.appx.on{display:flex;position:absolute;inset:0;z-index:20;flex-direction:column;background:#fff;overflow:hidden;box-shadow:0 2px 14px rgba(15,30,50,.18)}
 section[data-sc] .axback{font-size:20px;padding:4px 14px} a.ax{font-size:20px;font-weight:700;color:var(--ci);text-decoration:none;white-space:nowrap;margin-left:6px} a.ax:hover{text-decoration:underline}
 @media print{section.appx{display:none!important}} section[data-sc] .bs{display:block;font-size:20px;color:var(--ink3);line-height:1.3;margin-top:3px} section[data-sc] .ch.r{background:var(--slateD)} section[data-sc] .t.mt td,section[data-sc] .t.mt th{padding:7px 14px}
@@ -218,7 +219,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <img class="logo" src="img/logo.png" alt="삼천리">
     <div class="kick">사업기획팀 보고 · 전력시장 가격 모니터링</div>
     <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
-    <div class="sub">① 발전량 추정 방법 · ② SMP 영향 · ③ SMP가 조금만 내려가는 이유</div>
+    <div class="sub">① 태양광 발전량 추정 방법 · ② 추정 결과: SMP 영향</div>
     <div class="pills"><span>기준: 올해 1.1~{{sc_end}} 실적</span><span>2030년까지 · 시나리오 4개(수요 2 × 설비 2)</span></div>
     <div class="note" style="margin-top:16px">자동 작성 {{updated}}</div>
   </div>
@@ -392,29 +393,9 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
   <div class="bd">
     <div class="card f1"><div class="cb">
       <div class="cv"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 연평균 SMP: 2022~2025 실적과 2026~2030 시나리오"></canvas></div>
+      <div class="cnote">{{s9_why}}</div>
     </div></div>
     <div class="note">{{s9_note}}</div>
-  </div>
-  <div class="ft"><span class="pg"></span></div>
-</section>
-
-<!-- ===================== 참고 3. 이유 ===================== -->
-<section class="slide" data-sc>
-  <div class="hd"><span class="pno"><span class="rpt">참고 </span>3</span><span class="pt">SMP가 조금만 내려가는 이유</span></div>
-  <div class="msg">{{s8_msg}}</div>
-  <div class="bd">
-    <div class="chips" style="margin-top:4px"><span class="chip s">태양광 증가</span><span class="arw">→</span><span class="chip">순부하 감소</span><span class="arw">→</span><span class="chip">싼 발전기가 가격 결정</span><span class="arw">→</span><span class="chip">SMP 하락(바닥 있음)</span></div>
-    <div class="row f1">
-      <div class="card f1"><div class="cb">
-        <div class="sh"><span>순부하별 SMP</span><small>원/kWh</small></div>
-        <div class="cv"><canvas id="cNL" role="img" aria-label="순부하 구간별 올해 평균 SMP"></canvas></div>
-      </div></div>
-      <div class="card" style="width:470px"><div class="ch">왜 바닥이 생기나</div><div class="cb" style="gap:12px;padding-top:14px">
-        <ul class="d"><li>태양광이 밀어내는 건 <b>비싼 LNG</b>부터</li><li>남은 <b>석탄·열병합</b>이 가격을 정함</li><li>더 남으면 SMP가 아니라 <b>출력제어</b>로 해소</li></ul>
-        <div class="bx r" style="margin-top:auto">출력제어는 남는 몫을 <b>모두 태양광</b>이 줄인다고 본 <b>상한값</b></div>
-      </div></div>
-    </div>
-    <div class="note">※ 순부하 = 계통수요 − 시장 태양광·풍력 · 올해 실적, 5GW 구간 평균</div>
   </div>
   <div class="ft"><span class="pg"></span></div>
 </section>
@@ -580,9 +561,6 @@ $('tGen').innerHTML=gt('all');$('tGenD').innerHTML=gt('day');
 const SC=D.scen, P=SC.res, Y0=SC.year, TG=SC.target, YR=Object.keys(P.lin_t).map(Number);
 const lastA=Math.max(...Object.keys(SC.end).map(Number));
 const capY=Object.keys(SC.lin_end).map(Number).sort((a,b)=>a-b);
-mkS('cNL',{type:'bar',data:{labels:SC.nlb.map(b=>b[0].split('~')[0]),datasets:[{label:'평균 SMP',data:SC.nlb.map(b=>b[1]),backgroundColor:SC.nlb.map(b=>+b[0].split('~')[0]<50?C.ci:C.slate)}]},
- options:{layout:{padding:{top:22}},plugins:{legend:{display:false},vLabel:{on:true,size:20,fmt:v=>Math.round(v)},tooltip:{titleFont:{size:20},bodyFont:{size:20},callbacks:{title:c=>`순부하 ${c[0].label}~${+c[0].label+5}GW`,label:c=>`평균 SMP ${f1(c.raw)}원 · ${SC.nlb[c.dataIndex][2].toLocaleString()}시간`}}},
-  scales:{x:{grid:noGrid,ticks:{color:C.ink,font:{size:20}},title:{display:true,text:'순부하(GW, 5GW 구간 시작값)',font:{size:20}}},y:{min:0,max:200,grid,border:{display:false},ticks:{font:{size:20},stepSize:50}}}}});
 {const M=SC.minh,MR=SC.minr,F=[['원전','nuc',C.navy],['석탄','coal',C.slateD],['LNG','lng',C.ci]];
  mkS('cMin',{type:'bar',data:{labels:F.map(f=>f[0]),datasets:[{label:'평균',data:F.map(f=>M[f[1]]),backgroundColor:F.map(f=>f[2])}]},
   options:{indexAxis:'y',layout:{padding:{right:70}},plugins:{legend:{display:false},vLabel:{on:true,size:20,fmt:v=>f1(v)+'GW'},
