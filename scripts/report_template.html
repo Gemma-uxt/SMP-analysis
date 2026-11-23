@@ -369,11 +369,11 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
   <div class="bd">
     <div class="row f1">
       <div class="card f1"><div class="cb">
-        <div class="sh"><span>전기가 가장 남던 시간의 실제 출력</span><small>GW</small></div>
+        <div class="sh"><span>{{sc2_h}} 실제 출력</span><small>GW</small></div>
         <div class="cv"><canvas id="cMin" role="img" aria-label="순부하 최저 시간의 원전·석탄·LNG 출력"></canvas></div>
       </div></div>
-      <div class="card" style="width:600px"><div class="cb">
-        <table class="t mt"><thead><tr><th>원별</th><th class="r">평균</th><th class="r">범위</th><th>더 못 줄이는 이유</th></tr></thead><tbody>{{sc2_rows}}</tbody></table>
+      <div class="card" style="width:700px"><div class="cb">
+        <table class="t mt"><thead><tr><th>원별</th><th class="r" style="white-space:nowrap">{{sc2_h}}</th><th class="r" style="white-space:nowrap">최저 30시간</th><th>더 못 줄이는 이유</th></tr></thead><tbody>{{sc2_rows}}</tbody></table>
         <div class="bx r" style="margin-top:auto">{{sc2_box}}</div>
       </div></div>
     </div>
@@ -583,10 +583,10 @@ const capY=Object.keys(SC.lin_end).map(Number).sort((a,b)=>a-b);
 mkS('cNL',{type:'bar',data:{labels:SC.nlb.map(b=>b[0].split('~')[0]),datasets:[{label:'평균 SMP',data:SC.nlb.map(b=>b[1]),backgroundColor:SC.nlb.map(b=>+b[0].split('~')[0]<50?C.ci:C.slate)}]},
  options:{layout:{padding:{top:22}},plugins:{legend:{display:false},vLabel:{on:true,size:20,fmt:v=>Math.round(v)},tooltip:{titleFont:{size:20},bodyFont:{size:20},callbacks:{title:c=>`순부하 ${c[0].label}~${+c[0].label+5}GW`,label:c=>`평균 SMP ${f1(c.raw)}원 · ${SC.nlb[c.dataIndex][2].toLocaleString()}시간`}}},
   scales:{x:{grid:noGrid,ticks:{color:C.ink,font:{size:20}},title:{display:true,text:'순부하(GW, 5GW 구간 시작값)',font:{size:20}}},y:{min:0,max:200,grid,border:{display:false},ticks:{font:{size:20},stepSize:50}}}}});
-{const M=SC.mins,MR=SC.minr,F=[['원전','nuc',C.navy],['석탄','coal',C.slateD],['LNG','lng',C.ci]];
+{const M=SC.minh,MR=SC.minr,F=[['원전','nuc',C.navy],['석탄','coal',C.slateD],['LNG','lng',C.ci]];
  mkS('cMin',{type:'bar',data:{labels:F.map(f=>f[0]),datasets:[{label:'평균',data:F.map(f=>M[f[1]]),backgroundColor:F.map(f=>f[2])}]},
   options:{indexAxis:'y',layout:{padding:{right:70}},plugins:{legend:{display:false},vLabel:{on:true,size:20,fmt:v=>f1(v)+'GW'},
-   tooltip:{titleFont:{size:20},bodyFont:{size:20},callbacks:{label:c=>`평균 ${f1(c.raw)}GW (범위 ${MR[F[c.dataIndex][1]].map(f1).join('~')}GW)`}}},
+   tooltip:{titleFont:{size:20},bodyFont:{size:20},callbacks:{label:c=>`${f1(c.raw)}GW (최저 30시간 범위 ${MR[F[c.dataIndex][1]].map(f1).join('~')}GW)`}}},
    scales:{x:{min:0,max:20,grid,border:{display:false},ticks:{font:{size:20},stepSize:5}},y:{grid:noGrid,ticks:{color:C.ink,font:{size:20,weight:'700'}}}}}})}
 const pick=g=>[...document.querySelectorAll(`#scOpt input[data-g="${g}"]:checked`)].map(x=>x.value);
 const picked=()=>{const d=pick('d'),c=pick('c');return c.flatMap(a=>d.map(b=>a+'_'+b))};
