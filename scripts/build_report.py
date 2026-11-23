@@ -722,11 +722,28 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
              ("② 설비", "최근 3년 증가 속도", f"<b>Base</b> +{f1(sc['add'])}GW/년 → {round(sc['lin_end'][str(tg)])}GW",
               f"<b>Upside</b> +{f1(sc['cagr'])}%/년 → {round(sc['cg_end'][str(tg)])}GW"),
              ("③ 발전량", "올해 시간별 출력 × 설비 배율", f"올해의 <b>{f1(kl)}배</b>", f"올해의 <b>{f1(kc)}배</b>"),
-             ("④ 최소발전량", "올해 순부하 최저 30시간 실출력", f"원전 {f1(mi['nuc'])} · 석탄 {f1(mi['coal'])} · LNG {f1(mi['lng'])}GW <span class=\"mut\">(다음 장)</span>", None),
+             ("④ 최소발전량", "올해 순부하 최저 30시간 실출력", f"원전 {f1(mi['nuc'])} · 석탄 {f1(mi['coal'])} · LNG {f1(mi['lng'])}GW <span class=\"mut\">(근거 별도 장)</span>", None),
              ("⑤ SMP", "순부하가 비슷한 올해 시간의 SMP", f"올해 재현 오차 <b>±{f1(sc['err'])}원</b>", None)]
     T["sc1_tbl"] = "".join(f'<tr><td class="rh">{a_}</td><td>{b_}</td>' + (f'<td>{c_}</td><td>{d_}</td>' if d_ else f'<td colspan="2">{c_}</td>') + "</tr>"
                            for a_, b_, c_, d_ in mrows)
     T["sc1_note"] = "※ 수요: 한전 판매량('22~'25 CAGR), 11차 전기본('23→'38 최대수요) · 설비: 에너지공단·산업부·기후부 실적 · 날씨는 올해와 동일"
+    def sc0(h, lines, cls=""):
+        return (f'<div class="card f1"><div class="ch"{' style="background:#6B7585"' if cls else ''}>{h}</div><div class="cb" style="gap:6px;padding-top:12px"><ul class="d">'
+                + "".join(f"<li>{x}</li>" for x in lines) + "</ul></div></div>")
+    gov = CAP.get("gov_target_2030")
+    T["sc0_msg"] = "수요는 <b>최근 실적</b>과 <b>정부 계획</b>, 설비는 최근 3년 증가를 <b>양</b>으로 볼지 <b>비율</b>로 볼지로 나눔"
+    T["sc0_d"] = (sc0(f"수요 ① 추세 +{f1(DGs['t']['rate'])}%/년",
+                      ["한전 판매량 '22년 547.9 → '25년 549.4TWh의 3년 연평균", "산업용 감소·경기 둔화로 최근 수요 정체",
+                       "자가용 태양광 소비는 빠져 실제보다 낮을 수 있음"])
+                  + sc0(f"수요 ② 전기본 +{f1(DGs['p']['rate'])}%/년",
+                        ["11차 전기본 최대수요 '23년 98.3 → '38년 129.3GW의 연평균", "반도체·데이터센터·전기화 신규 수요 반영",
+                         "최대전력 증가율을 모든 시간에 똑같이 적용"], " r"))
+    T["sc0_c"] = (sc0(f"설비 ① Base +{f1(sc['add'])}GW/년",
+                      [f"'23~'25년 연간 증가량 {' · '.join(f1(x) for x in sc['adds'])}GW의 평균", f"매년 같은 양씩 증가 → {tg}년 {f1(sc['lin_end'][str(tg)])}GW"])
+                  + sc0(f"설비 ② Upside +{f1(sc['cagr'])}%/년",
+                        [f"'22~'25년 연평균 증가율({f1(endv[0])} → {f1(endv[-1])}GW)", f"설비가 늘수록 증가량도 커짐 → {tg}년 {f1(sc['cg_end'][str(tg)])}GW"]
+                        + ([f"정부 {tg}년 목표 {f1(gov)}GW보다는 낮음"] if gov else []), " r"))
+    T["sc0_note"] = "※ 수요: 한전 2024·2025 결산, 11차 전력수급기본계획(2025.2 확정) · 설비: 에너지공단 보급통계, 산업부(2025.1), 기후부(2026.8)"
     li = sc["lowinfo"]; mr = sc["minr"]
     tops = ", ".join(f"{int(d_[5:7])}/{int(d_[8:])}" for d_ in li["top"])
     T["sc2_msg"] = f"올해 전기가 가장 남던 시간에도 원전·석탄·LNG는 <span class=\"em\">약 {round(mi['nuc'] + mi['coal'] + mi['lng'])}GW</span>를 유지 → 최소발전량으로 설정"

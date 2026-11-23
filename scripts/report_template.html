@@ -167,7 +167,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 .slide[data-sc] .t.mt td,.slide[data-sc] .t.mt th,.slide[data-sc] .note,.slide[data-sc] .bx,.slide[data-sc] .chip,.slide[data-sc] .ch,
 .slide[data-sc] .k1,.slide[data-sc] .k3,.slide[data-sc] .k2 small,.slide[data-sc] .opts label,.slide[data-sc] .opts .og,.slide[data-sc] .pg,.slide[data-sc] .mut,
 .slide[data-mini] .kick,.slide[data-mini] .sub,.slide[data-mini] .pills span,.slide[data-mini] .note{font-size:20px!important;line-height:1.4}
-.slide[data-sc] .msg{font-size:26px} .slide[data-sc] .t.mt td,.slide[data-sc] .t.mt th{padding:13px 14px}
+.slide[data-sc] .msg{font-size:26px} .slide[data-sc] .ch.r{background:var(--slateD)} .slide[data-sc] .t.mt td,.slide[data-sc] .t.mt th{padding:13px 14px}
 .slide[data-sc] .imp .num{font-size:20px;min-width:30px;height:30px} .slide[data-sc] .mut{color:var(--ink3)}
 .slide[data-sc] #scK .kpi .k2{font-size:32px} .slide[data-sc] #scK .kpi{padding:6px 16px} .slide[data-sc] .opts input{width:20px;height:20px}
 </style>
@@ -215,7 +215,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
     <img class="logo" src="img/logo.png" alt="삼천리">
     <div class="kick">사업기획팀 보고 · 전력시장 가격 모니터링</div>
     <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
-    <div class="sub">① 발전량 추정 방법 · ② 최소발전량 근거 · ③ SMP 영향 · ④ SMP가 조금만 내려가는 이유</div>
+    <div class="sub">① 추정 방법 · ② 시나리오 근거 · ③ 최소발전량 근거 · ④ SMP 영향 · ⑤ SMP가 조금만 내려가는 이유</div>
     <div class="pills"><span>기준: 올해 1.1~{{sc_end}} 실적</span><span>2030년까지 · 시나리오 4개(수요 2 × 설비 2)</span></div>
     <div class="note" style="margin-top:16px">자동 작성 {{updated}}</div>
   </div>
@@ -359,9 +359,21 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
   <div class="ft"><span class="pg"></span></div>
 </section>
 
-<!-- ===================== 참고 2. 최소발전량 근거 ===================== -->
+<!-- ===================== 참고 2. 시나리오 설정 근거 ===================== -->
 <section class="slide" data-sc>
-  <div class="hd"><span class="pno"><span class="rpt">참고 </span>2</span><span class="pt">최소발전량 설정 근거</span></div>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>2</span><span class="pt">시나리오 설정 근거</span></div>
+  <div class="msg">{{sc0_msg}}</div>
+  <div class="bd">
+    <div class="row f1">{{sc0_d}}</div>
+    <div class="row f1">{{sc0_c}}</div>
+    <div class="note">{{sc0_note}}</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 참고 3. 최소발전량 근거 ===================== -->
+<section class="slide" data-sc>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>3</span><span class="pt">최소발전량 설정 근거</span></div>
   <div class="msg">{{sc2_msg}}</div>
   <div class="bd">
     <div class="row f1">
@@ -381,7 +393,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 
 <!-- ===================== 참고 3. 추정 결과 ===================== -->
 <section class="slide" data-sc>
-  <div class="hd"><span class="pno"><span class="rpt">참고 </span>3</span><span class="pt">추정 결과: SMP 영향<small>2030년</small></span>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>4</span><span class="pt">추정 결과: SMP 영향<small>2030년</small></span>
     <div class="opts" id="scOpt" role="group" aria-label="시나리오 선택">
       <span class="og">수요</span><label><input type="checkbox" data-g="d" value="t" checked>추세</label><label><input type="checkbox" data-g="d" value="p" checked>전기본</label>
       <span class="og">설비</span><label><input type="checkbox" data-g="c" value="lin" checked>Base</label><label><input type="checkbox" data-g="c" value="cg" checked>Upside</label></div></div>
@@ -404,7 +416,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 
 <!-- ===================== 참고 3. 이유 ===================== -->
 <section class="slide" data-sc>
-  <div class="hd"><span class="pno"><span class="rpt">참고 </span>4</span><span class="pt">SMP가 조금만 내려가는 이유</span></div>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>5</span><span class="pt">SMP가 조금만 내려가는 이유</span></div>
   <div class="msg">{{s8_msg}}</div>
   <div class="bd">
     <div class="chips" style="margin-top:4px"><span class="chip s">태양광 증가</span><span class="arw">→</span><span class="chip">순부하 감소</span><span class="arw">→</span><span class="chip">싼 발전기가 가격 결정</span><span class="arw">→</span><span class="chip">SMP 하락(바닥 있음)</span></div>
