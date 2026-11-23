@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>태양광 확대 시 SMP 전망</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* =====================================================================
+   삼천리 사업기획팀 보고서 표준 템플릿 v1 (2026.10)
+   - 슬라이드 1280 x 720, 흰 바탕 / 바깥 회색 배경 + 그림자
+   - 내용 박스 전부 직각, 본문 17px 이상, 헤드라인 24px
+   - 숫자 카운트업·요소 등장 애니메이션 없음
+   ※ 이 <style> 블록은 수정하지 말고, 슬라이드 내용만 바꿀 것
+   ===================================================================== */
+:root{
+  --ci:#00A6ED;--blue:#0096DC;--blue-ink:#0080C4;--navy:#0B3D66;
+  --soft:#E6F6FD;--tint:#F2F9FD;--gray-bg:#F1F5F9;
+  --slate:#B4BECB;--slate-d:#6F7D90;--slate-l:#EEF1F5;
+  --ink:#1A2230;--ink2:#3F4856;--ink3:#6B7585;--line:#D9DFE7;
+  --red:#D93A3F;--red-l:#FDECEC;--amber:#9A6412;--amber-l:#FFF4D6;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0}
+html,body{height:100%;background:#E5E7EB}
+body{font-family:"Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",sans-serif;color:var(--ink);
+  word-break:keep-all;overflow-wrap:break-word;line-break:strict;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;overflow:hidden}
+b,strong{font-weight:700}
+
+/* ---------- 덱 ---------- */
+#deck{position:fixed;inset:0;background:#E5E7EB}
+#stage{width:1280px;height:720px;position:absolute;left:50%;top:calc(50% - 28px);margin:-360px 0 0 -640px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:#fff;overflow:hidden;box-shadow:0 2px 14px rgba(15,30,50,.18);display:none;flex-direction:column}
+.slide.active{display:flex}
+
+/* ---------- 페이지 제목 + 헤드라인 박스 ---------- */
+.hd{display:flex;align-items:center;gap:14px;margin:30px 52px 0;padding-bottom:11px;border-bottom:2px solid var(--navy)}
+.pno{background:var(--navy);color:#fff;font-weight:700;font-size:20px;min-width:40px;height:38px;padding:0 9px;display:grid;place-items:center}
+.pt{font-size:30px;font-weight:800;color:var(--navy);letter-spacing:-.6px;line-height:normal}
+.pt small{font-size:19px;color:var(--ink3);font-weight:500;margin-left:10px;letter-spacing:0}
+.hd .lk{font-family:inherit;font-size:15px;font-weight:600;color:var(--navy);background:#fff;border:1.5px solid var(--navy);padding:4px 12px;cursor:pointer}
+.hd .lk:hover{background:var(--navy);color:#fff}
+.hd .mo{margin-left:auto;font-size:14px;color:var(--ink3)}
+.msg{margin:14px 52px 0;background:var(--gray-bg);border-left:6px solid var(--ci);padding:11px 22px;
+  font-size:24px;font-weight:700;color:var(--navy);letter-spacing:-.5px;line-height:1.38}
+.bd{flex:1;min-height:0;padding:0 52px;display:flex;flex-direction:column;gap:14px}
+.ft{margin-top:8px;padding:7px 52px 16px;display:flex;justify-content:flex-end;align-items:center;font-size:12px}
+.ft .pg{font-weight:700;color:#56657a;font-size:14px}
+
+/* ---------- 카드 ---------- */
+.card{background:#fff;border:1px solid var(--line);box-shadow:0 2px 6px rgba(20,50,90,.06);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.card .ch{background:var(--navy);color:#fff;text-align:center;font-size:18px;font-weight:700;padding:8px 12px}
+.card .ch.blue{background:var(--blue)} .card .ch.gray{background:var(--slate-d)}
+.card .cb{padding:12px 18px;flex:1;display:flex;flex-direction:column;gap:8px;min-height:0}
+.sh{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:19px;font-weight:700;color:var(--navy);line-height:1.3;border-left:4px solid var(--ci);padding-left:10px}
+.sh small{font-weight:400;color:var(--ink3);font-size:14px}
+.row{display:flex;gap:14px;min-height:0} .f1{flex:1;min-width:0}
+.tx{font-size:17px;line-height:1.5;color:var(--ink2)} .tx b{color:var(--ink)}
+.note{font-size:14.5px;color:var(--ink3);line-height:1.5}
+.em{color:var(--blue-ink);font-weight:700} .rd{color:var(--red);font-weight:700}
+ul.d{list-style:none}
+ul.d>li{position:relative;padding-left:16px;font-size:17px;line-height:1.5;margin-bottom:3px;color:var(--ink2)}
+ul.d>li b{color:var(--ink)}
+ul.d>li::before{content:"";position:absolute;left:2px;top:.64em;width:7px;height:7px;background:var(--ci)}
+.tag{display:inline-block;padding:2px 10px;font-size:15px;font-weight:700;white-space:nowrap}
+.t-neu{background:var(--slate-l);color:var(--ink2)} .t-up{background:var(--soft);color:var(--blue-ink)}
+.t-dn{background:var(--red-l);color:var(--red)} .t-unk{background:var(--amber-l);color:var(--amber)}
+.num{width:28px;height:28px;background:var(--navy);color:#fff;font-weight:900;font-size:17px;display:grid;place-items:center;flex:none}
+.num.r{background:var(--red)} .num.b{background:var(--blue)} .num.g{background:var(--slate-d)}
+.bx{padding:10px 16px;background:var(--tint);border-left:5px solid var(--ci);font-size:17px;line-height:1.5;color:var(--ink2)}
+.bx.r{background:var(--red-l);border-left-color:var(--red)}
+
+/* ---------- 표 ---------- */
+table.t{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:tabular-nums}
+.t th{background:var(--navy);color:#fff;font-weight:700;padding:7px 11px;text-align:left}
+.t th.r,.t td.r{text-align:right}
+.t td{padding:7px 11px;border-bottom:1px solid var(--line);vertical-align:middle;line-height:1.42;color:var(--ink2)}
+.t td.rh{font-weight:700;color:var(--ink)}
+.t tr.hl td{background:var(--soft);font-weight:700;color:var(--navy)}
+.t tbody tr:hover td{background:#EAF6FC}
+.t tr:last-child td{border-bottom:0}
+.up{color:var(--red)} .dn{color:var(--blue-ink)}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{padding:10px 16px;border-top:4px solid var(--ci)}
+.kpi .k1{font-size:16px;font-weight:700;color:var(--ink2)}
+.kpi .k2{font-size:38px;font-weight:900;letter-spacing:-1px;line-height:1.15;margin-top:2px;color:var(--ink)}
+.kpi .k2 small{font-size:18px;font-weight:700;margin-left:3px}
+.kpi .k2.b{color:var(--blue-ink)}
+.kpi .k3{font-size:14.5px;color:var(--ink3)}
+
+/* ---------- 차트 영역 ---------- */
+.cv{position:relative;flex:1;min-height:0} .cv canvas{position:absolute;inset:0}
+
+/* ---------- 흐름 칩 ---------- */
+.chips{display:flex;align-items:center;justify-content:center;gap:10px}
+.chip{padding:8px 16px;font-size:17px;font-weight:700;background:var(--slate-l);color:var(--ink)}
+.chip.s{background:var(--navy);color:#fff} .chip.e{background:var(--red-l);color:var(--red);border:1px solid #F0BCBE}
+.arw{color:var(--ci);font-size:22px;font-weight:700}
+
+/* ---------- 표지 ---------- */
+.cover{flex-direction:row}
+.cover .lt{width:55%;padding:0 0 0 76px;display:flex;flex-direction:column;justify-content:center;position:relative}
+.cover .logo{position:absolute;left:76px;top:52px;height:44px;width:auto}
+.cover .kick{font-size:20px;color:var(--ink2);font-weight:500}
+.cover h1{margin-top:14px;font-size:54px;line-height:1.2;font-weight:900;letter-spacing:-2px;color:var(--ink)}
+.cover h1 .b{color:var(--ci)}
+.cover .sub{margin-top:20px;font-size:18px;color:var(--ink3);line-height:1.6}
+.cover .pills{display:flex;gap:10px;margin-top:44px;flex-wrap:wrap}
+.cover .pills span{padding:10px 20px;font-size:16px;color:var(--ink2);border:1px solid var(--line);background:#fff}
+.cover .rt{flex:1;position:relative}
+.cover .rt svg{position:absolute;right:20px;top:50%;width:560px;transform:translateY(-50%)}
+.px{transition:transform .25s ease-out}
+.flow{stroke-dasharray:7 7;animation:flow 1.1s linear infinite} @keyframes flow{to{stroke-dashoffset:-28}}
+.pulse{animation:pulse 2.4s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.25);opacity:.15}}
+
+/* ---------- 내비게이션 ---------- */
+.nav{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;justify-content:center;gap:10px;background:#D5D9E0;font-size:14px;z-index:20}
+.nav button,.nav select{background:#fff;color:#14202e;border:1px solid #AEB6C2;padding:6px 14px;font:inherit;font-size:14px;cursor:pointer}
+.nav select{min-width:330px}
+.nav button:hover{background:var(--ci);color:#fff}
+#print{background:var(--ci);color:#fff;border-color:var(--ci);font-weight:700}
+
+/* ---------- 인쇄 / PDF (1280 x 720) ---------- */
+@page{size:1280px 720px;margin:0}
+@media print{
+  html,body{overflow:visible;height:auto;background:#fff}
+  #deck{position:static} #stage{transform:none!important;width:auto;height:auto;position:static;margin:0}
+  .slide{display:flex!important;position:relative;inset:auto;width:1280px;height:720px;box-shadow:none;break-after:page}
+  .slide:last-child{break-after:auto}
+  .nav{display:none!important} .flow,.pulse{animation:none}
+}
+</style>
+<style>
+/* ---------- 이 보고서 전용 보완 (표준 템플릿 위에 추가) ---------- */
+a.lk{text-decoration:none;white-space:nowrap}
+.chip{white-space:nowrap}
+.t.c th{padding:6px 11px} .t.c td{padding:5px 11px}
+.t th.c{text-align:center}
+.t td.tl{white-space:normal}
+.t td{white-space:nowrap}
+ul.d.two{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
+select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:1px solid var(--slate);background:#fff;padding:3px 8px;cursor:pointer}
+.opts{margin-left:auto;display:flex;gap:8px}
+.opts label{display:flex;align-items:center;gap:7px;border:1.5px solid var(--line);padding:4px 12px;cursor:pointer;font-weight:700;font-size:15px;color:var(--ink3)}
+.opts input{width:17px;height:17px;accent-color:var(--navy);margin:0}
+.opts label:has(input:checked){border-color:var(--navy);color:var(--navy);background:var(--tint)}
+.band{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:10px;margin:6px 0}
+.band b{font-size:16px}
+.band .bar{display:flex;height:28px;gap:2px}
+.band .bar div{color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.blg{display:flex;gap:14px;font-size:14.5px;color:var(--ink2);margin-top:2px}
+.blg i{display:inline-block;width:11px;height:11px;margin-right:5px}
+#scK .kpi{padding:8px 16px} #scK .kpi .k2{font-size:34px}
+.t.pre td{font-size:17px;padding:11px 14px;white-space:normal} .t.pre td.rh{width:150px;color:var(--navy)}
+.sc1 .tx{font-size:17px} .sc1 .big{font-size:30px;font-weight:800;color:var(--navy);line-height:1.15} .sc1 .big small{font-size:16px;font-weight:700;margin-left:3px}
+.imp{display:flex;gap:10px;align-items:flex-start} .imp .tx{font-size:17px}
+.nav select{min-width:300px}
+</style>
+</head>
+<body data-mini="1">
+<div id="deck"><div id="stage">
+
+<!-- ===================== [표지] ===================== -->
+<section class="slide cover" data-main>
+  <div class="lt">
+    <img class="logo" src="img/logo.png" alt="삼천리">
+    <div class="kick">사업기획팀 보고 · 전력시장 가격 모니터링</div>
+    <h1>2026년 11월(1~22일)<br><span class="b">전력시장 검토 결과</span></h1>
+    <div class="sub">핵심 요약 · 시간대별 SMP · 수요 변화 · 발전가격 stack 변화 · 원별 발전량 · 참고: 중장기 태양광 시나리오</div>
+    <div class="pills"><span>잠정 · 11.1~11.22 실적</span><span>비교: 전년 11.1~11.22 · 2026년 10월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 10:13</div>
+  </div>
+  <div class="rt">
+    <svg viewBox="0 0 560 520" aria-label="발전가격 stack과 SMP 결정 일러스트">
+      <g fill="none" stroke="#E6EAEF" stroke-width="1.5"><circle cx="300" cy="260" r="250"/><circle cx="300" cy="260" r="190"/><circle cx="300" cy="260" r="130"/></g>
+      <g class="px" data-depth="6">
+        <line x1="70" y1="440" x2="520" y2="440" stroke="#B9C3CF" stroke-width="2"/><line x1="70" y1="440" x2="70" y2="120" stroke="#B9C3CF" stroke-width="2"/>
+        <g fill="#B4BECB"><rect x="80" y="400" width="70" height="40"/><rect x="152" y="380" width="80" height="60"/><rect x="234" y="350" width="60" height="90"/></g>
+        <g fill="#9AA6B6"><rect x="296" y="300" width="40" height="140"/><rect x="338" y="240" width="50" height="200"/></g>
+        <rect x="390" y="190" width="56" height="250" fill="#00A6ED"/><rect x="448" y="160" width="56" height="280" fill="#9AA6B6"/>
+      </g>
+      <g class="px" data-depth="10">
+        <line x1="70" y1="190" x2="520" y2="190" stroke="#D93A3F" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="80" y="180" font-size="16" font-weight="700" fill="#D93A3F">SMP</text>
+        <path d="M418 440 L418 205" stroke="#0B3D66" stroke-width="3" fill="none" class="flow"/>
+        <circle cx="418" cy="190" r="10" fill="#0B3D66"/><circle cx="418" cy="190" r="30" fill="#00A6ED" opacity=".14" class="pulse"/>
+      </g>
+      <g class="px" data-depth="14">
+        <rect x="290" y="56" width="230" height="78" fill="#fff" stroke="#D9DFE7"/><rect x="290" y="56" width="230" height="5" fill="#00A6ED"/>
+        <text x="405" y="90" text-anchor="middle" font-size="16" font-weight="700" fill="#0B3D66">가격결정 발전기</text>
+        <text x="405" y="116" text-anchor="middle" font-size="14" fill="#6B7585">수요와 공급곡선이 만나는 곳</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ===================== [미니 리포트 표지] ===================== -->
+<section class="slide cover" data-mini>
+  <div class="lt">
+    <img class="logo" src="img/logo.png" alt="삼천리">
+    <div class="kick">사업기획팀 보고 · 전력시장 가격 모니터링</div>
+    <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
+    <div class="sub">① 태양광 발전량 추정 방법 · ② 추정 결과(SMP 영향) · ③ SMP가 조금만 내려가는 이유</div>
+    <div class="pills"><span>기준: 올해 1.1~11.22 실적</span><span>2030년까지 · 시나리오 2개</span></div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 10:13</div>
+  </div>
+  <div class="rt">
+    <svg viewBox="0 0 560 520" aria-label="태양광 설비 증가와 SMP 일러스트">
+      <g fill="none" stroke="#E6EAEF" stroke-width="1.5"><circle cx="300" cy="260" r="250"/><circle cx="300" cy="260" r="190"/><circle cx="300" cy="260" r="130"/></g>
+      <g class="px" data-depth="14"><circle cx="440" cy="110" r="38" fill="#F0B400" opacity=".9"/><circle cx="440" cy="110" r="60" fill="#F0B400" opacity=".14" class="pulse"/></g>
+      <g class="px" data-depth="6">
+        <line x1="70" y1="440" x2="520" y2="440" stroke="#B9C3CF" stroke-width="2"/>
+        <g fill="#B4BECB"><rect x="90" y="370" width="46" height="70"/><rect x="150" y="350" width="46" height="90"/><rect x="210" y="328" width="46" height="112"/></g>
+        <g fill="#00A6ED"><rect x="270" y="300" width="46" height="140"/><rect x="330" y="270" width="46" height="170"/><rect x="390" y="236" width="46" height="204"/><rect x="450" y="200" width="46" height="240"/></g>
+      </g>
+      <g class="px" data-depth="10">
+        <path d="M100 205 L170 208 L230 212 L290 222 L350 230 L410 236 L470 240" fill="none" stroke="#0B3D66" stroke-width="3" class="flow"/>
+        <circle cx="470" cy="240" r="7" fill="#0B3D66"/>
+        <text x="100" y="190" font-size="16" font-weight="700" fill="#0B3D66">SMP</text>
+        <text x="270" y="470" font-size="14" fill="#6B7585">태양광 설비</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ===================== 1. 핵심 요약 ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">1</span><span class="pt">핵심 요약<small>11.1~11.22 잠정 · 전년 같은 기간 대비</small></span></div>
+  <div class="msg">11월 평일 SMP <span class="em">137.9원</span>(전년 +36.5%, 10월 대비 +24.1%) — SMP/LNG 비율 10.4 → 12.6로 상승</div>
+  <div class="bd">
+    <div class="kpis" id="kpis"></div>
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>월별 SMP/LNG 비율</span><small>평일 SMP(원/kWh) ÷ LNG(원/㎥) × 100 · 11월은 1~22일</small></div>
+        <div class="cv"><canvas id="cRatio" role="img" aria-label="월별 SMP/LNG 비율"></canvas></div>
+      </div></div>
+      <div class="card" style="width:470px"><div class="cb">
+        <div class="sh"><span>월별 전년 대비 증감률</span><small>%</small></div>
+        <table class="t c" id="tMon"></table>
+      </div></div>
+    </div>
+    <div class="note">※ 평일 = 주말·공휴일 제외(11월 15일, 전년 15일) · SMP: KPX 육지 시간별 · LNG: 한국가스공사 발전용(일반발전) · 계통수요 피크는 평일 시간 평균 최대</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 2. 시간대별 SMP ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">2</span><span class="pt">11월 SMP 상승은 어디서 왔나<small>평일 시간대별 SMP</small></span>
+    <a class="lk" href="hourly.html#2026-11">참조 · 시간별 SMP와 가격결정 연료 ▶</a></div>
+  <div class="msg">상승은 <span class="em">평일 낮(9~17시)</span>에 집중 — 낮 SMP 112.9 → <span class="rd">167.4원</span>, 새벽(1~7시)은 101.4 → 101.4원</div>
+  <div class="bd">
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>평일 시간대별 평균 SMP</span><small>원/kWh</small></div>
+        <div class="cv"><canvas id="cProf" role="img" aria-label="평일 시간대별 SMP 비교"></canvas></div>
+      </div></div>
+      <div class="card" style="width:500px"><div class="cb">
+        <div class="sh"><span>평일 SMP 가격대별 시간 비중</span><small>% · 전체 평일 시간</small></div>
+        <div id="bands"></div>
+        <ul class="d" style="margin-top:6px"><li>160원 이상 시간: 10월 <b>2.7%</b> → 11월 <b class="rd">42.8%</b> (전년 11월 0.0%)</li><li>11월 평일 9~19시 SMP는 절반 이상의 날에 160원 이상</li><li>160원 이상은 주로 LNG 평균요금제 복합 발전가격대(발전가격 순위표 기준)</li></ul>
+      </div></div>
+    </div>
+    <div class="note">※ 낮 = 9~17시(10~17시 SMP 8개 시간) · 새벽 = 1~7시 · 시간마다 어느 발전기·연료가 가격을 정했는지는 위 '참조' 페이지에서 확인</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 3-1. 수요 변화 ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">3-1</span><span class="pt">원인 ① 수요 변화<small>평일 · 10월 → 11월</small></span></div>
+  <div class="msg">평일 낮 총수요 71.6 → 74.0GW, 태양광이 17.6 → 12.7GW로 줄어 <span class="em">계통수요 +5.8GW</span> (59.2 → 65.0GW)</div>
+  <div class="bd">
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>평일 시간대별 <span id="demName">총수요</span></span>
+          <select class="opt" id="demSel" aria-label="수요 종류"><option value="tot">총수요</option><option value="dem">계통수요</option><option value="net">총수요 − 모든 태양광</option></select></div>
+        <div class="cv"><canvas id="cDem" role="img" aria-label="평일 시간대별 수요"></canvas></div>
+        <div class="note" id="demDesc"></div>
+      </div></div>
+      <div class="card" style="width:520px"><div class="cb">
+        <div class="sh"><span>낮(10~16시) 수요·태양광·날씨</span><small>평일 평균</small></div>
+        <table class="t c" id="tDem"></table>
+        <ul class="d"><li>낮 시간 태양광(시장+시장 외) <b>17.6 → 12.7GW</b>, 그만큼 계통이 더 공급</li><li>저녁(17~19시) 계통수요 70.6 → 73.0GW</li></ul>
+      </div></div>
+    </div>
+    <div class="note">※ 계통수요 = KPX 실시간 수급현황 발전원 합 · 시장 외 태양광 = 한전 PPA·자가용(BTM, KPX 추정) · 날씨: Open-Meteo, 기온은 서울, 일사량은 목포·전주·서산·안동 평균</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 3-2. 발전가격 stack ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">3-2</span><span class="pt">원인 ② 발전가격 stack 변화<small>평일 · 10월 → 11월</small></span></div>
+  <div class="msg">직도입 LNG 등 <span class="rd">7기(5.7GW)</span>의 발전가격이 160원 이상으로 뛰어 160원 미만 공급 79.4 → <span class="em">73.7GW</span></div>
+  <div class="bd">
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>발전가격 stack (공급곡선)</span><small>싼 발전기부터 쌓은 입찰량</small></div>
+        <div class="cv"><canvas id="cStack" role="img" aria-label="전월과 이번 달 발전가격 stack 비교"></canvas></div>
+      </div></div>
+      <div class="card" style="width:540px"><div class="cb">
+        <div class="sh"><span>160원 선을 넘어 올라간 발전기</span><small>10월 → 11월 · 원/kWh</small></div>
+        <table class="t c" id="tMov"></table>
+      </div></div>
+    </div>
+    <ul class="d two"><li>110원 미만 공급은 72.3 → 71.3GW로 비슷 — 달라진 것은 <b>110~160원 구간</b>(7.1 → 2.4GW)</li><li>10월엔 낮 시간 가격을 105~113원대 직도입 LNG가 정했지만, 11월엔 이들이 160원 위로 올라가 <b>164~180원대 평균요금제 LNG</b>가 정함</li><li>그 결과 같은 수요에서도 11월 SMP가 10월보다 8~35원 높음</li><li>LNG가 가격을 정한 비중은 64.5% → 63.7%로 비슷 — 더 비싼 LNG가 결정</li></ul>
+    <div class="note">※ 발전가격 stack: 사업기획팀 발전가격 순위표(육지·입찰량, 정비·고장 미반영)를 5원 구간으로 누적 · 점 = 160원 미만 누적 입찰량 · 같은 수요 SMP 차이: 평일 시간, 5GW 수요 구간별 평균 · 연료별 결정: EPSIS 연료원별 SMP 결정 횟수(11.1~11.22)</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 3-3. 원별 발전량 ===================== -->
+<section class="slide">
+  <div class="hd"><span class="pno">3-3</span><span class="pt">원별 발전량<small>평일 평균 출력 · GW</small></span></div>
+  <div class="msg">전년 11월보다 원전·석탄 <span class="em">+6.8GW</span>, LNG <span class="dn">▼4.4GW</span> (평일 평균 출력)</div>
+  <div class="bd">
+    <div class="row">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>하루 전체</span><small>GW · 평일</small></div>
+        <table class="t" id="tGen"></table>
+      </div></div>
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>낮 10~16시</span><small>GW · 평일</small></div>
+        <table class="t" id="tGenD"></table>
+      </div></div>
+    </div>
+    <ul class="d"><li>10월 → 11월 낮 출력: LNG 13.5 → 16.1GW(+2.7), 석탄 19.1 → 23.7GW(+4.5), 태양광 17.6 → 12.7GW</li><li>LNG 단가 전년 대비 +64.7% — LNG가 가격을 정하는 시간의 SMP 수준을 좌우</li></ul>
+    <div class="note" style="margin-top:auto">※ KPX 실시간 수급현황(5분) 시간 평균 · 빠진 시간은 공공데이터포털 발전원별 발전량(5분)으로 보완 · 태양광 계 = 시장 + 시장 외</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 참고 1. 태양광 발전량 추정 방법 ===================== -->
+<section class="slide" data-sc>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>1</span><span class="pt">태양광 발전량 추정 방법</span></div>
+  <div class="msg">최근 3년 증가 속도가 이어지면 2030년 태양광 설비 <span class="em">47~58GW</span>, 발전량은 올해의 <span class="em">1.4~1.7배</span></div>
+  <div class="bd">
+    <div class="row f1"><div class="card f1 sc1"><div class="ch">① 설비 전망</div><div class="cb" style="gap:10px"><div class="big">47.1~58.3<small>GW · 2030년 말</small></div><ul class="d"><li>실적 2022년 21.0 → 2025년 30.8GW (연 +2.9 · 3.2 · 3.7GW)</li><li><b>기본</b>: 매년 +3.3GW씩</li><li><b>상단</b>: 매년 +13.6%씩</li></ul></div></div><div class="card f1 sc1"><div class="ch">② 발전량 추정</div><div class="cb" style="gap:10px"><div class="big">1.4~1.7<small>배 · 2030년, 올해 대비</small></div><ul class="d"><li>올해 <b>시간별 태양광 출력</b>(시장·PPA·자가용)에 설비 증가 배율을 곱함</li><li>날씨(일사량)는 올해와 같다고 봄</li></ul></div></div><div class="card f1 sc1"><div class="ch">③ SMP 계산</div><div class="cb" style="gap:10px"><div class="big">±0.9<small>원 · 올해 재현 오차</small></div><ul class="d"><li>늘어난 태양광만큼 <b>순부하</b>(계통수요 − 태양광·풍력)가 줄어듦</li><li>같은 달, 순부하가 비슷했던 올해 40개 시간의 <b>평균 SMP</b> 적용</li></ul></div></div></div>
+    <div class="bx"><b class="em">고정 조건:</b> 수요·연료비·원전·석탄·LNG 설비는 올해와 동일 &nbsp;·&nbsp; <b class="rd">출력제어:</b> 순부하가 올해 최저(26.1GW) 밑으로 가는 만큼 태양광이 줄인다고 계산(상한값)</div>
+    <div class="note">※ 설비: 2023년 말 23.9GW(한국에너지공단 보급통계), 2024년 말 27.1GW(산업통상자원부 2025.1.31 보도자료, 잠정), 2025년 말 30.8GW(기후에너지환경부 12차 전기본 재생에너지 보급전망 토론회 2026.8.26), 2022년 말은 2023·2024년 신규 설치량(2.9·3.16GW)으로 역산 · 정부 2030년 목표 86.7GW는 상단보다 커서 목표대로면 영향이 더 큼</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 참고 2. 추정 결과 ===================== -->
+<section class="slide" data-sc>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>2</span><span class="pt">추정 결과: SMP 영향<small>2030년</small></span>
+    <div class="opts" id="scOpt" role="group" aria-label="시나리오 선택">
+      <label><input type="checkbox" value="lin" checked>기본 (+3.3GW/년)</label>
+      <label><input type="checkbox" value="cg" checked>상단 (+13.6%/년)</label></div></div>
+  <div class="msg">태양광이 2030년 47~58GW로 늘어도 연평균 SMP는 <span class="em">3~5원 하락</span>에 그침</div>
+  <div class="bd">
+    <div class="kpis" id="scK"></div>
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>태양광 설비와 SMP</span><small>위: 연말 설비(GW) · 아래: SMP(원/kWh)</small></div>
+        <div class="cv"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 SMP 시나리오"></canvas></div>
+      </div></div>
+      <div class="card" style="width:400px"><div class="ch">시사점</div><div class="cb" style="gap:14px;padding-top:16px">
+        <div class="imp"><span class="num">1</span><div class="tx">SMP 하락 효과는 <b>제한적</b> — 주로 낮 시간</div></div><div class="imp"><span class="num">2</span><div class="tx">SMP <b>바닥 93~102원</b> (석탄·열병합 가격대)</div></div><div class="imp"><span class="num r">3</span><div class="tx">더 큰 변화는 <b>출력제어 증가</b> — 연 115~287시간</div></div>
+      </div></div>
+    </div>
+    <div class="note">※ 올해(1.1~11.22)의 날씨·수요·연료비가 반복된다고 가정 · 출력제어는 상한값(참고 2) · ESS·원전·석탄 설비 변화 미반영</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+<!-- ===================== 참고 3. 이유 ===================== -->
+<section class="slide" data-sc>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>3</span><span class="pt">SMP가 조금만 내려가는 이유</span></div>
+  <div class="msg">순부하가 50GW 아래로 내려가도 SMP는 <span class="em">93~102원</span>에서 멈춤 — 석탄·열병합이 바닥을 받침</div>
+  <div class="bd">
+    <div class="chips" style="margin-top:4px"><span class="chip s">태양광 증가</span><span class="arw">→</span><span class="chip">순부하 감소</span><span class="arw">→</span><span class="chip">더 싼 발전기가 가격 결정</span><span class="arw">→</span><span class="chip">SMP 하락 (바닥 있음)</span><span class="arw">+</span><span class="chip e">남는 태양광은 출력제어</span></div>
+    <div class="row f1">
+      <div class="card f1"><div class="cb">
+        <div class="sh"><span>순부하별 SMP</span><small>올해 실적 · 5GW 구간 평균 · 원/kWh</small></div>
+        <div class="cv"><canvas id="cNL" role="img" aria-label="순부하 구간별 올해 평균 SMP"></canvas></div>
+      </div></div>
+      <div class="card" style="width:460px"><div class="ch">남는 전력은 왜 태양광이 줄이나?</div><div class="cb" style="gap:10px;padding-top:14px">
+        <ul class="d"><li>석탄·LNG가 <b>먼저 줄지만 0까지는 못 줄임</b> — 계통 안정용 필수운전·최소출력·겨울 열병합</li><li>낮에 세우면 <b>해 진 뒤 저녁 피크</b>에 다시 켜기 어려워 일부는 켜 둠</li><li>그래도 남는 몫은 <b>원전·태양광·풍력</b>이 줄임 = 출력제어 (태양광은 대부분 보상 없음)</li></ul>
+        <div class="bx r" style="margin-top:auto">이 분석: 순부하가 올해 최저(26.1GW, 석탄·LNG·원전이 더 못 줄인 수준) 밑으로 가는 만큼 <b>태양광이 줄인다고</b> 계산 → <b>상한값</b></div>
+      </div></div>
+    </div>
+    <div class="note">※ 순부하 = 계통수요 − 시장 태양광·풍력(석탄·LNG·원전 등이 채울 몫) · 출력제어 순서: 산업통상자원부 '가을철 전력계통 안정화 대책'(2023.9.14)</div>
+  </div>
+  <div class="ft"><span class="pg"></span></div>
+</section>
+
+</div></div>
+
+<nav class="nav">
+  <button type="button" onclick="location.href='index.html'">◀ 월간 검토 결과</button>
+  <button id="prev" type="button">◀ 이전</button>
+  <select id="sel" aria-label="슬라이드 선택"></select>
+  <button id="next" type="button">다음 ▶</button>
+  <button id="print" type="button">PDF 만들기</button>
+</nav>
+
+<script>
+/* 미니 리포트(태양광 시나리오만)·월간 보고서 구분 */
+{const MINI=document.body.dataset.mini==='1';
+ document.querySelectorAll('#stage > section').forEach(s=>{const keep=MINI?(s.hasAttribute('data-sc')||s.hasAttribute('data-mini')):!s.hasAttribute('data-mini');
+   if(!keep){s.classList.remove('slide');s.style.display='none'}});
+ if(MINI){document.querySelectorAll('.rpt').forEach(e=>e.remove());document.querySelector('.nav button').textContent='◀ 대시보드'}}
+/* ===== 덱 제어 (수정 불필요) ===== */
+const slides=[...document.querySelectorAll('.slide')],stage=document.getElementById('stage'),sel=document.getElementById('sel');
+let cur=0;
+function fit(){stage.style.transform=`scale(${Math.min((innerWidth-40)/1280,(innerHeight-56-24)/720)})`}
+addEventListener('resize',fit);fit();
+slides.forEach((s,i)=>{const no=s.querySelector('.pno'),pt=s.querySelector('.pt');
+  sel.add(new Option(i===0?'표지':((no?no.textContent+'. ':'')+(pt?pt.textContent:'')).trim(),i));
+  const pg=s.querySelector('.pg');if(pg)pg.textContent=(i+1)+' / '+slides.length});
+function go(n){n=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>s.classList.toggle('active',i===n));cur=n;sel.value=n;
+  history.replaceState(null,'','#'+(n+1));(chartsBySlide[n]||[]).forEach(c=>{c.reset();c.update()})}
+function goTo(t){if(typeof t==='number')return go(t);const i=slides.findIndex(s=>s.id===t);if(i>=0)go(i)}
+sel.onchange=()=>go(+sel.value);
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+document.getElementById('print').onclick=()=>window.print();
+addEventListener('keydown',e=>{if(e.target.tagName==='SELECT')return;
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}});
+document.addEventListener('mousemove',e=>{const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
+  slides[cur].querySelectorAll('.px').forEach(p=>{const d=+p.dataset.depth||6;p.style.transform=`translate(${x*d}px,${y*d}px)`})});
+
+/* ===== Chart.js 공통 설정 (수정 불필요) ===== */
+const C={blue:'#0096DC',ci:'#00A6ED',navy:'#0B3D66',slate:'#B4BECB',slateD:'#6F7D90',red:'#D93A3F',amber:'#F2A33A',ink:'#1A2230',ink2:'#3F4856',line:'#E6EAEF'};
+const FONT='"Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",sans-serif';
+Chart.defaults.font.family=FONT;Chart.defaults.font.size=14;Chart.defaults.color=C.ink2;
+Chart.defaults.animation.duration=900;Chart.defaults.maintainAspectRatio=false;
+Chart.defaults.plugins.legend.labels.boxWidth=12;Chart.defaults.plugins.legend.labels.boxHeight=12;
+Chart.defaults.plugins.tooltip.backgroundColor='rgba(26,34,48,.92)';Chart.defaults.plugins.tooltip.padding=10;Chart.defaults.plugins.tooltip.cornerRadius=0;
+/* 값 레이블 플러그인: options.plugins.vLabel={on:true, only:[데이터셋 번호], below:[선 그래프 번호], fmt:v=>.., size:15} */
+const vLabel={id:'vLabel',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const ctx=ch.ctx;ctx.save();
+  ch.data.datasets.forEach((ds,di)=>{if(o.only&&!o.only.includes(di))return;const m=ch.getDatasetMeta(di);if(m.hidden)return;const below=o.below&&o.below.includes(di);
+    m.data.forEach((el,i)=>{const v=ds.data[i];if(v==null)return;const txt=o.fmt?o.fmt(v,di,i):v;const p=el.tooltipPosition();
+      ctx.font=`700 ${o.size||15}px ${FONT}`;ctx.fillStyle=typeof o.color==='function'?o.color(v,di,i):(o.color||C.ink);
+      if(below){ctx.textAlign='center';ctx.textBaseline='top';ctx.lineWidth=4;ctx.strokeStyle='#fff';ctx.strokeText(txt,p.x,el.y+8);ctx.fillStyle=C.slateD;ctx.fillText(txt,p.x,el.y+8)}
+      else if(ch.options.indexAxis==='y'){ctx.textBaseline='middle';ctx.textAlign=v<0?'right':'left';ctx.fillText(txt,el.x+(v<0?-6:6),el.y)}
+      else{ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(txt,p.x,el.y-4)}})});ctx.restore()}};
+Chart.register(vLabel);
+const chartsBySlide={};
+function mk(id,cfg){const el=document.getElementById(id),idx=slides.indexOf(el.closest('.slide'));const c=new Chart(el,cfg);(chartsBySlide[idx]=chartsBySlide[idx]||[]).push(c);return c}
+const grid={color:C.line,drawTicks:false},noGrid={display:false};
+
+/* 슬라이드 선택 목록: 제목의 보조 설명(small)은 빼고 표시 */
+slides.forEach((s,i)=>{const pt=s.querySelector('.pt');if(i&&pt){const no=s.querySelector('.pno');sel.options[i].text=((no?no.textContent+'. ':'')+pt.firstChild.textContent).trim()}});
+
+/* ===== 보고서 데이터·차트 ===== */
+{
+const D={"lab":{"cur":"2026년 11월","prev":"2026년 10월","ly":"2025년 11월","curS":"26년 11월","prevS":"26년 10월","lyS":"25년 11월","curT":"26.11","prevT":"26.10","lyT":"25.11","curM":"11월","prevM":"10월"},"monthly":[{"m":1,"partial":false,"smp":107.1,"smp0":123.9,"gas":696.42,"gas0":855.08,"lngYoY":-18.6,"smpYoY":-13.6,"ratio":15.4,"ratio0":14.5},{"m":2,"partial":false,"smp":111.5,"smp0":119.3,"gas":707.38,"gas0":818.03,"lngYoY":-13.5,"smpYoY":-6.5,"ratio":15.8,"ratio0":14.6},{"m":3,"partial":false,"smp":110.0,"smp0":115.8,"gas":684.67,"gas0":807.81,"lngYoY":-15.2,"smpYoY":-5.0,"ratio":16.1,"ratio0":14.3},{"m":4,"partial":false,"smp":119.2,"smp0":129.3,"gas":712.77,"gas0":849.61,"lngYoY":-16.1,"smpYoY":-7.8,"ratio":16.7,"ratio0":15.2},{"m":5,"partial":false,"smp":124.0,"smp0":127.1,"gas":766.3,"gas0":796.83,"lngYoY":-3.8,"smpYoY":-2.5,"ratio":16.2,"ratio0":16.0},{"m":6,"partial":false,"smp":117.0,"smp0":119.9,"gas":826.81,"gas0":771.91,"lngYoY":7.1,"smpYoY":-2.4,"ratio":14.2,"ratio0":15.5},{"m":7,"partial":false,"smp":134.0,"smp0":120.0,"gas":875.56,"gas0":727.59,"lngYoY":20.3,"smpYoY":11.7,"ratio":15.3,"ratio0":16.5},{"m":8,"partial":false,"smp":148.5,"smp0":116.5,"gas":969.61,"gas0":719.31,"lngYoY":34.8,"smpYoY":27.5,"ratio":15.3,"ratio0":16.2},{"m":9,"partial":false,"smp":123.4,"smp0":113.4,"gas":1058.34,"gas0":762.78,"lngYoY":38.7,"smpYoY":8.9,"ratio":11.7,"ratio0":14.9},{"m":10,"partial":false,"smp":111.2,"smp0":110.5,"gas":1070.33,"gas0":722.53,"lngYoY":48.1,"smpYoY":0.5,"ratio":10.4,"ratio0":15.3},{"m":11,"partial":true,"smp":137.9,"smp0":101.0,"gas":1097.46,"gas0":666.39,"lngYoY":64.7,"smpYoY":36.5,"ratio":12.6,"ratio0":15.2}],"prof":{"cur":[105.3,98.2,96.7,96.5,97.1,100.4,115.4,131.4,166.4,170.6,169.0,166.8,156.2,171.9,172.4,168.0,164.5,156.8,154.4,147.9,138.3,127.4,121.5,117.7],"prev":[104.9,99.2,98.7,98.2,99.7,102.6,106.9,109.5,110.4,108.6,113.0,113.0,109.5,112.9,113.0,114.1,119.3,121.3,124.6,122.8,120.1,118.0,114.7,112.8],"ly":[94.6,79.4,77.8,76.4,76.8,81.0,96.4,104.8,115.8,113.0,114.4,108.7,104.6,107.1,108.1,113.5,109.9,110.9,111.5,109.0,105.5,103.0,101.6,100.9]},"band":{"cur":[27.8,29.4,42.8],"prev":[68.5,28.7,2.7],"ly":[74.2,25.8,0.0]},"dprof":{"cur":{"dem":[59.7,57.3,56.0,55.4,55.8,57.7,61.5,66.5,69.8,68.9,66.4,63.3,59.6,62.9,65.6,68.6,72.0,73.6,73.4,72.2,69.9,67.5,66.7,65.0],"tot":[59.7,57.3,56.0,55.4,55.8,57.8,61.6,66.7,71.9,74.2,74.7,73.7,70.9,74.0,75.2,75.4,75.1,74.1,73.4,72.2,69.9,67.5,66.7,65.0],"net":[59.7,57.3,56.0,55.4,55.8,57.6,61.4,66.4,68.9,66.5,62.9,59.0,54.8,58.3,61.7,65.8,70.8,73.5,73.4,72.2,69.9,67.5,66.7,65.0]},"prev":{"dem":[57.5,55.4,54.2,53.5,53.7,55.3,58.5,61.9,63.1,62.0,59.6,56.9,53.5,57.4,60.9,64.1,68.6,71.0,72.0,70.6,68.2,65.7,64.3,62.1],"tot":[57.5,55.4,54.2,53.5,53.7,55.4,58.6,62.8,67.4,70.3,71.2,70.9,68.5,72.1,73.9,74.0,74.4,72.7,72.1,70.6,68.2,65.7,64.3,62.1],"net":[57.5,55.4,54.2,53.5,53.7,55.3,58.5,61.6,61.4,58.5,54.6,51.0,47.2,51.3,55.6,60.0,66.2,70.4,72.0,70.6,68.2,65.7,64.3,62.1]}},"gen":{"cur":{"all":{"nuc":19.75,"coal":25.08,"lng":14.66,"oil":0.2,"hydro":0.21,"pump":-0.17,"renew":3.01,"wind":0.88,"sunM":1.2,"hid":2.87,"ess":-0.01,"dem":64.8},"day":{"nuc":19.74,"coal":23.69,"lng":16.15,"oil":0.19,"hydro":0.26,"pump":-1.75,"renew":2.62,"wind":0.79,"sunM":3.75,"hid":8.96,"ess":-0.42,"dem":65.04}},"prev":{"all":{"nuc":20.04,"coal":22.12,"lng":13.58,"oil":0.17,"hydro":0.22,"pump":-0.16,"renew":2.93,"wind":0.62,"sunM":1.74,"hid":4.14,"ess":-0.0,"dem":61.25},"day":{"nuc":20.01,"coal":19.15,"lng":13.49,"oil":0.16,"hydro":0.23,"pump":-1.45,"renew":2.46,"wind":0.46,"sunM":5.2,"hid":12.36,"ess":-0.49,"dem":59.21}},"ly":{"all":{"nuc":17.56,"coal":20.47,"lng":19.03,"oil":0.23,"hydro":0.31,"pump":-0.16,"renew":3.43,"wind":0.57,"sunM":1.45,"hid":3.48,"ess":0.0,"dem":62.89},"day":{"nuc":17.55,"coal":19.3,"lng":18.01,"oil":0.18,"hydro":0.31,"pump":-1.23,"renew":3.04,"wind":0.49,"sunM":4.57,"hid":11.01,"ess":0.0,"dem":62.22}}},"wx":{"cur":{"tmp":6.9,"rad":8.9,"sun":6.0},"prev":{"tmp":15.4,"rad":13.9,"sun":8.5}},"ms":{"cur":{"stack":[[0,0.0],[5,0.0],[10,25.95],[15,26.59],[20,26.59],[25,26.59],[30,26.59],[35,26.59],[40,26.59],[45,26.59],[50,26.59],[55,26.59],[60,26.59],[65,26.77],[70,27.26],[75,27.26],[80,30.96],[85,33.86],[90,41.14],[95,56.66],[100,62.94],[105,70.13],[110,71.26],[115,71.72],[120,72.33],[125,72.44],[130,72.44],[135,73.09],[140,73.09],[145,73.09],[150,73.68],[155,73.68],[160,73.68],[165,75.27],[170,78.67],[175,87.43],[180,91.82],[185,99.9],[190,107.62],[195,110.43],[200,110.43],[205,111.48],[210,111.71],[215,112.27],[220,114.48],[225,115.19],[230,115.19],[235,115.35],[240,116.52],[245,116.64],[250,117.67],[255,117.67],[260,117.86],[265,117.91],[270,117.91],[275,117.91],[280,117.91],[285,117.91],[290,117.91],[295,117.97],[300,117.97]],"below160":73.7,"below110":71.3,"total":119.2,"movers":[["여주복합CC","LNG 직도입",106,164,1098],["신평택복합1CC","LNG 직도입",139,248,1030],["파주문산복합1CC","LNG 직도입",105,172,973],["파주문산복합2CC","LNG 직도입",105,173,942],["광양복합1CC","LNG 직도입",43,239,591],["광양복합2CC","LNG 직도입",43,235,581],["안양열병합2-2CC","LNG 평균",159,164,495]]},"prev":{"stack":[[0,0.0],[5,0.0],[10,25.95],[15,26.59],[20,26.59],[25,26.59],[30,26.59],[35,26.59],[40,26.59],[45,27.77],[50,27.77],[55,27.77],[60,27.77],[65,27.77],[70,28.07],[75,28.07],[80,28.07],[85,31.11],[90,38.84],[95,54.17],[100,64.6],[105,67.52],[110,72.29],[115,73.72],[120,74.44],[125,74.44],[130,76.61],[135,77.26],[140,78.29],[145,78.29],[150,78.88],[155,78.88],[160,79.37],[165,81.28],[170,89.17],[175,93.43],[180,100.96],[185,109.8],[190,111.52],[195,112.1],[200,113.15],[205,113.37],[210,114.06],[215,116.15],[220,117.37],[225,117.37],[230,117.53],[235,117.65],[240,117.65],[245,117.65],[250,117.65],[255,117.81],[260,117.89],[265,117.89],[270,117.89],[275,117.92],[280,117.92],[285,117.92],[290,118.42],[295,119.0],[300,119.02]],"below160":79.4,"below110":72.3,"total":119.2,"movers":[["안양열병합2-1CC","LNG 직도입","110원대","210원대",518]]}},"bins":{"cur":{"50":[110.3,24],"55":[112.7,77],"60":[134.8,61],"65":[144.3,93],"70":[161.3,91],"75":[164.5,10]},"prev":{"45":[99.5,12],"50":[101.7,86],"55":[104.4,124],"60":[112.2,107],"65":[119.6,83],"70":[126.0,65]},"ly":{"50":[86.4,30],"55":[89.5,86],"60":[107.0,95],"65":[107.3,97],"70":[111.0,41]}},"fuel":{"cur":{"LNG":335,"석탄":189,"기타":2},"prev":{"LNG":480,"석탄":264},"ly":{"LNG":421,"석탄":104}},"peak":{"cur":78.8,"ly":76.2,"curD":"2026-11-20"},"daily":[["2026-09-01",190.8,true,23.1,{"u":[["영월복합CC","LNG 평균",5],["화성열병합CC","LNG 평균",2],["신인천복합3CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":16,"석탄":8}}],["2026-09-02",191.4,true,24.3,{"u":[["GS당진복합1CC","LNG 개별",4],["영월복합CC","LNG 평균",3],["울산복합3CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":16,"석탄":8}}],["2026-09-03",191.0,true,25.2,{"u":[["GS당진복합1CC","LNG 개별",5],["영월복합CC","LNG 평균",2],["화성열병합CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":15,"석탄":9}}],["2026-09-04",188.6,true,23.7,{"u":[["GS당진복합1CC","LNG 개별",6],["울산복합2CC","LNG 평균",1],["GS당진복합2CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":15,"석탄":9}}],["2026-09-05",95.5,false,22.8,{"u":[["태안#7","석탄",3],["당진#1","석탄",1],["태안#8","석탄",1]],"f":{"석탄":8},"a":{"LNG":7,"석탄":17}}],["2026-09-06",79.2,false,22.9,{"u":[["태안#10","석탄",2],["한빛#2","원자력",1],["광양복합1CC","LNG 직도입",1]],"f":{"석탄":6,"원자력":1,"LNG":1},"a":{"LNG":5,"원자력":1,"석탄":18}}],["2026-09-07",170.2,true,23.3,{"u":[["포스코에너지복합9CC","LNG 평균",7],["인천복합3CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":15,"석탄":9}}],["2026-09-08",163.3,true,24.1,{"u":[["명품오산열병합CC","LNG 평균",3],["포천천연복합1CC","LNG 평균",2],["포스코에너지복합9CC","LNG 평균",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":14,"석탄":10}}],["2026-09-09",105.8,true,21.4,{"u":[["파주문산복합2CC","LNG 직도입",2],["삼천포#5","석탄",2],["위례열병합","LNG 직도입",1]],"f":{"LNG":5,"석탄":3},"a":{"LNG":11,"석탄":13}}],["2026-09-10",114.5,true,18.8,{"u":[["삼천포#3","석탄",3],["안양열병합2-2CC","LNG 평균",1],["율촌복합1CC","LNG 개별",1]],"f":{"석탄":5,"LNG":3},"a":{"LNG":12,"석탄":12}}],["2026-09-11",137.6,true,20.0,{"u":[["서울복합1CC","LNG 평균",3],["신서천#1","석탄",1],["삼천포#4","석탄",1]],"f":{"LNG":5,"석탄":3},"a":{"LNG":13,"석탄":11}}],["2026-09-12",102.5,false,20.6,{"u":[["보령#5","석탄",5],["태안#3","석탄",1],["하동#1","석탄",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":12,"석탄":12}}],["2026-09-13",103.5,false,21.3,{"u":[["보령#5","석탄",5],["보령#7","석탄",1],["당진#4","석탄",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":9,"석탄":15}}],["2026-09-14",107.2,true,22.1,{"u":[["삼천포#3","석탄",3],["삼천포#5","석탄",2],["율촌복합1CC","LNG 개별",2]],"f":{"석탄":5,"LNG":3},"a":{"LNG":8,"석탄":16}}],["2026-09-15",96.2,true,20.7,{"u":[["태안#2","석탄",3],["태안#5","석탄",2],["보령#7","석탄",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":6,"석탄":18}}],["2026-09-16",97.2,true,21.7,{"u":[["태안#5","석탄",5],["당진#3","석탄",1],["삼천포#5","석탄",1]],"f":{"석탄":8},"a":{"LNG":2,"석탄":22}}],["2026-09-17",101.0,true,22.6,{"u":[["태안#5","석탄",5],["삼천포#5","석탄",1],["신평택복합1CC","LNG 직도입",1]],"f":{"석탄":6,"LNG":2},"a":{"LNG":6,"석탄":18}}],["2026-09-18",103.9,true,23.5,{"u":[["태안#5","석탄",3],["파주문산복합2CC","LNG 직도입",1],["삼천포#5","석탄",1]],"f":{"석탄":5,"LNG":3},"a":{"LNG":9,"석탄":15}}],["2026-09-19",98.8,false,24.0,{"u":[["태안#2","석탄",2],["태안#3","석탄",1],["하동#3","석탄",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":11,"석탄":13}}],["2026-09-20",84.2,false,23.6,{"u":[["보령#3","석탄",2],["태안#10","석탄",1],["한울#1","원자력",1]],"f":{"석탄":7,"원자력":1},"a":{"LNG":7,"원자력":1,"석탄":16}}],["2026-09-21",114.8,true,24.2,{"u":[["삼천포#5","석탄",2],["파주문산복합1CC","LNG 직도입",1],["김포열병합CC","LNG 개별",1]],"f":{"LNG":4,"석탄":4},"a":{"LNG":14,"석탄":10}}],["2026-09-22",103.6,true,24.1,{"u":[["태안#5","석탄",3],["삼천포#3","석탄",2],["태안#7","석탄",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":5,"석탄":19}}],["2026-09-23",103.4,true,23.9,{"u":[["김포열병합CC","LNG 개별",2],["보령#5","석탄",2],["파주문산복합2CC","LNG 직도입",2]],"f":{"LNG":6,"석탄":2},"a":{"LNG":19,"석탄":5}}],["2026-09-24",95.5,false,22.7,{"u":[["태안#10","석탄",2],["태안#9","석탄",2],["당진#3","석탄",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":9,"석탄":15}}],["2026-09-25",69.3,false,20.2,{"u":[["통영천연가스","LNG 직도입",2],["한울#1","원자력",2],["내포열병합CC","LNG 개별",1]],"f":{"LNG":5,"원자력":2,"석탄":1},"a":{"LNG":8,"원자력":1,"석탄":14}}],["2026-09-26",85.6,false,21.1,{"u":[["태안#7","석탄",3],["한울#1","원자력",1],["보령#7","석탄",1]],"f":{"석탄":7,"원자력":1},"a":{"LNG":6,"원자력":1,"석탄":17}}],["2026-09-27",72.5,false,21.4,{"u":[["한울#1","원자력",2],["태안#7","석탄",2],["내포열병합CC","LNG 개별",1]],"f":{"석탄":5,"원자력":2,"LNG":1},"a":{"LNG":4,"원자력":1,"석탄":18}}],["2026-09-28",110.8,false,20.3,{"u":[["삼천포#3","석탄",5],["구미복합","LNG 개별",1],["신평택복합1CC","LNG 직도입",1]],"f":{"석탄":5,"LNG":3},"a":{"LNG":10,"석탄":14}}],["2026-09-29",107.6,true,20.5,{"u":[["삼천포#3","석탄",5],["삼천포#4","석탄",2],["구미복합","LNG 개별",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":8,"석탄":16}}],["2026-09-30",108.5,true,21.4,{"u":[["삼천포#4","석탄",3],["율촌복합1CC","LNG 개별",2],["구미복합","LNG 개별",1]],"f":{"석탄":5,"LNG":3},"a":{"LNG":12,"석탄":12}}],["2026-10-01",106.6,true,17.7,{"u":[["파주문산복합1CC","LNG 직도입",4],["삼천포#4","석탄",1],["구미복합","LNG 개별",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":13,"석탄":11}}],["2026-10-02",107.3,true,16.1,{"u":[["파주문산복합1CC","LNG 직도입",7],["삼천포#3","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":13,"석탄":11}}],["2026-10-03",105.5,false,16.9,{"u":[["파주문산복합1CC","LNG 직도입",6],["삼척화력#1","석탄",1],["파주문산복합2CC","LNG 직도입",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":21,"석탄":3}}],["2026-10-04",101.5,false,19.1,{"u":[["파주문산복합1CC","LNG 직도입",4],["태안#9","석탄",2],["하동#5","석탄",1]],"f":{"LNG":5,"석탄":3},"a":{"LNG":15,"석탄":9}}],["2026-10-05",106.9,false,16.4,{"u":[["파주문산복합1CC","LNG 직도입",7],["파주문산복합2CC","LNG 직도입",1]],"f":{"LNG":8},"a":{"LNG":20,"석탄":4}}],["2026-10-06",104.7,true,15.8,{"u":[["파주문산복합1CC","LNG 직도입",5],["하동#3","석탄",1],["율촌복합1CC","LNG 개별",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":18,"석탄":6}}],["2026-10-07",107.8,true,16.9,{"u":[["파주문산복합1CC","LNG 직도입",6],["여주복합CC","LNG 직도입",1],["여수#2","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":18,"석탄":6}}],["2026-10-08",107.7,true,17.4,{"u":[["파주문산복합1CC","LNG 직도입",6],["파주문산복합2CC","LNG 직도입",1],["여수#2","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":19,"석탄":5}}],["2026-10-09",106.4,false,18.4,{"u":[["파주문산복합1CC","LNG 직도입",7],["삼천포#4","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":13,"석탄":11}}],["2026-10-10",106.5,false,19.2,{"u":[["파주문산복합1CC","LNG 직도입",7],["여주복합CC","LNG 직도입",1]],"f":{"LNG":8},"a":{"LNG":20,"석탄":4}}],["2026-10-11",107.0,false,21.5,{"u":[["파주문산복합1CC","LNG 직도입",7],["삼천포#5","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":13,"석탄":11}}],["2026-10-12",109.3,true,22.7,{"u":[["위례열병합","LNG 직도입",7],["여수#2","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":14,"석탄":10}}],["2026-10-13",168.7,true,18.2,{"u":[["부산복합4CC","LNG 평균",6],["세종천연가스CC","LNG 평균",2]],"f":{"LNG":8},"a":{"LNG":14,"석탄":10}}],["2026-10-14",107.3,true,14.2,{"u":[["파주문산복합1CC","LNG 직도입",7],["여수#1","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":19,"석탄":5}}],["2026-10-15",109.2,true,15.7,{"u":[["파주문산복합1CC","LNG 직도입",4],["파주문산복합2CC","LNG 직도입",2],["구미복합","LNG 개별",1]],"f":{"LNG":8},"a":{"LNG":21,"석탄":3}}],["2026-10-16",108.0,true,17.6,{"u":[["파주문산복합1CC","LNG 직도입",3],["여주복합CC","LNG 직도입",2],["율촌복합1CC","LNG 개별",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":12,"석탄":12}}],["2026-10-17",106.7,false,18.4,{"u":[["파주문산복합1CC","LNG 직도입",7],["삼천포#3","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":14,"석탄":10}}],["2026-10-18",107.6,false,18.0,{"u":[["파주문산복합1CC","LNG 직도입",4],["파주문산복합2CC","LNG 직도입",1],["여주복합CC","LNG 직도입",1]],"f":{"LNG":8},"a":{"LNG":17,"석탄":7}}],["2026-10-19",107.8,true,13.8,{"u":[["삼천포#6","석탄",5],["구미복합","LNG 개별",2],["여수#2","석탄",1]],"f":{"석탄":6,"LNG":2},"a":{"LNG":7,"석탄":17}}],["2026-10-20",107.8,true,15.5,{"u":[["위례열병합","LNG 직도입",6],["삼천포#3","석탄",1],["청주열병합","LNG 개별",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":18,"석탄":6}}],["2026-10-21",106.2,true,12.5,{"u":[["위례열병합","LNG 직도입",2],["파주문산복합1CC","LNG 직도입",2],["삼천포#4","석탄",1]],"f":{"LNG":6,"석탄":2},"a":{"LNG":11,"석탄":13}}],["2026-10-22",109.9,true,8.8,{"u":[["파주문산복합1CC","LNG 직도입",6],["율촌복합1CC","LNG 개별",1],["세종천연가스CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":21,"석탄":3}}],["2026-10-23",107.2,true,12.5,{"u":[["파주문산복합1CC","LNG 직도입",3],["삼천포#6","석탄",2],["구미복합","LNG 개별",1]],"f":{"LNG":6,"석탄":2},"a":{"LNG":19,"석탄":5}}],["2026-10-24",107.0,false,14.7,{"u":[["위례열병합","LNG 직도입",8]],"f":{"LNG":8},"a":{"LNG":19,"석탄":5}}],["2026-10-25",105.2,false,16.6,{"u":[["파주문산복합1CC","LNG 직도입",3],["율촌복합1CC","LNG 개별",2],["대산복합#1","LNG 개별",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":14,"석탄":10}}],["2026-10-26",111.4,true,15.6,{"u":[["삼천포#5","석탄",6],["울산GPS복합(LNG)","LNG 직도입",1],["GS당진복합4CC","LNG 직도입",1]],"f":{"석탄":6,"LNG":2},"a":{"LNG":8,"석탄":16}}],["2026-10-27",107.8,true,11.2,{"u":[["파주문산복합1CC","LNG 직도입",6],["삼천포#5","석탄",1],["여수#2","석탄",1]],"f":{"LNG":6,"석탄":2},"a":{"LNG":13,"석탄":11}}],["2026-10-28",106.8,true,6.9,{"u":[["삼천포#5","석탄",7],["청주열병합","LNG 개별",1]],"f":{"석탄":7,"LNG":1},"a":{"LNG":12,"석탄":12}}],["2026-10-29",152.2,true,7.4,{"u":[["대구그린파워CC","LNG 평균",6],["위례열병합","LNG 직도입",2]],"f":{"LNG":8},"a":{"LNG":18,"석탄":6}}],["2026-10-30",104.9,true,11.3,{"u":[["파주문산복합1CC","LNG 직도입",3],["구미복합","LNG 개별",2],["당진#2","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":15,"석탄":9}}],["2026-10-31",104.6,false,10.9,{"u":[["파주문산복합1CC","LNG 직도입",4],["삼천포#5","석탄",3],["하동#7","석탄",1]],"f":{"LNG":4,"석탄":4},"a":{"LNG":11,"석탄":13}}],["2026-11-01",118.4,false,7.9,{"u":[["양산열병합CC","LNG 개별",5],["여수#2","석탄",2],["태안#5","석탄",1]],"f":{"LNG":5,"석탄":3},"a":{"LNG":12,"석탄":12}}],["2026-11-02",139.0,true,9.7,{"u":[["평택복합2CC","LNG 평균",4],["여수#2","석탄",1],["하동#3","석탄",1]],"f":{"석탄":4,"LNG":4},"a":{"LNG":12,"석탄":12}}],["2026-11-03",151.8,true,9.6,{"u":[["안양열병합2-2CC","LNG 평균",5],["포스코에너지복합7CC","LNG 평균",1],["위례열병합","LNG 직도입",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":18,"석탄":6}}],["2026-11-04",174.1,true,10.9,{"u":[["대구그린파워CC","LNG 평균",5],["포스코에너지복합8CC","LNG 평균",1],["춘천열병합CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":17,"석탄":7}}],["2026-11-05",173.2,true,12.2,{"u":[["부산복합4CC","LNG 평균",7],["양산열병합CC","LNG 개별",1]],"f":{"LNG":8},"a":{"LNG":15,"석탄":9}}],["2026-11-06",162.4,true,6.9,{"u":[["대구그린파워CC","LNG 평균",7],["신서천#1","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":17,"석탄":7}}],["2026-11-07",122.6,false,3.8,{"u":[["양산열병합CC","LNG 개별",6],["태안#10","석탄",1],["신세종열병합","LNG 직도입",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":19,"석탄":5}}],["2026-11-08",119.4,false,4.1,{"u":[["양산열병합CC","LNG 개별",5],["위례열병합","LNG 직도입",2],["대산복합#1","LNG 개별",1]],"f":{"LNG":8},"a":{"LNG":17,"석탄":7}}],["2026-11-09",175.7,true,7.2,{"u":[["포천천연복합1CC","LNG 평균",3],["파주문산복합1CC","LNG 직도입",1],["대구그린파워CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":18,"석탄":6}}],["2026-11-10",158.6,true,5.4,{"u":[["안양열병합2-2CC","LNG 평균",4],["평택복합2CC","LNG 평균",2],["태안#5","석탄",1]],"f":{"LNG":7,"석탄":1},"a":{"LNG":18,"석탄":6}}],["2026-11-11",165.0,true,7.9,{"u":[["안양열병합2-2CC","LNG 평균",5],["포스코에너지복합7CC","LNG 평균",1],["여주복합CC","LNG 직도입",1]],"f":{"LNG":8},"a":{"LNG":19,"석탄":5}}],["2026-11-12",179.6,true,9.1,{"u":[["부산복합4CC","LNG 평균",3],["하남열병합CC","LNG 평균",2],["명품오산열병합CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":21,"석탄":3}}],["2026-11-13",177.8,true,11.5,{"u":[["동탄열병합#1CC","LNG 평균",7],["부산복합4CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":17,"석탄":7}}],["2026-11-14",105.1,false,10.3,{"u":[["하동#3","석탄",5],["여수#1","석탄",1],["양산열병합CC","LNG 개별",1]],"f":{"석탄":6,"LNG":2},"a":{"LNG":4,"석탄":20}}],["2026-11-15",82.9,false,11.3,{"u":[["당진#3","석탄",2],["태안#4","석탄",1],["신서천#1","석탄",1]],"f":{"석탄":7,"원자력":1},"a":{"LNG":1,"원자력":1,"석탄":22}}],["2026-11-16",166.8,true,10.8,{"u":[["포스코에너지복합9CC","LNG 평균",5],["안양열병합2-2CC","LNG 평균",2],["포스코에너지복합7CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":14,"석탄":10}}],["2026-11-17",165.5,true,10.8,{"u":[["영남파워#1CC","LNG 평균",3],["포스코에너지복합7CC","LNG 평균",2],["안양열병합2-2CC","LNG 평균",2]],"f":{"LNG":8},"a":{"LNG":13,"석탄":11}}],["2026-11-18",172.6,true,5.7,{"u":[["대구그린파워CC","LNG 평균",7],["평택복합2CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":15,"석탄":9}}],["2026-11-19",174.5,true,0.8,{"u":[["대구그린파워CC","LNG 평균",3],["신인천복합2CC","LNG 평균",1],["포스코에너지복합9CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":16,"석탄":8}}],["2026-11-20",175.0,true,-1.3,{"u":[["부산복합4CC","LNG 평균",3],["대구그린파워CC","LNG 평균",2],["울산복합4CC","LNG 평균",1]],"f":{"LNG":8},"a":{"LNG":17,"석탄":7}}],["2026-11-21",91.7,false,-1.8,{"u":[["영흥#3","석탄",2],["양산열병합CC","LNG 개별",2],["태안#2","석탄",1]],"f":{"석탄":4,"LNG":3,"원자력":1},"a":{"LNG":18,"석탄":5}}],["2026-11-22",73.5,false,0.0,{"u":[["한울#2","원자력",2],["당진#2","석탄",1],["당진#3","석탄",1]],"f":{"석탄":6,"원자력":2},"a":{"LNG":17,"원자력":1,"석탄":5}}]],"monthStart":"2026-11-01","scen":{"year":2026,"b":"2026-11-22","NMIN":26.1,"err":0.9,"add":3.27,"cagr":13.6,"adds":[2.9,3.2,3.7],"ys":[2022,2023,2024,2025],"end":{"2022":21.0,"2023":23.9,"2024":27.1,"2025":30.8},"lin_end":{"2022":21.0,"2023":23.9,"2024":27.1,"2025":30.8,"2026":34.1,"2027":37.3,"2028":40.6,"2029":43.9,"2030":47.1},"cg_end":{"2022":21.0,"2023":23.9,"2024":27.1,"2025":30.8,"2026":35.0,"2027":39.8,"2028":45.2,"2029":51.3,"2030":58.3},"target":2030,"res":{"lin":{"2026":{"k":1.0,"all":117.5,"day":115.7,"all0":117.5,"curH":0,"curTWh":0.0,"hiH":761,"solTWh":47.6,"curPct":0.0,"mon":{"2026-01":102.6,"2026-02":107.3,"2026-03":108.8,"2026-04":117.4,"2026-05":119.5,"2026-06":112.2,"2026-07":130.2,"2026-08":144.1,"2026-09":114.6,"2026-10":109.1,"2026-11":129.2},"prof":[113.2,108.3,106.1,105.3,105.4,106.6,110.3,115.8,119.5,118.1,115.4,112.2,109.1,112.4,115.1,118.8,124.9,130.5,133.8,134.3,132.3,128.0,124.9,120.6]},"2027":{"k":1.101,"all":116.8,"day":113.7,"all0":116.7,"curH":5,"curTWh":0.01,"hiH":716,"solTWh":52.4,"curPct":0.0,"mon":{"2026-01":102.3,"2026-02":107.0,"2026-03":108.2,"2026-04":116.6,"2026-05":118.6,"2026-06":111.4,"2026-07":129.1,"2026-08":142.6,"2026-09":113.7,"2026-10":108.6,"2026-11":128.5},"prof":[113.2,108.3,106.1,105.3,105.4,106.6,110.2,115.4,118.7,116.7,113.3,109.9,106.3,110.2,112.8,116.7,123.6,130.0,133.6,134.3,132.3,128.0,124.9,120.6]},"2028":{"k":1.203,"all":116.0,"day":111.7,"all0":115.7,"curH":26,"curTWh":0.04,"hiH":659,"solTWh":57.3,"curPct":0.1,"mon":{"2026-01":102.1,"2026-02":106.8,"2026-03":107.6,"2026-04":116.0,"2026-05":117.7,"2026-06":110.6,"2026-07":127.9,"2026-08":140.9,"2026-09":112.8,"2026-10":108.2,"2026-11":127.7},"prof":[113.2,108.3,106.1,105.3,105.4,106.6,110.1,115.0,117.7,115.4,111.1,107.8,103.6,107.7,111.2,114.8,122.0,129.5,133.4,134.3,132.3,128.0,124.9,120.6]},"2029":{"k":1.304,"all":115.3,"day":109.7,"all0":114.5,"curH":68,"curTWh":0.17,"hiH":610,"solTWh":62.1,"curPct":0.3,"mon":{"2026-01":101.6,"2026-02":106.3,"2026-03":107.2,"2026-04":115.2,"2026-05":117.0,"2026-06":109.8,"2026-07":126.7,"2026-08":139.4,"2026-09":112.1,"2026-10":107.9,"2026-11":127.0},"prof":[113.2,108.3,106.1,105.3,105.3,106.6,110.1,114.7,116.8,113.9,109.2,105.6,101.3,105.2,109.0,112.8,120.7,128.7,133.2,134.2,132.3,128.0,124.9,120.6]},"2030":{"k":1.405,"all":114.5,"day":107.7,"all0":113.2,"curH":115,"curTWh":0.41,"hiH":578,"solTWh":66.9,"curPct":0.6,"mon":{"2026-01":101.2,"2026-02":105.9,"2026-03":106.7,"2026-04":114.4,"2026-05":116.2,"2026-06":109.0,"2026-07":125.4,"2026-08":137.7,"2026-09":111.2,"2026-10":107.4,"2026-11":126.5},"prof":[113.2,108.3,106.1,105.3,105.3,106.6,110.1,114.4,115.7,112.4,107.3,102.9,99.3,102.6,106.6,111.3,119.1,127.9,133.0,134.2,132.3,128.0,124.9,120.6]}},"cg":{"2026":{"k":1.0,"all":117.5,"day":115.7,"all0":117.5,"curH":0,"curTWh":0.0,"hiH":761,"solTWh":47.6,"curPct":0.0,"mon":{"2026-01":102.6,"2026-02":107.3,"2026-03":108.8,"2026-04":117.4,"2026-05":119.5,"2026-06":112.2,"2026-07":130.2,"2026-08":144.1,"2026-09":114.6,"2026-10":109.1,"2026-11":129.2},"prof":[113.2,108.3,106.1,105.3,105.4,106.6,110.3,115.8,119.5,118.1,115.4,112.2,109.1,112.4,115.1,118.8,124.9,130.5,133.8,134.3,132.3,128.0,124.9,120.6]},"2027":{"k":1.136,"all":116.5,"day":113.0,"all0":116.4,"curH":8,"curTWh":0.01,"hiH":696,"solTWh":54.1,"curPct":0.0,"mon":{"2026-01":102.3,"2026-02":107.0,"2026-03":107.9,"2026-04":116.4,"2026-05":118.4,"2026-06":111.1,"2026-07":128.7,"2026-08":142.0,"2026-09":113.3,"2026-10":108.5,"2026-11":128.3},"prof":[113.2,108.3,106.1,105.3,105.4,106.6,110.2,115.2,118.4,116.3,112.6,109.1,105.3,109.3,112.4,115.9,123.0,129.8,133.6,134.3,132.3,128.0,124.9,120.6]},"2028":{"k":1.291,"all":115.4,"day":110.0,"all0":114.7,"curH":60,"curTWh":0.15,"hiH":616,"solTWh":61.5,"curPct":0.2,"mon":{"2026-01":101.7,"2026-02":106.4,"2026-03":107.2,"2026-04":115.3,"2026-05":117.0,"2026-06":109.8,"2026-07":126.9,"2026-08":139.6,"2026-09":112.2,"2026-10":107.9,"2026-11":127.2},"prof":[113.2,108.3,106.1,105.3,105.3,106.6,110.1,114.8,116.9,114.1,109.4,105.8,101.7,105.6,109.4,113.1,120.9,128.7,133.2,134.2,132.3,128.0,124.9,120.6]},"2029":{"k":1.467,"all":114.1,"day":106.6,"all0":112.4,"curH":154,"curTWh":0.63,"hiH":560,"solTWh":69.8,"curPct":0.9,"mon":{"2026-01":100.9,"2026-02":105.8,"2026-03":106.5,"2026-04":114.0,"2026-05":115.7,"2026-06":108.6,"2026-07":124.6,"2026-08":136.9,"2026-09":111.0,"2026-10":107.1,"2026-11":126.0},"prof":[113.2,108.3,106.1,105.3,105.3,106.6,110.1,114.0,115.2,111.5,106.0,101.8,98.1,101.1,105.5,110.4,118.5,127.5,133.0,134.2,132.3,128.0,124.9,120.6]},"2030":{"k":1.666,"all":112.8,"day":103.4,"all0":109.7,"curH":287,"curTWh":1.73,"hiH":510,"solTWh":79.3,"curPct":2.2,"mon":{"2026-01":100.4,"2026-02":105.2,"2026-03":105.9,"2026-04":112.8,"2026-05":114.3,"2026-06":107.4,"2026-07":122.3,"2026-08":134.1,"2026-09":109.9,"2026-10":106.4,"2026-11":124.9},"prof":[113.2,108.3,106.1,105.3,105.3,106.6,109.9,113.4,113.6,108.2,103.1,98.9,96.1,98.3,101.0,106.5,115.5,125.8,132.6,134.1,132.3,128.0,124.9,120.6]}}},"low_nl":[26.1,31.4],"low_smp":[70,101],"act":117.5,"nlb":[["30~35",92.9,89],["35~40",97.6,146],["40~45",95.6,252],["45~50",102.1,504],["50~55",106.3,1074],["55~60",108.8,1503],["60~65",113.8,1437],["65~70",123.2,1171],["70~75",135.3,749],["75~80",145.5,449],["80~85",148.1,285],["85~90",163.9,112],["90~95",170.8,43]]}};
+const $=id=>document.getElementById(id);
+const f1=v=>v==null?'-':(+v).toLocaleString('ko-KR',{minimumFractionDigits:1,maximumFractionDigits:1});
+const sg=v=>(v>0?'+':v<0?'▼':'')+f1(Math.abs(v));
+const pc=(a,b)=>(a/b-1)*100;
+const cls=v=>v>0?'up':v<0?'dn':'';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const L=D.lab, M=D.monthly, N=M[M.length-1], Pm=M.length>1?M[M.length-2]:null;
+const mkS=(id,cfg)=>{try{return mk(id,cfg)}catch(e){console.error(e);return null}};
+const F14=`700 14px ${FONT}`;
+Chart.defaults.interaction={mode:'index',intersect:false};
+/* 점 옆 라벨: options.plugins.ptl={on:true, items:[[데이터셋 번호, 'left'|'right', dx, 색]]} */
+Chart.register({id:'ptl',afterDatasetsDraw(ch,a,o){if(!o||!o.on)return;const x=ch.ctx;x.save();x.font=F14;x.textBaseline='middle';
+  o.items.forEach(([i,al,dx,col,dy=-14])=>{const m=ch.getDatasetMeta(i);if(!m||!m.data[0])return;const p=m.data[0],v=ch.data.datasets[i].data[0].x;
+   x.textAlign=al;x.fillStyle=col;x.fillText(`${f1(v)}GW`,p.x+dx,p.y+dy)});x.restore()}});
+/* 가격 구간 음영: options.plugins.band={on:true, from, to, text} */
+Chart.register({id:'band',beforeDatasetsDraw(ch,a,o){if(!o||!o.on)return;const {ctx,chartArea:c,scales}=ch,y=scales.y;const y1=y.getPixelForValue(o.to),y0=y.getPixelForValue(o.from);
+  ctx.save();ctx.fillStyle='rgba(217,58,63,.07)';ctx.fillRect(c.left,y1,c.right-c.left,y0-y1);ctx.strokeStyle='rgba(217,58,63,.55)';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(c.left,y1);ctx.lineTo(c.right,y1);ctx.stroke();
+  ctx.fillStyle='#B3262B';ctx.font=F14;ctx.textAlign='left';ctx.fillText(o.text,c.left+8,y1+18);ctx.restore()}});
+
+/* 1. 핵심 요약 */
+const peakTxt=D.peak.curD?` (${+D.peak.curD.slice(5,7)}/${+D.peak.curD.slice(8)})`:'';
+const kp=[['LNG 단가',sg(N.lngYoY),'%',`${f1(N.gas0)} → ${f1(N.gas)}원/㎥`,''],
+ ['평일 SMP',sg(N.smpYoY),'%',`${f1(N.smp0)} → ${f1(N.smp)}원/kWh`,'b'],
+ ['SMP/LNG 비율',sg(N.ratio-N.ratio0),'p',`전년 ${f1(N.ratio0)} → ${f1(N.ratio)}`+(Pm?` (${L.prevM} ${f1(Pm.ratio)})`:''),''],
+ ['계통수요 피크',sg(pc(D.peak.cur,D.peak.ly)),'%',`${f1(D.peak.ly)} → ${f1(D.peak.cur)}GW${peakTxt}`,'']];
+$('kpis').innerHTML=kp.map(([l,v,u,s,b])=>`<div class="card kpi"><div class="k1">${l}</div><div class="k2 ${b}">${v}<small>${u}</small></div><div class="k3">${s}</div></div>`).join('');
+$('tMon').innerHTML='<thead><tr><th>월</th><th class="r">LNG 단가</th><th class="r">평일 SMP</th><th class="r">SMP/LNG 비율</th></tr></thead><tbody>'+
+ M.slice(-6).map((m,i,a)=>`<tr class="${i===a.length-1?'hl':''}"><td class="rh">${m.m}월${m.partial?'*':''}</td><td class="r ${cls(m.lngYoY)}">${sg(m.lngYoY)}%</td><td class="r ${cls(m.smpYoY)}">${sg(m.smpYoY)}%</td><td class="r">${f1(m.ratio)}</td></tr>`).join('')+'</tbody>';
+
+const yr=L.cur.slice(0,4), yr0=String(+yr-1);
+mkS('cRatio',{type:'line',data:{labels:M.map(m=>m.m+'월'+(m.partial?'*':'')),datasets:[
+ {label:yr0+'년',data:M.map(m=>m.ratio0),borderColor:C.slate,backgroundColor:C.slate,borderWidth:2,pointRadius:3},
+ {label:yr+'년',data:M.map(m=>m.ratio),borderColor:C.blue,backgroundColor:C.blue,borderWidth:2.5,pointRadius:4}]},
+ options:{layout:{padding:{top:20}},plugins:{legend:{position:'top',align:'end'},vLabel:{on:true,only:[1],fmt:f1,size:14}},scales:{x:{grid:noGrid,ticks:{color:C.ink}},y:{grid,border:{display:false},grace:'12%'}}}});
+
+/* 2. 시간대별 SMP */
+const H=[...Array(24)].map((_,i)=>(i+1)+'시');
+mkS('cProf',{type:'line',data:{labels:H,datasets:[
+ {label:L.ly,data:D.prof.ly,borderColor:C.slate,backgroundColor:C.slate,borderWidth:2,pointRadius:0},
+ {label:L.prev,data:D.prof.prev,borderColor:C.navy,backgroundColor:C.navy,borderWidth:2,pointRadius:0},
+ {label:L.cur,data:D.prof.cur,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0}]},
+ options:{layout:{padding:{top:10}},plugins:{legend:{position:'top',align:'end'}},scales:{x:{grid:noGrid,ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid,border:{display:false},grace:'8%'}}}});
+const BN=[['110원 미만',C.slate],['110~160원',C.navy],['160원 이상',C.red]];
+const brow=(name,a)=>`<div class="band"><b>${name}</b><div class="bar">${a.map((v,i)=>v>0?`<div title="${BN[i][0]} ${f1(v)}%" style="width:${v}%;background:${BN[i][1]}">${v>=8?f1(v):''}</div>`:'').join('')}</div></div>`;
+$('bands').innerHTML=brow(L.lyS,D.band.ly)+brow(L.prevS,D.band.prev)+brow(L.curS,D.band.cur)+
+ `<div class="blg">${BN.map(b=>`<span><i style="background:${b[1]}"></i>${b[0]}</span>`).join('')}</div>`;
+
+/* 3-1. 수요 변화 (총수요 · 계통수요 · 총수요 − 모든 태양광) */
+const DN={tot:['총수요','총수요 = 계통수요 + 시장 외 태양광(한전 PPA·자가용, KPX 추정)'],dem:['계통수요','계통수요 = KPX 실시간 수급현황 발전원 합(시장 외 태양광이 줄인 뒤의 수요)'],net:['총수요 − 모든 태양광','시장·시장 외 태양광을 모두 뺀 수요 = 태양광 외 발전기가 채워야 하는 몫']};
+const cDem=mkS('cDem',{type:'line',data:{labels:H,datasets:[
+   {label:L.prev,data:D.dprof.prev.tot,borderColor:C.navy,backgroundColor:C.navy,borderWidth:2,pointRadius:0},
+   {label:L.cur,data:D.dprof.cur.tot,borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0}]},
+   options:{plugins:{legend:{position:'top',align:'end'}},scales:{x:{grid:noGrid,ticks:{maxRotation:0,maxTicksLimit:12}},y:{grid,border:{display:false},min:30,max:85,title:{display:true,text:'GW'}}}}});
+const demSet=key=>{$('demName').textContent=DN[key][0];$('demDesc').textContent=DN[key][1];
+  if(cDem){cDem.data.datasets[0].data=D.dprof.prev[key];cDem.data.datasets[1].data=D.dprof.cur[key];cDem.update()}};
+$('demSel').addEventListener('change',e=>demSet(e.target.value));demSet('tot');
+const G=D.gen, W=D.wx;
+const dr=(n,a,b,bold)=>`<tr class="${bold?'hl':''}"><td class="rh">${n}</td><td class="r">${f1(a)}</td><td class="r">${f1(b)}</td><td class="r ${cls(b-a)}">${sg(b-a)}</td></tr>`;
+const gp=G.prev.day,gc=G.cur.day;
+$('tDem').innerHTML=`<thead><tr><th>항목</th><th class="r">${L.prevM}</th><th class="r">${L.curM}</th><th class="r">증감</th></tr></thead><tbody>`+
+ dr('총수요(GW)',gp.dem+gp.hid,gc.dem+gc.hid)+dr('계통수요(GW)',gp.dem,gc.dem,1)+dr('총수요 − 모든 태양광(GW)',gp.dem-gp.sunM,gc.dem-gc.sunM)+
+ dr('시장 외 태양광(GW)',gp.hid,gc.hid)+dr('시장 태양광(GW)',gp.sunM,gc.sunM)+
+ dr('서울 평균기온(℃)',W.prev.tmp,W.cur.tmp)+dr('일사량(MJ/㎡·일)',W.prev.rad,W.cur.rad)+dr('일조시간(h/일)',W.prev.sun,W.cur.sun)+'</tbody>';
+
+/* 3-2. 발전가격 stack */
+const MS=D.ms;
+if(MS&&MS.cur&&MS.prev){
+  const pts=s=>s.stack.map(([p,g])=>({x:g,y:p}));
+  const mark=(s,col)=>({type:'scatter',label:'',data:[{x:s.below160,y:160}],backgroundColor:col,borderColor:'#fff',borderWidth:2,pointRadius:8,pointHoverRadius:9,showLine:false});
+  mkS('cStack',{type:'line',data:{datasets:[
+    {label:L.prev,data:pts(MS.prev),borderColor:C.navy,backgroundColor:C.navy,borderWidth:2.5,pointRadius:0,stepped:'after'},
+    {label:L.cur,data:pts(MS.cur),borderColor:C.ci,backgroundColor:C.ci,borderWidth:3,pointRadius:0,stepped:'after'},
+    mark(MS.prev,C.navy),mark(MS.cur,C.ci)]},
+   options:{interaction:{mode:'nearest',intersect:false,axis:'xy'},layout:{padding:{top:6}},
+    plugins:{legend:{position:'top',align:'end',labels:{filter:i=>i.text!==''}},band:{on:true,from:110,to:160,text:'110~160원 구간'},
+      ptl:{on:true,items:[[2,'left',12,C.navy,18],[3,'right',-14,'#0080C4']]},
+      tooltip:{callbacks:{title:c=>`발전가격 ${c[0].raw.y}원 미만`,label:c=>c.datasetIndex>=2?`${c.datasetIndex===2?L.prevM:L.curM} 160원 미만 공급 ${f1(c.raw.x)}GW`:`${c.dataset.label}: 누적 ${f1(c.raw.x)}GW`}}},
+    scales:{x:{type:'linear',min:55,max:100,grid,border:{display:false},title:{display:true,text:'누적 입찰량(GW)'}},y:{min:80,max:220,grid,border:{display:false},title:{display:true,text:'발전가격(원/kWh)'}}}}});
+  const mv=MS.cur.movers||[];
+  const won=v=>typeof v==='number'?v+'원':esc(v);
+  $('tMov').innerHTML=`<thead><tr><th>발전기</th><th>연료</th><th class="r">${L.prevM}</th><th class="r">${L.curM}</th><th class="r">MW</th></tr></thead><tbody>`+
+    (mv.length?mv.map(r=>`<tr><td class="rh">${esc(r[0])}</td><td>${esc(r[1])}</td><td class="r">${won(r[2])}</td><td class="r up">${won(r[3])}</td><td class="r">${r[4].toLocaleString()}</td></tr>`).join('')
+      +`<tr class="hl"><td colspan="4">합계 ${mv.length}기</td><td class="r">${mv.reduce((s,r)=>s+r[4],0).toLocaleString()}</td></tr>`:'<tr><td colspan="5">해당 발전기 없음</td></tr>')+'</tbody>';
+} else {$('tMov').innerHTML='<tbody><tr><td>발전가격 순위표 요약이 없어 표시할 수 없음</td></tr></tbody>'}
+
+/* 3-3. 원별 발전량 */
+const GK=[['원자력','nuc'],['석탄','coal'],['LNG','lng'],['신재생(태양광 외)',['renew','wind']],['태양광 계',['sunM','hid']],['계통수요','dem']];
+const gv=(o,k)=>Array.isArray(k)?k.reduce((s,x)=>s+o[x],0):o[k];
+const gt=p=>`<thead><tr><th>원별</th><th class="r">${L.lyT}</th><th class="r">${L.prevT}</th><th class="r">${L.curT}</th><th class="r">전년비</th><th class="r">전월비</th></tr></thead><tbody>`+GK.map(([n,kk])=>{const a=gv(G.ly[p],kk),b=gv(G.prev[p],kk),c=gv(G.cur[p],kk);
+ return `<tr class="${n==='계통수요'?'hl':''}"><td class="rh">${n}</td><td class="r">${f1(a)}</td><td class="r">${f1(b)}</td><td class="r"><b>${f1(c)}</b></td><td class="r ${cls(c-a)}">${sg(c-a)}</td><td class="r ${cls(c-b)}">${sg(c-b)}</td></tr>`}).join('')+'</tbody>';
+$('tGen').innerHTML=gt('all');$('tGenD').innerHTML=gt('day');
+
+/* 참고. 중장기 시나리오 */
+const SC=D.scen, P=SC.res, Y0=SC.year, TG=SC.target, YR=Object.keys(P.lin).map(Number);
+const lastA=Math.max(...Object.keys(SC.end).map(Number));
+const capY=Object.keys(SC.lin_end).map(Number).sort((a,b)=>a-b);
+mkS('cNL',{type:'bar',data:{labels:SC.nlb.map(b=>b[0]),datasets:[{label:'평균 SMP',data:SC.nlb.map(b=>b[1]),backgroundColor:SC.nlb.map(b=>+b[0].split('~')[0]<50?C.ci:C.slate)}]},
+ options:{layout:{padding:{top:22}},plugins:{legend:{display:false},vLabel:{on:true,size:13,fmt:v=>Math.round(v)},tooltip:{callbacks:{title:c=>`순부하 ${c[0].label}GW`,label:c=>`평균 SMP ${f1(c.raw)}원 · ${SC.nlb[c.dataIndex][2].toLocaleString()}시간`}}},
+  scales:{x:{grid:noGrid,ticks:{color:C.ink},title:{display:true,text:'순부하(GW)'}},y:{min:0,grid,border:{display:false},title:{display:true,text:'원/kWh'}}}}});
+const picked=()=>[...document.querySelectorAll('#scOpt input:checked')].map(x=>x.value);
+const SCN={lin:['기본',C.ci],cg:['상단',C.slateD]};
+const rg=(a,fmt)=>{const v=[...new Set(a.map(fmt))];return v.length>1?v.join('~'):v[0]};
+const tScen=()=>{const s=picked();if(!s.length){$('scK').innerHTML='<div class="note">시나리오를 하나 이상 고르세요</div>';return}
+  const b=P.lin[Y0],r=s.map(k=>P[k][TG]),cap=s.map(k=>(k==='lin'?SC.lin_end:SC.cg_end)[TG]);
+  const K=[[`${TG}년 말 태양광 설비`,rg(cap,f1),'GW',`올해 초 ${f1(SC.end[lastA])}GW`,'b'],
+   ['연평균 SMP','▼'+rg(r,x=>Math.round(b.all-x.all)),'원',`올해 ${f1(b.all)} → ${rg(r,x=>f1(x.all))}원`,''],
+   ['낮(10~17시) SMP','▼'+rg(r,x=>Math.round(b.day-x.day)),'원',`올해 ${f1(b.day)} → ${rg(r,x=>f1(x.day))}원`,''],
+   ['태양광 출력제어',rg(r,x=>f1(x.curTWh)),'TWh',`연간 태양광 발전의 ${rg(r,x=>f1(x.curPct))}%`,'']];
+  $('scK').innerHTML=K.map(([l,v,u,s3,c],i)=>`<div class="card kpi"${i===3?' style="border-top-color:var(--red)"':''}><div class="k1">${l}</div><div class="k2 ${c}"${i===3?' style="color:var(--red)"':''}>${v}<small>${u}</small></div><div class="k3">${s3}</div></div>`).join('')};
+const ds=[{key:'act',type:'bar',label:'설비 실적',data:capY.map(y=>y<=lastA?SC.end[y]??null:null),backgroundColor:C.navy,yAxisID:'yCap',order:3}];
+['lin','cg'].forEach(k=>{const end=k==='lin'?SC.lin_end:SC.cg_end;
+  ds.push({key:k,type:'bar',label:`설비 ${SCN[k][0]}`,data:capY.map(y=>y>lastA?end[y]:null),backgroundColor:SCN[k][1]+'B3',yAxisID:'yCap',order:3});
+  ds.push({key:k,type:'line',label:`연평균 SMP ${SCN[k][0]}`,data:capY.map(y=>P[k][y]?P[k][y].all:null),borderColor:SCN[k][1],backgroundColor:SCN[k][1],borderWidth:2.5,pointRadius:4,yAxisID:'ySmp',order:1,spanGaps:true});
+  ds.push({key:k,type:'line',label:`낮 SMP ${SCN[k][0]}`,data:capY.map(y=>P[k][y]?P[k][y].day:null),borderColor:SCN[k][1],backgroundColor:'#fff',borderDash:[5,4],borderWidth:2,pointRadius:3,yAxisID:'ySmp',order:1,spanGaps:true})});
+const lastBar=ds.map((d,i)=>d.type==='bar'?i:-1).filter(i=>i>=0);
+Chart.register({id:'capLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const x=ch.ctx,n=capY.length-1;x.save();x.font=F14;x.textBaseline='bottom';
+  const vis=ch.data.datasets.map((d,i)=>d.type==='bar'&&ch.isDatasetVisible(i)?i:-1).filter(i=>i>0);
+  ch.data.datasets.forEach((d,i)=>{if(d.type!=='bar'||!ch.isDatasetVisible(i))return;const m=ch.getDatasetMeta(i);
+    m.data.forEach((el,j)=>{const v=d.data[j];if(v==null||!(j===n||(i===0&&capY[j]===lastA)))return;
+      let al='center',px=el.x;if(i>0&&vis.length>1){al=i===vis[0]?'right':'left';px=el.x+(i===vis[0]?el.width/2:-el.width/2)}
+      x.textAlign=al;x.fillStyle=i===0?C.navy:d.key==='lin'?'#0080C4':C.slateD;x.fillText(f1(v),px,el.y-4)})});x.restore()}});
+const cScen=mkS('cScen',{type:'bar',data:{labels:capY.map(String),datasets:ds},
+ options:{datasets:{bar:{categoryPercentage:.8,barPercentage:.95}},layout:{padding:{top:16}},
+  plugins:{legend:{position:'bottom',labels:{font:{size:13},filter:i=>!/^설비 (기본|상단)$/.test(i.text)}},
+   capLbl:{on:true},
+   tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)}${c.dataset.yAxisID==='yCap'?'GW':'원/kWh'}`}}},
+  scales:{x:{grid:noGrid,ticks:{color:C.ink}},
+   ySmp:{type:'linear',position:'left',stack:'sc',stackWeight:1.3,min:100,max:120,grid,border:{display:false},title:{display:true,text:'SMP'}},
+   yCap:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:0,grid,border:{display:false},title:{display:true,text:'설비 GW'}}}}});
+const applyScen=()=>{const s=picked();if(cScen){cScen.data.datasets.forEach((d,i)=>cScen.setDatasetVisibility(i,d.key==='act'||s.includes(d.key)));cScen.update()}tScen()};
+$('scOpt').addEventListener('change',applyScen);applyScen();
+}
+
+/* 시작 · 인쇄 */
+const h=parseInt(location.hash.slice(1));go(isNaN(h)?0:h-1);
+addEventListener('beforeprint',()=>Object.values(chartsBySlide).flat().forEach(c=>{c.options.animation=false;c.resize(1,1);c.update()}));
+</script>
+</body>
+</html>

@@ -15,6 +15,7 @@ from pathlib import Path
 KST = timezone(timedelta(hours=9))
 RAW, MAN, DOCS = Path("data/raw"), Path("data/manual"), Path("docs")
 TPL = Path("scripts/report_template.html")
+MINI_HTML = {}
 STATE = DOCS / "data" / "reports.json"
 mean = st.mean
 DOW = "월화수목금토일"
@@ -494,14 +495,19 @@ def build(m, today):
              ms=dict(cur=merit_summary(m), prev=merit_summary(pm)),
              bins=dict(cur=cur["bins"], prev=prv["bins"], ly=lyr["bins"]), fuel=dict(cur=cur["fuel"], prev=prv["fuel"], ly=lyr["fuel"]),
              peak=dict(cur=cur["peak"], ly=lyr["peak"], curD=cur["peakD"]), daily=daily, monthStart=a, scen=sc)
-    html = TPL.read_text(encoding="utf-8")
-    for k, v in T.items():
-        html = html.replace("{{" + k + "}}", v)
-    html = html.replace("__DATA__", json.dumps(D, ensure_ascii=False, separators=(",", ":")))
-    left = re.findall(r"\{\{\w+\}\}", html)
-    if left:
-        raise SystemExit("채우지 못한 자리: " + ", ".join(sorted(set(left))))
-    (DOCS / f"{m}.html").write_text(html, encoding="utf-8")
+    def render(mini):
+        T2 = dict(T, mini="1" if mini else "0",
+                  doc_title="태양광 확대 시 SMP 전망" if mini else f"{lab['cur']} 전력시장 검토 결과")
+        html = TPL.read_text(encoding="utf-8")
+        for k, v in T2.items():
+            html = html.replace("{{" + k + "}}", v)
+        html = html.replace("__DATA__", json.dumps(D, ensure_ascii=False, separators=(",", ":")))
+        left = re.findall(r"\{\{\w+\}\}", html)
+        if left:
+            raise SystemExit("채우지 못한 자리: " + ", ".join(sorted(set(left))))
+        return html
+    (DOCS / f"{m}.html").write_text(render(False), encoding="utf-8")
+    MINI_HTML[m] = render(True)  # 태양광 시나리오 미니 리포트(가장 최근 달 것을 main에서 저장)
     return dict(m=m, final=final, period=per, title=lab["cur"])
 
 
@@ -688,6 +694,25 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
             ("검증", f"같은 방법으로 올해 실적 재현 시 월평균 SMP 오차 ±{f1(sc['err'])}원")]
     if CAP.get("gov_target_2030"):
         rows.append(("참고", f"정부 2030년 목표 <b>{f1(CAP['gov_target_2030'])}GW</b> — 상단보다 커서 목표대로면 영향이 더 큼"))
+    kl, kc = sc["res"]["lin"][tg]["k"], sc["res"]["cg"][tg]["k"]
+    endv = [sc["end"][str(y)] for y in sc["ys"]]
+    T["sc_end"] = per.split("~")[1]
+    T["sc1_msg"] = (f"최근 3년 증가 속도가 이어지면 {tg}년 태양광 설비 <span class=\"em\">{round(sc['lin_end'][str(tg)])}~{round(sc['cg_end'][str(tg)])}GW</span>, "
+                    f"발전량은 올해의 <span class=\"em\">{f1(kl)}~{f1(kc)}배</span>")
+    def card(h, big, sm, lines):
+        return (f'<div class="card f1 sc1"><div class="ch">{h}</div><div class="cb" style="gap:10px">'
+                f'<div class="big">{big}<small>{sm}</small></div><ul class="d">' + "".join(f"<li>{x}</li>" for x in lines) + "</ul></div></div>")
+    T["sc1_cards"] = (card("① 설비 전망", f"{f1(sc['lin_end'][str(tg)])}~{f1(sc['cg_end'][str(tg)])}", f"GW · {tg}년 말",
+                           [f"실적 {sc['ys'][0]}년 {f1(endv[0])} → {sc['ys'][-1]}년 {f1(endv[-1])}GW (연 +{' · '.join(f1(x) for x in sc['adds'])}GW)",
+                            f"<b>기본</b>: 매년 +{f1(sc['add'])}GW씩", f"<b>상단</b>: 매년 +{f1(sc['cagr'])}%씩"])
+                      + card("② 발전량 추정", f"{f1(kl)}~{f1(kc)}", f"배 · {tg}년, 올해 대비",
+                             ["올해 <b>시간별 태양광 출력</b>(시장·PPA·자가용)에 설비 증가 배율을 곱함", "날씨(일사량)는 올해와 같다고 봄"])
+                      + card("③ SMP 계산", f"±{f1(sc['err'])}", "원 · 올해 재현 오차",
+                             ["늘어난 태양광만큼 <b>순부하</b>(계통수요 − 태양광·풍력)가 줄어듦", "같은 달, 순부하가 비슷했던 올해 40개 시간의 <b>평균 SMP</b> 적용"]))
+    T["sc1_box"] = (f"<b class=\"em\">고정 조건:</b> 수요·연료비·원전·석탄·LNG 설비는 올해와 동일 &nbsp;·&nbsp; "
+                    f"<b class=\"rd\">출력제어:</b> 순부하가 올해 최저({f1(sc['NMIN'])}GW) 밑으로 가는 만큼 태양광이 줄인다고 계산(상한값)")
+    T["sc1_note"] = ("※ 설비: " + CAP.get("_출처", "") +
+                     (f" · 정부 2030년 목표 {f1(CAP['gov_target_2030'])}GW는 상단보다 커서 목표대로면 영향이 더 큼" if CAP.get("gov_target_2030") else ""))
     T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
     T["s9_note"] = (f"※ 올해(1.1~{per.split('~')[1]})의 날씨·수요·연료비가 반복된다고 가정 · 출력제어는 상한값(참고 2) · ESS·원전·석탄 설비 변화 미반영")
     # 6 종합
@@ -763,6 +788,8 @@ def main():
     latest = lst[-1] if lst else None  # 가장 최근 달(이번 달은 10일 이후부터 잠정본 생성)
     if latest:
         shutil.copyfile(DOCS / f"{latest['m']}.html", DOCS / "report.html")
+    if latest and latest["m"] in MINI_HTML:
+        (DOCS / "solar-scenario.html").write_text(MINI_HTML[latest["m"]], encoding="utf-8")
         print("report.html ←", latest["m"])
 
 
