@@ -683,7 +683,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     dP = [x[tg]["all"] - base["all"] for k_, x in sc["res"].items() if k_.endswith("_p")]
     sgr = lambda v: ("+" if v > 0 else "▼") + str(abs(round(v)))
     rr = lambda a_: sgr(min(a_, key=abs)) + ("" if round(min(a_)) == round(max(a_)) else "~" + str(abs(round(max(a_, key=abs)))))
-    T["s9_msg"] = (f"{tg}년 SMP 방향은 <b>수요</b>가 결정 — 수요 정체 시 <span class=\"em\">{rr(dT)}원</span>, "
+    T["s9_msg"] = (f"{tg}년 연평균 SMP(올해 {f1(base['all'])}원 대비): 수요 추세 시 <span class=\"em\">{rr(dT)}원</span>, "
                    f"전기본 수요 시 <span class=\"rd\">{rr(dP)}원</span>")
     T["s9_msg_old"] = (f"{tg}년 연평균 SMP는 <span class=\"em\">{round(min(a1, a2))}~{round(max(a1, a2))}원"
                    f"(▼{f1(min(a1, a2) / base['all'] * 100)}~{f1(max(a1, a2) / base['all'] * 100)}%) 하락</span> — "
@@ -705,8 +705,8 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
            ("2", "", f"SMP 바닥 <b>{fl_lo}~{fl_hi}원</b>"),
            ("3", " r", f"출력제어 <b>연 {cu[0]}~{cu[1]}시간</b>")]
     T["s9_imp"] = "".join(f'<div class="imp"><span class="num{c}">{n}</span><div class="tx">{x}</div></div>' for n, c, x in imp)
-    T["s9_why"] = (f"<b>SMP가 조금만 내려가는 이유</b><br>순부하 50GW 아래에선 석탄·열병합이 가격을 정해 SMP가 "
-                   f"<b>{fl_lo}~{fl_hi}원</b>에서 멈춤 — 남는 태양광은 출력제어")
+    T["s9_why"] = (f"<b>참고: 순부하와 SMP</b><br>올해 순부하 50GW 이하 구간의 SMP는 <b>{fl_lo}~{fl_hi}원</b> 수준"
+                   f"(석탄·열병합 가격대) · 잉여 태양광은 출력제어로 처리")
     T["s8_msg"] = f"순부하가 50GW 아래로 내려가도 SMP는 <span class=\"em\">{fl_lo}~{fl_hi}원</span>에서 멈춤"
     T["s8b_msg"] = (f"최근 3년 태양광 증가 속도(연 +{f1(sc['add'])}GW, {f1(sc['cagr'])}%)가 {tg}년까지 이어지고, 나머지는 올해와 같다고 가정")
     caps = " → ".join(f"{f1(sc['end'][str(y)])}" for y in sc["ys"])

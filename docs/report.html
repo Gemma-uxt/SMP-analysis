@@ -187,7 +187,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <h1>2026년 11월(1~22일)<br><span class="b">전력시장 검토 결과</span></h1>
     <div class="sub">핵심 요약 · 시간대별 SMP · 수요 변화 · 발전가격 stack 변화 · 원별 발전량 · 참고: 중장기 태양광 시나리오</div>
     <div class="pills"><span>잠정 · 11.1~11.22 실적</span><span>비교: 전년 11.1~11.22 · 2026년 10월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:12</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:19</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="발전가격 stack과 SMP 결정 일러스트">
@@ -221,7 +221,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
     <div class="sub">① 태양광 발전량 추정 방법 · ② 추정 결과: SMP 영향</div>
     <div class="pills"><span>기준: 올해 1.1~11.22 실적</span><span>2030년까지 · 시나리오 4개(수요 2 × 설비 2)</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:12</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:19</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="태양광 설비 증가와 SMP 일러스트">
@@ -374,7 +374,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
         <div class="cv"><canvas id="cMin" role="img" aria-label="순부하 최저 시간의 원전·석탄·LNG 출력"></canvas></div>
       </div></div>
       <div class="card" style="width:700px"><div class="cb">
-        <table class="t mt"><thead><tr><th>원별</th><th class="r" style="white-space:nowrap">2/17 13시</th><th class="r" style="white-space:nowrap">최저 30시간</th><th>더 못 줄이는 이유</th></tr></thead><tbody><tr><td class="rh">원전</td><td class="r"><b>15.9</b></td><td class="r">15.9~18.4</td><td>출력 조절이 어려워 상시 운전</td></tr><tr><td class="rh">석탄</td><td class="r"><b>6.0</b></td><td class="r">5.7~7.1</td><td>필수운전 발전기는 못 세움</td></tr><tr><td class="rh">LNG</td><td class="r"><b>5.3</b></td><td class="r">5.3~9.1</td><td>열 공급·저녁 피크 대비</td></tr></tbody></table>
+        <table class="t mt"><thead><tr><th>원별</th><th class="r" style="white-space:nowrap">2/17 13시</th><th class="r" style="white-space:nowrap">최저 30시간</th><th>운전 사유</th></tr></thead><tbody><tr><td class="rh">원전</td><td class="r"><b>15.9</b></td><td class="r">15.9~18.4</td><td>출력 조절이 어려워 상시 운전</td></tr><tr><td class="rh">석탄</td><td class="r"><b>6.0</b></td><td class="r">5.7~7.1</td><td>필수운전 발전기는 못 세움</td></tr><tr><td class="rh">LNG</td><td class="r"><b>5.3</b></td><td class="r">5.3~9.1</td><td>열 공급·저녁 피크 대비</td></tr></tbody></table>
         <div class="bx r" style="margin-top:auto">원전 15.9 + 석탄 6.0 + LNG 5.3 − 양수 충전 3.4 + 기타 2.3 = 순부하 <b>26.1GW</b> → 이 밑은 태양광 출력제어</div>
       </div></div>
     </div>
@@ -389,11 +389,11 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <div class="opts" id="scOpt" role="group" aria-label="시나리오 선택">
       <span class="og">수요</span><label><input type="checkbox" data-g="d" value="t" checked>추세</label><label><input type="checkbox" data-g="d" value="p" checked>전기본</label>
       <span class="og">설비</span><label><input type="checkbox" data-g="c" value="lin" checked>Base</label><label><input type="checkbox" data-g="c" value="cg" checked>Upside</label></div></div>
-  <div class="msg">2030년 SMP 방향은 <b>수요</b>가 결정 — 수요 정체 시 <span class="em">▼3~4원</span>, 전기본 수요 시 <span class="rd">+2~4원</span></div>
+  <div class="msg">2030년 연평균 SMP(올해 117.5원 대비): 수요 추세 시 <span class="em">▼3~4원</span>, 전기본 수요 시 <span class="rd">+2~4원</span></div>
   <div class="bd">
     <div class="card f1"><div class="cb">
       <div class="cv"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 연평균 SMP: 2022~2025 실적과 2026~2030 시나리오"></canvas></div>
-      <div class="cnote"><b>SMP가 조금만 내려가는 이유</b><br>순부하 50GW 아래에선 석탄·열병합이 가격을 정해 SMP가 <b>93~102원</b>에서 멈춤 — 남는 태양광은 출력제어</div>
+      <div class="cnote"><b>참고: 순부하와 SMP</b><br>올해 순부하 50GW 이하 구간의 SMP는 <b>93~102원</b> 수준(석탄·열병합 가격대) · 잉여 태양광은 출력제어로 처리</div>
     </div></div>
     <div class="note">※ 2022~2025년: 한전 결산 연평균 SMP · 2026년: 1.1~11.22 실적 · 이후: 시나리오(연료비·원전·석탄·LNG 설비는 올해와 동일)</div>
   </div>
