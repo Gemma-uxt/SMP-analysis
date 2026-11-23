@@ -169,7 +169,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 .slide[data-mini] .kick,.slide[data-mini] .sub,.slide[data-mini] .pills span,.slide[data-mini] .note{font-size:20px!important;line-height:1.4}
 .slide[data-sc] .msg{font-size:26px} .slide[data-sc] .t.mt td,.slide[data-sc] .t.mt th{padding:13px 14px}
 .slide[data-sc] .imp .num{font-size:20px;min-width:30px;height:30px} .slide[data-sc] .mut{color:var(--ink3)}
-.slide[data-sc] #scK .kpi .k2{font-size:36px} .slide[data-sc] .opts input{width:20px;height:20px}
+.slide[data-sc] #scK .kpi .k2{font-size:32px} .slide[data-sc] #scK .kpi{padding:6px 16px} .slide[data-sc] .opts input{width:20px;height:20px}
 </style>
 </head>
 <body data-mini="0">
@@ -183,7 +183,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
     <h1>2026년 10월<br><span class="b">전력시장 검토 결과</span></h1>
     <div class="sub">핵심 요약 · 시간대별 SMP · 수요 변화 · 발전가격 stack 변화 · 원별 발전량 · 참고: 중장기 태양광 시나리오</div>
     <div class="pills"><span>확정 · 10.1~10.31 실적</span><span>비교: 전년 10.1~10.31 · 2026년 9월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 10:41</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 10:44</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="발전가격 stack과 SMP 결정 일러스트">
@@ -217,7 +217,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
     <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
     <div class="sub">① 발전량 추정 방법 · ② 최소발전량 근거 · ③ SMP 영향 · ④ SMP가 조금만 내려가는 이유</div>
     <div class="pills"><span>기준: 올해 1.1~10.31 실적</span><span>2030년까지 · 시나리오 4개(수요 2 × 설비 2)</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 10:41</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 10:44</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="태양광 설비 증가와 SMP 일러스트">
@@ -393,7 +393,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
         <div class="sh"><span>태양광 설비와 연평균 SMP</span></div>
         <div class="cv"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 SMP 시나리오"></canvas></div>
       </div></div>
-      <div class="card" style="width:360px"><div class="ch">시사점</div><div class="cb" style="gap:14px;padding-top:16px">
+      <div class="card" style="width:330px"><div class="ch">시사점</div><div class="cb" style="gap:14px;padding-top:16px">
         <div class="imp"><span class="num">1</span><div class="tx">수요 정체 <b>▼3~4원</b><br>전기본 수요 <b>+2~4원</b></div></div><div class="imp"><span class="num">2</span><div class="tx">SMP 바닥 <b>92~101원</b></div></div><div class="imp"><span class="num r">3</span><div class="tx">출력제어 <b>연 41~270시간</b></div></div>
       </div></div>
     </div>
@@ -611,7 +611,7 @@ const ds=[{key:'act',type:'bar',label:'설비 실적',data:capY.map(y=>y<=lastA?
   ['t','p'].forEach(d=>{const k=c+'_'+d;
     ds.push({key:k,cap:c,dem:d,type:'line',label:`${CN[c][0]} · ${DN2[d]}`,data:capY.map(y=>P[k][y]?P[k][y].all:null),borderColor:CN[c][1],backgroundColor:d==='p'?'#fff':CN[c][1],borderDash:d==='p'?[6,4]:[],borderWidth:2.5,pointRadius:4,yAxisID:'ySmp',order:1,spanGaps:true})})});
 const smpAll=Object.values(P).flatMap(o=>Object.values(o).map(x=>x.all));
-const sMin=Math.floor(Math.min(...smpAll)/5)*5-5,sMax=Math.ceil(Math.max(...smpAll)/5)*5+5;
+const sMin=Math.floor((Math.min(...smpAll)-2)/10)*10,sMax=Math.ceil((Math.max(...smpAll)+2)/10)*10;
 Chart.register({id:'capLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const x=ch.ctx,n=capY.length-1;x.save();x.font=F20;x.textBaseline='bottom';
   const vis=ch.data.datasets.map((d,i)=>d.type==='bar'&&ch.isDatasetVisible(i)?i:-1).filter(i=>i>0);
   ch.data.datasets.forEach((d,i)=>{if(d.type!=='bar'||!ch.isDatasetVisible(i))return;const m=ch.getDatasetMeta(i);
@@ -619,12 +619,12 @@ Chart.register({id:'capLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const 
       let al='center',px=el.x;if(i>0&&vis.length>1){al=i===vis[0]?'right':'left';px=el.x+(i===vis[0]?el.width/2:-el.width/2)}
       x.textAlign=al;x.fillStyle=i===0?C.navy:d.key==='lin'?'#0080C4':C.slateD;x.fillText(f1(v),px,el.y-4)})});x.restore()}});
 const cScen=mkS('cScen',{type:'bar',data:{labels:capY.map(String),datasets:ds},
- options:{datasets:{bar:{categoryPercentage:.8,barPercentage:.95}},layout:{padding:{top:16}},
+ options:{datasets:{bar:{categoryPercentage:.8,barPercentage:.95}},layout:{padding:{top:26,right:34}},
   plugins:{legend:{position:'bottom',labels:{font:{size:20},boxWidth:22,filter:i=>!/^설비 (Base|Upside|실적)$/.test(i.text)}},capLbl:{on:true},
    tooltip:{titleFont:{size:20},bodyFont:{size:20},callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)}${c.dataset.yAxisID==='yCap'?'GW':'원/kWh (연평균 SMP)'}`}}},
   scales:{x:{grid:noGrid,ticks:{color:C.ink,font:{size:20}}},
-   ySmp:{type:'linear',position:'left',stack:'sc',stackWeight:1.4,min:sMin,max:sMax,grid,border:{display:false},ticks:{font:{size:20},stepSize:10},title:{display:true,text:'SMP 원',font:{size:20}}},
-   yCap:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:0,grid,border:{display:false},ticks:{font:{size:20},maxTicksLimit:3},title:{display:true,text:'설비 GW',font:{size:20}}}}}});
+   ySmp:{type:'linear',position:'left',stack:'sc',stackWeight:1.15,min:sMin,max:sMax,grid,border:{display:false},ticks:{font:{size:20},stepSize:10},title:{display:true,text:'SMP 원',font:{size:20}}},
+   yCap:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:0,max:60,grid,border:{display:false},ticks:{font:{size:20},stepSize:30},title:{display:true,text:'설비 GW',font:{size:20}}}}}});
 const applyScen=()=>{const s=picked(),cs=pick('c');if(cScen){cScen.data.datasets.forEach((d,i)=>cScen.setDatasetVisibility(i,d.key==='act'||(d.type==='bar'?cs.includes(d.cap):s.includes(d.key))));cScen.update()}tScen()};
 $('scOpt').addEventListener('change',applyScen);applyScen();
 }
