@@ -714,7 +714,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["sc1_note"] = ("※ 설비: " + CAP.get("_출처", "") +
                      (f" · 정부 2030년 목표 {f1(CAP['gov_target_2030'])}GW는 상단보다 커서 목표대로면 영향이 더 큼" if CAP.get("gov_target_2030") else ""))
     T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
-    T["s9_note"] = (f"※ 올해(1.1~{per.split('~')[1]})의 날씨·수요·연료비가 반복된다고 가정 · 출력제어는 상한값(참고 2) · ESS·원전·석탄 설비 변화 미반영")
+    T["s9_note"] = (f"※ 올해(1.1~{per.split('~')[1]})의 날씨·수요·연료비가 반복된다고 가정 · 출력제어는 상한값(다음 장) · ESS·원전·석탄 설비 변화 미반영")
     # 6 종합
     T["s7_msg"] = note.get("s7_msg") or T["s1_msg"]
     rows = list(note.get("s7_rows_before", []))
