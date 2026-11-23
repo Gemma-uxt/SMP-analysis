@@ -727,8 +727,11 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
               f"<b>Base</b> +{f1(sc['add'])}GW/년 → {round(sc['lin_end'][str(tg)])}GW" + bs(f"'23~'25 연간 증가량 평균<br>({' · '.join(f1(x) for x in sc['adds'])}GW)"),
               f"<b>Upside</b> +{f1(sc['cagr'])}%/년 → {round(sc['cg_end'][str(tg)])}GW" + bs(f"'22~'25 연평균 증가율<br>({f1(endv[0])} → {f1(endv[-1])}GW)")),
              ("③ 발전량", "올해 시간별 출력 × 설비 배율", f"올해의 <b>{f1(kl)}배</b>", f"올해의 <b>{f1(kc)}배</b>"),
-             ("④ 최소발전량", "올해 순부하 최저 30시간 실출력", f"원전 {f1(mi['nuc'])} · 석탄 {f1(mi['coal'])} · LNG {f1(mi['lng'])}GW <span class=\"mut\">(근거 다음 장)</span>", None),
-             ("⑤ SMP", "순부하가 비슷한 올해 시간의 SMP", f"올해 재현 오차 <b>±{f1(sc['err'])}원</b>", None)]
+             ("④ 최소발전량", "순부하 최저 30시간 실출력",
+              f"원전 <b>{f1(mi['nuc'])}</b> · 석탄 <b>{f1(mi['coal'])}</b> · LNG <b>{f1(mi['lng'])}GW</b> → 바닥 <b>{f1(sc['NMIN'])}GW</b> "
+              '<a class="ax" href="#appxMin">근거 보기 ▶</a>'
+              + bs("원전 상시 운전 · 석탄 필수운전 · LNG 열병합·저녁 피크 대비로 더 못 줄임"), None),
+             ("⑤ SMP", "비슷한 순부하 시간의 SMP", f"올해 재현 오차 <b>±{f1(sc['err'])}원</b>", None)]
     T["sc1_tbl"] = "".join(f'<tr><td class="rh">{a_}</td><td>{b_}</td>' + (f'<td>{c_}</td><td>{d_}</td>' if d_ else f'<td colspan="2">{c_}</td>') + "</tr>"
                            for a_, b_, c_, d_ in mrows)
     T["sc1_note"] = "※ 한전 판매량은 자가용 태양광 소비 제외 · 설비: 에너지공단·산업부·기후부 · 날씨는 올해와 동일"

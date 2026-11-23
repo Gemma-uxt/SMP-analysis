@@ -163,13 +163,16 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 .imp{display:flex;gap:10px;align-items:flex-start} .imp .tx{font-size:17px}
 .nav select{min-width:300px}
 /* 태양광 시나리오: 최소 글씨 20px */
-.slide[data-sc] .pt small,.slide[data-sc] .sh,.slide[data-sc] .sh small,.slide[data-sc] .tx,.slide[data-sc] li,.slide[data-sc] td,.slide[data-sc] th,
-.slide[data-sc] .t.mt td,.slide[data-sc] .t.mt th,.slide[data-sc] .note,.slide[data-sc] .bx,.slide[data-sc] .chip,.slide[data-sc] .ch,
-.slide[data-sc] .k1,.slide[data-sc] .k3,.slide[data-sc] .k2 small,.slide[data-sc] .opts label,.slide[data-sc] .opts .og,.slide[data-sc] .pg,.slide[data-sc] .mut,
+section[data-sc] .pt small,section[data-sc] .sh,section[data-sc] .sh small,section[data-sc] .tx,section[data-sc] li,section[data-sc] td,section[data-sc] th,
+section[data-sc] .t.mt td,section[data-sc] .t.mt th,section[data-sc] .note,section[data-sc] .bx,section[data-sc] .chip,section[data-sc] .ch,
+section[data-sc] .k1,section[data-sc] .k3,section[data-sc] .k2 small,section[data-sc] .opts label,section[data-sc] .opts .og,section[data-sc] .pg,section[data-sc] .mut,
 .slide[data-mini] .kick,.slide[data-mini] .sub,.slide[data-mini] .pills span,.slide[data-mini] .note{font-size:20px!important;line-height:1.4}
-.slide[data-sc] .msg{font-size:26px} .slide[data-sc] .bs{display:block;font-size:20px;color:var(--ink3);line-height:1.3;margin-top:3px} .slide[data-sc] .ch.r{background:var(--slateD)} .slide[data-sc] .t.mt td,.slide[data-sc] .t.mt th{padding:7px 14px}
-.slide[data-sc] .imp .num{font-size:20px;min-width:30px;height:30px} .slide[data-sc] .mut{color:var(--ink3)}
-.slide[data-sc] #scK .kpi .k2{font-size:32px} .slide[data-sc] #scK .kpi{padding:6px 16px} .slide[data-sc] .opts input{width:20px;height:20px}
+section[data-sc] .msg{font-size:26px}
+section.appx{display:none} section.appx.on{display:flex;position:absolute;inset:0;z-index:20;flex-direction:column;background:#fff;overflow:hidden;box-shadow:0 2px 14px rgba(15,30,50,.18)}
+section[data-sc] .axback{font-size:20px;padding:4px 14px} a.ax{font-size:20px;font-weight:700;color:var(--ci);text-decoration:none;white-space:nowrap;margin-left:6px} a.ax:hover{text-decoration:underline}
+@media print{section.appx{display:none!important}} section[data-sc] .bs{display:block;font-size:20px;color:var(--ink3);line-height:1.3;margin-top:3px} section[data-sc] .ch.r{background:var(--slateD)} section[data-sc] .t.mt td,section[data-sc] .t.mt th{padding:7px 14px}
+section[data-sc] .imp .num{font-size:20px;min-width:30px;height:30px} section[data-sc] .mut{color:var(--ink3)}
+section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{padding:6px 16px} section[data-sc] .opts input{width:20px;height:20px}
 </style>
 </head>
 <body data-mini="0">
@@ -183,7 +186,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
     <h1>2026년 10월<br><span class="b">전력시장 검토 결과</span></h1>
     <div class="sub">핵심 요약 · 시간대별 SMP · 수요 변화 · 발전가격 stack 변화 · 원별 발전량 · 참고: 중장기 태양광 시나리오</div>
     <div class="pills"><span>확정 · 10.1~10.31 실적</span><span>비교: 전년 10.1~10.31 · 2026년 9월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:00</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:02</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="발전가격 stack과 SMP 결정 일러스트">
@@ -215,9 +218,9 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
     <img class="logo" src="img/logo.png" alt="삼천리">
     <div class="kick">사업기획팀 보고 · 전력시장 가격 모니터링</div>
     <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
-    <div class="sub">① 발전량 추정 방법 · ② 최소발전량 근거 · ③ SMP 영향 · ④ SMP가 조금만 내려가는 이유</div>
+    <div class="sub">① 발전량 추정 방법 · ② SMP 영향 · ③ SMP가 조금만 내려가는 이유</div>
     <div class="pills"><span>기준: 올해 1.1~10.31 실적</span><span>2030년까지 · 시나리오 4개(수요 2 × 설비 2)</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:00</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-23 11:02</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="태양광 설비 증가와 SMP 일러스트">
@@ -352,7 +355,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
   <div class="msg">전력수요 2개 × 태양광 설비 2개 = <span class="em">시나리오 4개</span>로 2030년까지 계산</div>
   <div class="bd">
     <div class="card f1"><div class="cb">
-      <table class="t mt"><thead><tr><th style="width:180px">구분</th><th style="width:290px">추정 방법</th><th>시나리오 ①</th><th>시나리오 ②</th></tr></thead><tbody><tr><td class="rh">① 전력수요</td><td>총수요 × 연 증가율</td><td><b>추세</b> +0.1%/년<span class="bs">한전 판매량 '22~'25 연평균<br>(547.9 → 549.4TWh)</span></td><td><b>전기본</b> +1.8%/년<span class="bs">11차 전기본 최대수요 '23~'38 연평균<br>(98.3 → 129.3GW)</span></td></tr><tr><td class="rh">② 설비</td><td>최근 3년 증가 속도</td><td><b>Base</b> +3.3GW/년 → 47GW<span class="bs">'23~'25 연간 증가량 평균<br>(2.9 · 3.2 · 3.7GW)</span></td><td><b>Upside</b> +13.6%/년 → 58GW<span class="bs">'22~'25 연평균 증가율<br>(21.0 → 30.8GW)</span></td></tr><tr><td class="rh">③ 발전량</td><td>올해 시간별 출력 × 설비 배율</td><td>올해의 <b>1.4배</b></td><td>올해의 <b>1.7배</b></td></tr><tr><td class="rh">④ 최소발전량</td><td>올해 순부하 최저 30시간 실출력</td><td colspan="2">원전 17.4 · 석탄 6.3 · LNG 7.4GW <span class="mut">(근거 다음 장)</span></td></tr><tr><td class="rh">⑤ SMP</td><td>순부하가 비슷한 올해 시간의 SMP</td><td colspan="2">올해 재현 오차 <b>±0.8원</b></td></tr></tbody></table>
+      <table class="t mt"><thead><tr><th style="width:180px">구분</th><th style="width:290px">추정 방법</th><th>시나리오 ①</th><th>시나리오 ②</th></tr></thead><tbody><tr><td class="rh">① 전력수요</td><td>총수요 × 연 증가율</td><td><b>추세</b> +0.1%/년<span class="bs">한전 판매량 '22~'25 연평균<br>(547.9 → 549.4TWh)</span></td><td><b>전기본</b> +1.8%/년<span class="bs">11차 전기본 최대수요 '23~'38 연평균<br>(98.3 → 129.3GW)</span></td></tr><tr><td class="rh">② 설비</td><td>최근 3년 증가 속도</td><td><b>Base</b> +3.3GW/년 → 47GW<span class="bs">'23~'25 연간 증가량 평균<br>(2.9 · 3.2 · 3.7GW)</span></td><td><b>Upside</b> +13.6%/년 → 58GW<span class="bs">'22~'25 연평균 증가율<br>(21.0 → 30.8GW)</span></td></tr><tr><td class="rh">③ 발전량</td><td>올해 시간별 출력 × 설비 배율</td><td>올해의 <b>1.4배</b></td><td>올해의 <b>1.7배</b></td></tr><tr><td class="rh">④ 최소발전량</td><td>순부하 최저 30시간 실출력</td><td colspan="2">원전 <b>17.4</b> · 석탄 <b>6.3</b> · LNG <b>7.4GW</b> → 바닥 <b>26.1GW</b> <a class="ax" href="#appxMin">근거 보기 ▶</a><span class="bs">원전 상시 운전 · 석탄 필수운전 · LNG 열병합·저녁 피크 대비로 더 못 줄임</span></td></tr><tr><td class="rh">⑤ SMP</td><td>비슷한 순부하 시간의 SMP</td><td colspan="2">올해 재현 오차 <b>±0.8원</b></td></tr></tbody></table>
     </div></div>
     <div class="note">※ 한전 판매량은 자가용 태양광 소비 제외 · 설비: 에너지공단·산업부·기후부 · 날씨는 올해와 동일</div>
   </div>
@@ -360,8 +363,8 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 </section>
 
 <!-- ===================== 참고 2. 최소발전량 근거 ===================== -->
-<section class="slide" data-sc>
-  <div class="hd"><span class="pno"><span class="rpt">참고 </span>2</span><span class="pt">최소발전량 설정 근거</span></div>
+<section class="slide appx" id="appxMin" data-sc data-appx>
+  <div class="hd"><span class="pno">참조</span><span class="pt">최소발전량 설정 근거</span><button type="button" class="lk axback" style="margin-left:auto">◀ 표로 돌아가기</button></div>
   <div class="msg">올해 전기가 가장 남던 시간에도 원전·석탄·LNG는 <span class="em">약 31GW</span>를 유지 → 최소발전량으로 설정</div>
   <div class="bd">
     <div class="row f1">
@@ -381,7 +384,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 
 <!-- ===================== 참고 3. 추정 결과 ===================== -->
 <section class="slide" data-sc>
-  <div class="hd"><span class="pno"><span class="rpt">참고 </span>3</span><span class="pt">추정 결과: SMP 영향<small>2030년</small></span>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>2</span><span class="pt">추정 결과: SMP 영향<small>2030년</small></span>
     <div class="opts" id="scOpt" role="group" aria-label="시나리오 선택">
       <span class="og">수요</span><label><input type="checkbox" data-g="d" value="t" checked>추세</label><label><input type="checkbox" data-g="d" value="p" checked>전기본</label>
       <span class="og">설비</span><label><input type="checkbox" data-g="c" value="lin" checked>Base</label><label><input type="checkbox" data-g="c" value="cg" checked>Upside</label></div></div>
@@ -397,7 +400,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 
 <!-- ===================== 참고 3. 이유 ===================== -->
 <section class="slide" data-sc>
-  <div class="hd"><span class="pno"><span class="rpt">참고 </span>4</span><span class="pt">SMP가 조금만 내려가는 이유</span></div>
+  <div class="hd"><span class="pno"><span class="rpt">참고 </span>3</span><span class="pt">SMP가 조금만 내려가는 이유</span></div>
   <div class="msg">순부하가 50GW 아래로 내려가도 SMP는 <span class="em">92~101원</span>에서 멈춤</div>
   <div class="bd">
     <div class="chips" style="margin-top:4px"><span class="chip s">태양광 증가</span><span class="arw">→</span><span class="chip">순부하 감소</span><span class="arw">→</span><span class="chip">싼 발전기가 가격 결정</span><span class="arw">→</span><span class="chip">SMP 하락(바닥 있음)</span></div>
@@ -431,6 +434,7 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 {const MINI=document.body.dataset.mini==='1';
  document.querySelectorAll('#stage > section').forEach(s=>{const keep=MINI?(s.hasAttribute('data-sc')||s.hasAttribute('data-mini')):!s.hasAttribute('data-mini');
    if(!keep){s.classList.remove('slide');s.style.display='none'}});
+ document.querySelectorAll('section[data-appx]').forEach(s=>s.classList.remove('slide'));
  if(MINI){document.querySelectorAll('.rpt').forEach(e=>e.remove());document.querySelector('.nav button').textContent='◀ 대시보드'}}
 /* ===== 덱 제어 (수정 불필요) ===== */
 const slides=[...document.querySelectorAll('.slide')],stage=document.getElementById('stage'),sel=document.getElementById('sel');
@@ -617,6 +621,13 @@ const applyScen=()=>{const s=picked(),cs=pick('c');if(cScen){cScen.data.datasets
 $('scOpt').addEventListener('change',applyScen);applyScen();
 }
 
+/* 참조(부록) 장: 표의 '근거 보기'로 열고 '돌아가기'로 닫음 */
+{const ap=document.getElementById('appxMin');let back=0;
+ const open=e=>{e.preventDefault();back=cur;ap.classList.add('on');(chartsBySlide[-1]||[]).forEach(c=>{c.resize();c.reset();c.update()})};
+ const close=()=>{ap.classList.remove('on');go(back)};
+ document.querySelectorAll('a.ax').forEach(a=>a.addEventListener('click',open));
+ ap.querySelector('.axback').addEventListener('click',close);
+ addEventListener('keydown',e=>{if(e.key==='Escape'&&ap.classList.contains('on'))close()},true);}
 /* 시작 · 인쇄 */
 const h=parseInt(location.hash.slice(1));go(isNaN(h)?0:h-1);
 addEventListener('beforeprint',()=>Object.values(chartsBySlide).flat().forEach(c=>{c.options.animation=false;c.resize(1,1);c.update()}));
