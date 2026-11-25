@@ -29019,5 +29019,16 @@
 {"fuelType": "LNG", "areaNm": "제주", "cnt": "8", "tradeDay": "20261122"},
 {"fuelType": "기타", "areaNm": "제주", "cnt": "16", "tradeDay": "20261122"},
 {"fuelType": "LNG", "areaNm": "육지", "cnt": "15", "tradeDay": "20261123"},
-{"fuelType": "유연탄", "areaNm": "육지", "cnt": "9", "tradeDay": "20261123"}
+{"fuelType": "유연탄", "areaNm": "육지", "cnt": "9", "tradeDay": "20261123"},
+{"fuelType": "LNG", "areaNm": "제주", "cnt": "3", "tradeDay": "20261123"},
+{"fuelType": "기타", "areaNm": "제주", "cnt": "21", "tradeDay": "20261123"},
+{"fuelType": "LNG", "areaNm": "육지", "cnt": "18", "tradeDay": "20261124"},
+{"fuelType": "유연탄", "areaNm": "육지", "cnt": "6", "tradeDay": "20261124"},
+{"fuelType": "급전가능 재생에너지", "areaNm": "제주", "cnt": "3", "tradeDay": "20261124"},
+{"fuelType": "기타", "areaNm": "제주", "cnt": "21", "tradeDay": "20261124"},
+{"fuelType": "LNG", "areaNm": "육지", "cnt": "19", "tradeDay": "20261125"},
+{"fuelType": "유연탄", "areaNm": "육지", "cnt": "5", "tradeDay": "20261125"},
+{"fuelType": "LNG", "areaNm": "제주", "cnt": "8", "tradeDay": "20261125"},
+{"fuelType": "기타", "areaNm": "제주", "cnt": "15", "tradeDay": "20261125"},
+{"fuelType": "등유", "areaNm": "제주", "cnt": "1", "tradeDay": "20261125"}
 ]
