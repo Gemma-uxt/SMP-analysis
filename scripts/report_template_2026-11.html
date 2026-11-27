@@ -644,42 +644,33 @@ const CN={lin:['Base',C.ci],cg:['Upside',C.slateD]}, DN2={t:'추세',p:'전기�
 const sgn=v=>(v>0?'+':v<0?'▼':'')+Math.abs(v);
 const rg=(a,fmt)=>{const v=[...new Set(a.map(fmt))];return v.length>1?v[0]+'~'+v[v.length-1]:v[0]};
 const tScen=()=>{};
-const ds=[{key:'act',type:'bar',label:'설비 실적',data:capY.map(y=>y<=lastA?SC.end[y]??null:null),backgroundColor:C.navy,yAxisID:'yCap',order:3}];
+const ds=[];
 ds.push({key:'act',type:'line',label:'SMP 실적',data:capY.map(y=>SC.smpy[y]??(y===Y0?P.lin_t[Y0].all:null)),borderColor:C.ink,backgroundColor:C.ink,borderWidth:3,pointRadius:5,yAxisID:'ySmp',order:0,spanGaps:true,lbl:true});
-['lin','cg'].forEach(c=>{const end=c==='lin'?SC.lin_end:SC.cg_end;
-  ds.push({key:c,cap:c,type:'bar',label:`설비 ${CN[c][0]}`,data:capY.map(y=>y>lastA?end[y]:null),backgroundColor:CN[c][1]+'B3',yAxisID:'yCap',order:3});
-  ['t','p'].forEach(d=>{const k=c+'_'+d;
-    ds.push({key:k,cap:c,dem:d,type:'line',label:`${CN[c][0]}·${DN2[d]} ${f1(P[k][TG].all)}`,data:capY.map(y=>y>Y0&&P[k][y]?P[k][y].all:(y===Y0?P[k][Y0].all:null)),borderColor:CN[c][1],backgroundColor:d==='p'?'#fff':CN[c][1],borderDash:d==='p'?[6,4]:[],borderWidth:2.5,pointRadius:4,yAxisID:'ySmp',order:1,spanGaps:true})})});
-/* 전력수요(한전 판매량 TWh): 실적 '22~'25, 올해는 추세로 환산, 이후 시나리오 증가율 */
-const DH=SC.demh,dLast=Math.max(...Object.keys(DH).map(Number)),d0=DH[dLast]*(1+SC.dg.t.raw);
-const demV=(g,y)=>y<=dLast?DH[y]:d0*Math.pow(1+g,y-Y0);
-ds.push({key:'act',type:'line',label:'수요 실적',data:capY.map(y=>y<=dLast?DH[y]:(y===Y0?d0:null)),borderColor:C.ink,backgroundColor:C.ink,borderWidth:3,pointRadius:5,yAxisID:'yDem',order:0,spanGaps:true,dl:true});
-[['t',[]],['p',[6,4]]].forEach(([d,dash])=>ds.push({key:'dem_'+d,dk:d,type:'line',label:`수요 ${DN2[d]}`,data:capY.map(y=>y>=Y0?demV(SC.dg[d].raw,y):null),borderColor:C.slateD,backgroundColor:dash.length?'#fff':C.slateD,borderDash:dash,borderWidth:2.5,pointRadius:4,yAxisID:'yDem',order:1,spanGaps:true,end:true}));
+const fromY0=(k,f)=>capY.map(y=>y>=Y0&&P[k][y]?P[k][y][f]:null);
+['lin','cg'].forEach(c=>['t','p'].forEach(d=>{const k=c+'_'+d,st={borderColor:CN[c][1],backgroundColor:d==='p'?'#fff':CN[c][1],borderDash:d==='p'?[6,4]:[],borderWidth:2.5,pointRadius:4,order:1,spanGaps:true};
+  ds.push({key:k,...st,type:'line',label:`${CN[c][0]}·${DN2[d]} ${f1(P[k][TG].all)}`,data:fromY0(k,'all'),yAxisID:'ySmp'});
+  ds.push({key:k,...st,type:'line',label:`순부하 ${k}`,data:fromY0(k,'nlGW'),yAxisID:'yNl',nlEnd:true})}));
+/* 총수요는 수요 시나리오에만 좌우(설비와 무관) */
+[['t',[]],['p',[6,4]]].forEach(([d,dash])=>ds.push({key:'dem_'+d,dk:d,type:'line',label:`총수요 ${DN2[d]}`,data:fromY0('lin_'+d,'totGW'),borderColor:C.ink,backgroundColor:dash.length?'#fff':C.ink,borderDash:dash,borderWidth:2.5,pointRadius:4,yAxisID:'yTot',order:1,spanGaps:true,end:true}));
 const smpAll=Object.values(P).flatMap(o=>Object.values(o).map(x=>x.all)).concat(Object.values(SC.smpy));
 const sMin=Math.floor((Math.min(...smpAll)-2)/20)*20,sMax=Math.ceil((Math.max(...smpAll)+2)/20)*20;
-const demAll=capY.flatMap(y=>[demV(SC.dg.t.raw,y),demV(SC.dg.p.raw,y)]).filter(v=>v!=null);
-const dMin=Math.floor((Math.min(...demAll)-15)/20)*20,dMax=Math.ceil((Math.max(...demAll)+15)/20)*20;
-Chart.register({id:'capLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const x=ch.ctx,n=capY.length-1;x.save();x.font=F20;x.textBaseline='bottom';
-  const vis=ch.data.datasets.map((d,i)=>d.type==='bar'&&ch.isDatasetVisible(i)?i:-1).filter(i=>i>0);
-  ch.data.datasets.forEach((d,i)=>{if(d.type!=='bar'||!ch.isDatasetVisible(i))return;const m=ch.getDatasetMeta(i);
-    m.data.forEach((el,j)=>{const v=d.data[j];if(v==null||!(j===n||(i===0&&capY[j]===lastA)))return;
-      let al='center',px=el.x;if(i>0&&vis.length>1){al=i===vis[0]?'right':'left';px=el.x+(i===vis[0]?el.width/2:-el.width/2)}
-      x.textAlign=al;x.fillStyle=i===0?C.navy:d.key==='lin'?'#0080C4':C.slateD;x.fillText(f1(v),px,el.y-4)})});x.restore()}});
-/* SMP 실적 값 · 수요 끝값(2030) · 수요 실적 첫·끝 값 */
+const rng=f=>{const v=Object.values(P).flatMap(o=>Object.values(o).map(x=>x[f]));return [Math.floor(Math.min(...v)-2),Math.ceil(Math.max(...v)+2)]};
+const [tMin,tMax]=rng('totGW'),[nMin,nMax]=rng('nlGW');
+/* SMP 실적 값 · 2030년 끝값 라벨(총수요·순부하) */
 Chart.register({id:'actLbl',afterDatasetsDraw(ch){const x=ch.ctx;x.save();x.font=F20;x.textBaseline='bottom';
-  ch.data.datasets.forEach((d,i)=>{if(!ch.isDatasetVisible(i))return;const m=ch.getDatasetMeta(i).data;
-    if(d.lbl){x.textAlign='center';x.fillStyle=C.ink;m.forEach((el,j)=>{const v=d.data[j];if(v!=null)x.fillText(f1(v),el.x,el.y-10)})}
-    if(d.end){const j=d.data.length-1,el=m[j];if(el&&d.data[j]!=null){x.textAlign='right';x.fillStyle=C.slateD;x.fillText(`${DN2[d.dk]} ${Math.round(d.data[j])}`,el.x-10,el.y+(d.dk==='p'?-6:24))}}
-    if(d.dl){x.textAlign='center';x.fillStyle=C.ink;[0,capY.indexOf(dLast)].forEach(j=>{const el=m[j];if(el&&d.data[j]!=null)x.fillText(Math.round(d.data[j]),el.x,el.y-10)})}});x.restore()}});
-const cScen=mkS('cScen',{type:'bar',data:{labels:capY.map(String),datasets:ds},
- options:{datasets:{bar:{categoryPercentage:.8,barPercentage:.95}},layout:{padding:{top:24,right:20}},
-  plugins:{legend:{position:'bottom',labels:{font:{size:20},boxWidth:22,filter:i=>!/^(설비 (Base|Upside)|수요 .+)$/.test(i.text)}},capLbl:{on:true},
-   tooltip:{titleFont:{size:20},bodyFont:{size:20},callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)}${c.dataset.yAxisID==='yCap'?'GW':c.dataset.yAxisID==='yDem'?'TWh':'원/kWh'}`}}},
+  ch.data.datasets.forEach((d,i)=>{if(!ch.isDatasetVisible(i))return;const m=ch.getDatasetMeta(i).data,j=d.data.length-1,el=m[j];
+    if(d.lbl){x.textAlign='center';x.fillStyle=C.ink;m.forEach((e,k)=>{const v=d.data[k];if(v!=null)x.fillText(f1(v),e.x,e.y-10)})}
+    if(d.end&&el&&d.data[j]!=null){x.textAlign='left';x.fillStyle=C.ink;x.fillText(`${DN2[d.dk]} ${f1(d.data[j])}`,el.x+10,el.y+10)}
+    if(d.nlEnd&&el&&d.data[j]!=null){x.textAlign='left';x.fillStyle=d.borderColor;x.fillText(f1(d.data[j]),el.x+10,el.y+10)}});x.restore()}});
+const cScen=mkS('cScen',{type:'line',data:{labels:capY.map(String),datasets:ds},
+ options:{layout:{padding:{top:24,right:120}},
+  plugins:{legend:{position:'bottom',labels:{font:{size:20},boxWidth:22,filter:i=>!/^(순부하|총수요) /.test(i.text)}},
+   tooltip:{titleFont:{size:20},bodyFont:{size:20},filter:c=>c.raw!=null,callbacks:{label:c=>{const a=c.dataset.yAxisID;return `${a==='ySmp'?'SMP '+c.dataset.label.split(' ')[0]:c.dataset.label.split(' ').slice(0,2).join(' ')}: ${f1(c.raw)}${a==='ySmp'?'원/kWh':'GW'}`}}}},
   scales:{x:{grid:noGrid,ticks:{color:C.ink,font:{size:20}}},
-   yCap:{type:'linear',position:'left',stack:'sc',stackWeight:.8,offset:true,min:0,max:60,grid,border:{display:false},ticks:{font:{size:20},stepSize:30},title:{display:true,text:'설비 GW',font:{size:20}}},
-   ySmp:{type:'linear',position:'left',stack:'sc',stackWeight:1.7,min:sMin,max:sMax,grid,border:{display:false},ticks:{font:{size:20},stepSize:20},title:{display:true,text:'SMP 원',font:{size:20}}},
-   yDem:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:dMin,max:dMax,grid,border:{display:false},ticks:{font:{size:20},stepSize:40},title:{display:true,text:'수요 TWh',font:{size:20}}}}}});
-const applyScen=()=>{const s=picked(),cs=pick('c'),dd=pick('d');if(cScen){cScen.data.datasets.forEach((d,i)=>cScen.setDatasetVisibility(i,d.key==='act'||(d.dk?dd.includes(d.dk):d.type==='bar'?cs.includes(d.cap):s.includes(d.key))));cScen.update()}tScen()};
+   ySmp:{type:'linear',position:'left',stack:'sc',stackWeight:1.6,min:sMin,max:sMax,grid,border:{display:false},ticks:{font:{size:20},stepSize:20},title:{display:true,text:'SMP 원',font:{size:20}}},
+   yNl:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:nMin,max:nMax,grid,border:{display:false},ticks:{font:{size:20},maxTicksLimit:3},title:{display:true,text:'순부하 GW',font:{size:20}}},
+   yTot:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:tMin,max:tMax,grid,border:{display:false},ticks:{font:{size:20},maxTicksLimit:3},title:{display:true,text:'총수요 GW',font:{size:20}}}}}});
+const applyScen=()=>{const s=picked(),dd=pick('d');if(cScen){cScen.data.datasets.forEach((d,i)=>cScen.setDatasetVisibility(i,d.key==='act'||(d.dk?dd.includes(d.dk):s.includes(d.key))));cScen.update()}tScen()};
 $('scOpt').addEventListener('change',applyScen);applyScen();
 }
 

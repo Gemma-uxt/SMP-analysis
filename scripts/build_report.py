@@ -410,12 +410,13 @@ def scenario(year, b):
         eff = {y: fe(y - 1) + (fe(y) - fe(y - 1)) * fr for y in YRS}
         res[c] = {}
         for y in YRS:
-            k = eff[y] / eff[year]; gd = (1 + g) ** (y - year); out = []
+            k = eff[y] / eff[year]; gd = (1 + g) ** (y - year); out = []; nls = []
             for r in R:
                 nl = r["nl"] + (gd - 1) * r["tot"] - (k - 1) * r["sol"]
-                out.append((r, price(r["m"], nl, r["d"]), max(0, NMIN - nl)))
+                out.append((r, price(r["m"], nl, r["d"]), max(0, NMIN - nl))); nls.append(max(nl, NMIN))
             A = lambda f: round(mean(p for r, p, cu in out if f(r)), 1)
-            res[c][y] = dict(k=round(k, 3), gd=round(gd, 3), all=A(lambda r: True), day=A(lambda r: 9 <= r["h"] <= 16),
+            res[c][y] = dict(k=round(k, 3), gd=round(gd, 3), all=A(lambda r: True),
+                             totGW=round(mean(gd * r["tot"] for r in R) / 1000, 1), nlGW=round(mean(nls) / 1000, 1), day=A(lambda r: 9 <= r["h"] <= 16),
                              all0=round(mean(0 if cu > 0 else p for r, p, cu in out), 1),
                              curH=sum(1 for r, p, cu in out if cu > 0), curTWh=round(sum(cu for r, p, cu in out) / 1e6, 2),
                              hiH=sum(1 for r, p, cu in out if p >= 150),
@@ -782,7 +783,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["sc2_note"] = (f"※ KPX 실시간 수급현황 · 범위 = 순부하 최저 {li['n']}시간(주말·공휴일 {li['hol']}시간, {li['h0']}~{li['h1']}시 · {tops} 등) · "
                      "석탄: 경부하기에도 비수도권 필수운전 약 13대 운전(산업부 2025 가을 대책)")
     T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
-    T["s9_note"] = (f"※ 실적 2022~2025년: 한전 결산(SMP 연평균, 수요 = 판매량) · {y0}년 SMP 1.1~{per.split('~')[1]} 실적(수요는 추세 환산) · 이후 시나리오")
+    T["s9_note"] = (f"※ 연평균 · {y0}년: 1.1~{per.split('~')[1]} 실적 · SMP 2022~2025년: 한전 결산 · 총수요 = 계통수요 + 시장 외 태양광 · 순부하 = 계통수요 − 시장 태양광·풍력(출력제어 후)")
     # 6 종합
     T["s7_msg"] = note.get("s7_msg") or T["s1_msg"]
     rows = list(note.get("s7_rows_before", []))
