@@ -714,7 +714,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
            ("2", "", f"SMP 바닥 <b>{fl_lo}~{fl_hi}원</b>"),
            ("3", " r", f"출력제어 <b>연 {cu[0]}~{cu[1]}시간</b>")]
     T["s9_imp"] = "".join(f'<div class="imp"><span class="num{c}">{n}</span><div class="tx">{x}</div></div>' for n, c, x in imp)
-    T["s9_why"] = f"<b>참고:</b> 올해 순부하 50GW 이하 구간 SMP <b>{fl_lo}~{fl_hi}원</b>(석탄·열병합 가격대) · 잉여 태양광은 출력제어"
+    T["s9_why"] = f"※ 올해 순부하 50GW 이하 구간 SMP {fl_lo}~{fl_hi}원(석탄·열병합 가격대), 잉여 태양광은 출력제어"
     T["s8_msg"] = f"순부하가 50GW 아래로 내려가도 SMP는 <span class=\"em\">{fl_lo}~{fl_hi}원</span>에서 멈춤"
     T["s8b_msg"] = (f"최근 3년 태양광 증가 속도(연 +{f1(sc['add'])}GW, {f1(sc['cagr'])}%)가 {tg}년까지 이어지고, 나머지는 올해와 같다고 가정")
     caps = " → ".join(f"{f1(sc['end'][str(y)])}" for y in sc["ys"])
@@ -783,7 +783,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["sc2_note"] = (f"※ KPX 실시간 수급현황 · 범위 = 순부하 최저 {li['n']}시간(주말·공휴일 {li['hol']}시간, {li['h0']}~{li['h1']}시 · {tops} 등) · "
                      "석탄: 경부하기에도 비수도권 필수운전 약 13대 운전(산업부 2025 가을 대책)")
     T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
-    T["s9_note"] = (f"※ 연평균 · {y0}년 = 1.1~{per.split('~')[1]} 실적 · SMP 2022~2025년 한전 결산 · 총수요 = 계통수요 + 시장 외 태양광 · 순부하 = 계통수요 − 시장 태양광·풍력(출력제어 후)")
+    T["s9_note"] = (f"연평균 · {y0}년 = 1.1~{per.split('~')[1]} 실적 · SMP 2022~2025년 한전 결산 · 총수요 = 계통수요 + 시장 외 태양광 · 순부하 = 계통수요 − 시장 태양광·풍력(출력제어 후)")
     # 6 종합
     T["s7_msg"] = note.get("s7_msg") or T["s1_msg"]
     rows = list(note.get("s7_rows_before", []))
