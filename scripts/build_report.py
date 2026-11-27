@@ -404,7 +404,7 @@ def scenario(year, b):
     target = max(2030, year + 4)
     YRS = list(range(year, target + 1))
     res = {}
-    DG = {k: v["rate"] for k, v in DGR.items() if not k.startswith("_")}
+    DG = {k: v["rate"] for k, v in DGR.items() if k in ("t", "p")}
     for (cp, fe), (dk, g) in [(c_, d_) for c_ in (("lin", lin_end), ("cg", cg_end)) for d_ in DG.items()]:
         c = f"{cp}_{dk}"
         eff = {y: fe(y - 1) + (fe(y) - fe(y - 1)) * fr for y in YRS}
@@ -441,7 +441,8 @@ def scenario(year, b):
     return dict(year=year, b=b, NMIN=round(NMIN / 1000, 1), err=round(err, 1), add=round(add, 2), cagr=round(cagr * 100, 1),
                 adds=[round(end[ys[i]] - end[ys[i - 1]], 1) for i in range(1, len(ys))], ys=ys, end={str(k): v for k, v in end.items()},
                 lin_end={str(y): round(lin_end(y), 1) for y in range(ys[0], target + 1)}, cg_end={str(y): round(cg_end(y), 1) for y in range(ys[0], target + 1)},
-                target=target, res=res, mins=mins, minr=minr, minh=minh, lowinfo=lowinfo, smpy=SMPY["values"], dg={k: dict(v, rate=round(v["rate"] * 100, 1)) for k, v in DGR.items() if not k.startswith("_")}, low_nl=[round(low[0]["nl"] / 1000, 1), round(low[-1]["nl"] / 1000, 1)],
+                target=target, res=res, mins=mins, minr=minr, minh=minh, lowinfo=lowinfo, smpy=SMPY["values"], dg={k: dict(v, rate=round(v["rate"] * 100, 1), raw=v["rate"]) for k, v in DGR.items() if k in ("t", "p")},
+                demh={k: v for k, v in DGR.get("hist", {}).items() if not k.startswith("_")}, low_nl=[round(low[0]["nl"] / 1000, 1), round(low[-1]["nl"] / 1000, 1)],
                 low_smp=[round(lowp[len(lowp) // 4]), round(lowp[len(lowp) * 3 // 4])],
                 act=round(mean(r["smp"] for r in R), 1), nlb=nlb)
 
@@ -511,7 +512,8 @@ def build(m, today):
     def render(mini):
         T2 = dict(T, mini="1" if mini else "0",
                   doc_title="태양광 확대 시 SMP 전망" if mini else f"{lab['cur']} 전력시장 검토 결과")
-        html = TPL.read_text(encoding="utf-8")
+        tp = Path(f"scripts/report_template_{m}.html")  # 달별 전용 양식이 있으면 그것을 씀(다른 달과 분리)
+        html = (tp if tp.exists() else TPL).read_text(encoding="utf-8")
         for k, v in T2.items():
             html = html.replace("{{" + k + "}}", v)
         html = html.replace("__DATA__", json.dumps(D, ensure_ascii=False, separators=(",", ":")))
@@ -623,6 +625,12 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["s5_bullets"] = (f"<li>{P_} → {M_} 낮 출력: LNG {f1(gp['lng'])} → {f1(gc['lng'])}GW({sg(gc['lng']-gp['lng'])}), "
                        f"석탄 {f1(gp['coal'])} → {f1(gc['coal'])}GW({sg(gc['coal']-gp['coal'])}), 태양광 {f1(sol_p)} → {f1(sol_c)}GW</li>"
                        f"<li>LNG 단가 전년 대비 {sg(N['lngYoY'], '%')} — LNG가 가격을 정하는 시간의 SMP 수준을 좌우</li>")
+    pa = prv["gen"]["all"]
+    sA = lambda g: g["sunM"] + g["hid"]
+    T["s5m_msg"] = (f"{P_}보다 태양광 <span class=\"dn\">{sg(sA(ga) - sA(pa), 'GW')}</span>, 그만큼 석탄 <span class=\"rd\">{sg(ga['coal'] - pa['coal'], 'GW')}</span>"
+                    f" · LNG <span class=\"rd\">{sg(ga['lng'] - pa['lng'], 'GW')}</span>가 더 공급 (평일 평균)")
+    T["s5m_bullets"] = (f"<li>낮(10~16시): 태양광 {f1(sol_p)} → {f1(sol_c)}GW, 석탄 {f1(gp['coal'])} → {f1(gc['coal'])}GW, LNG {f1(gp['lng'])} → {f1(gc['lng'])}GW</li>"
+                        "<li>늘어난 계통수요와 줄어든 태양광을 석탄·LNG가 채움</li>")
     # 4
     dl_wd = [x for x in [mean(SMP[d][9:17]) for d in rng(f"{m}-01", f"{m}-{cut:02d}") if d in SMP and is_wd(d)]]
     dl_we = [x for x in [mean(SMP[d][9:17]) for d in rng(f"{m}-01", f"{m}-{cut:02d}") if d in SMP and not is_wd(d)]]
@@ -727,18 +735,22 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     mh = sc["minh"]
     mdt = f"'{mh['d'][2:4]}.{int(mh['d'][5:7])}.{int(mh['d'][8:])} {mh['h']}시" + (" (설 연휴)" if mh["d"][5:] in ("02-16", "02-17", "02-18") and mh["d"].startswith("2026") else "")
     bs = lambda s: f'<span class="bs">{s}</span>'
+    tgA = lambda s: f'<span class="tg s1">{s}</span>'
+    tgB = lambda s: f'<span class="tg s2">{s}</span>'
+    kv = lambda s: f'<span class="kv">{s}</span>'
     mrows = [("① 전력수요", "총수요 × 연 증가율",
-              f"<b>추세</b> +{f1(DGs['t']['rate'])}%/년" + bs("한전 판매량 '22~'25 연평균<br>(547.9 → 549.4TWh)"),
-              f"<b>전기본</b> +{f1(DGs['p']['rate'])}%/년" + bs("11차 전기본 최대수요 '23~'38 연평균<br>(98.3 → 129.3GW)")),
+              tgA("추세") + kv(f"+{f1(DGs['t']['rate'])}%/년") + bs("한전 판매량 '22~'25 연평균"),
+              tgB("전기본") + kv(f"+{f1(DGs['p']['rate'])}%/년") + bs("11차 전기본 최대수요 '23~'38 연평균")),
              ("② 설비", "최근 3년 증가 속도",
-              f"<b>Base</b> +{f1(sc['add'])}GW/년 → {round(sc['lin_end'][str(tg)])}GW" + bs(f"'23~'25 연간 증가량 평균<br>({' · '.join(f1(x) for x in sc['adds'])}GW)"),
-              f"<b>Upside</b> +{f1(sc['cagr'])}%/년 → {round(sc['cg_end'][str(tg)])}GW" + bs(f"'22~'25 연평균 증가율<br>({f1(endv[0])} → {f1(endv[-1])}GW)")),
-             ("③ 발전량", "올해 시간별 출력 × 설비 배율", f"올해의 <b>{f1(kl)}배</b>", f"올해의 <b>{f1(kc)}배</b>"),
+              tgA("Base") + kv(f"{round(sc['lin_end'][str(tg)])}GW") + bs(f"매년 +{f1(sc['add'])}GW ('23~'25 평균)"),
+              tgB("Upside") + kv(f"{round(sc['cg_end'][str(tg)])}GW") + bs(f"매년 +{f1(sc['cagr'])}% ('22~'25 연평균)")),
+             ("③ 발전량", "올해 시간별 출력 × 설비 배율", f"{tg}년 올해의 " + kv(f"{f1(kl)}배"), f"{tg}년 올해의 " + kv(f"{f1(kc)}배")),
              ("④ 최소발전량", "올해 전기가 가장 남은 시간 실적",
-              f"원전 <b>{f1(mh['nuc'])}</b> · 석탄 <b>{f1(mh['coal'])}</b> · LNG <b>{f1(mh['lng'])}GW</b> → 순부하 <b>{f1(mh['nl'])}GW</b> "
-              '<a class="ax" href="#appxMin">근거 보기 ▶</a>'
-              + bs(f"올해 전기가 가장 남았던 {mdt.split(' (')[0]} 실적으로 설정"), None),
-             ("⑤ SMP", "비슷한 순부하 시간의 SMP", f"올해 재현 오차 <b>±{f1(sc['err'])}원</b>", None)]
+              f"원전 <b>{f1(mh['nuc'])}</b> · 석탄 <b>{f1(mh['coal'])}</b> · LNG <b>{f1(mh['lng'])}GW</b> → 순부하 " + kv(f"{f1(mh['nl'])}GW")
+              + ' <a class="ax" href="#appxMin">근거 보기 ▶</a>'
+              + bs(f"올해 전기가 가장 남았던 {mdt.split(' (')[0]} 실적으로 설정")
+              + '<span class="warn">→ 최소발전량을 감안하면 태양광 증가분 중 일부는 출력제어됨</span>', None),
+             ("⑤ SMP", "비슷한 순부하 시간의 SMP", f"올해 실적 재현 오차 " + kv(f"±{f1(sc['err'])}원"), None)]
     T["sc1_tbl"] = "".join(f'<tr><td class="rh">{a_}</td><td>{b_}</td>' + (f'<td>{c_}</td><td>{d_}</td>' if d_ else f'<td colspan="2">{c_}</td>') + "</tr>"
                            for a_, b_, c_, d_ in mrows)
     T["sc1_note"] = "※ 한전 판매량은 자가용 태양광 소비 제외 · 설비: 에너지공단·산업부·기후부 · 날씨는 올해와 동일"
@@ -771,7 +783,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["sc2_note"] = (f"※ KPX 실시간 수급현황 · 범위 = 순부하 최저 {li['n']}시간(주말·공휴일 {li['hol']}시간, {li['h0']}~{li['h1']}시 · {tops} 등) · "
                      "석탄: 경부하기에도 비수도권 필수운전 약 13대 운전(산업부 2025 가을 대책)")
     T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
-    T["s9_note"] = (f"※ 2022~2025년: 한전 결산 연평균 SMP · {y0}년: 1.1~{per.split('~')[1]} 실적 · 이후: 시나리오(연료비·원전·석탄·LNG 설비는 올해와 동일)")
+    T["s9_note"] = (f"※ 실적 2022~2025년: 한전 결산(SMP 연평균, 수요 = 판매량) · {y0}년 SMP 1.1~{per.split('~')[1]} 실적(수요는 추세 환산) · 이후 시나리오")
     # 6 종합
     T["s7_msg"] = note.get("s7_msg") or T["s1_msg"]
     rows = list(note.get("s7_rows_before", []))
