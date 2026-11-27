@@ -199,7 +199,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <h1>2026년 11월(1~26일)<br><span class="b">전력시장 검토 결과</span></h1>
     <div class="sub">핵심 요약 · 시간대별 SMP · 수요 변화 · 발전가격 stack 변화 · 원별 발전량 · 참고: 중장기 태양광 시나리오</div>
     <div class="pills"><span>잠정 · 11.1~11.26 실적</span><span>비교: 전년 11.1~11.26 · 2026년 10월</span><span>근거: KPX·한국가스공사·Open-Meteo</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-27 16:40</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-27 16:41</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="발전가격 stack과 SMP 결정 일러스트">
@@ -233,7 +233,7 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
     <h1>태양광 확대 시<br><span class="b">SMP 전망</span></h1>
     <div class="sub">① 태양광 발전량 추정 방법 · ② 추정 결과: SMP 영향</div>
     <div class="pills"><span>기준: 올해 1.1~11.26 실적</span><span>2030년까지 · 시나리오 4개(수요 2 × 설비 2)</span></div>
-    <div class="note" style="margin-top:16px">자동 작성 2026-11-27 16:40</div>
+    <div class="note" style="margin-top:16px">자동 작성 2026-11-27 16:41</div>
   </div>
   <div class="rt">
     <svg viewBox="0 0 560 520" aria-label="태양광 설비 증가와 SMP 일러스트">
@@ -420,10 +420,12 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
   <div class="msg">2030년 연평균 SMP(올해 117.9원 대비): 수요 추세 시 <span class="em">▼3~4원</span>, 전기본 수요 시 <span class="rd">+2~4원</span></div>
   <div class="bd">
     <div class="card f1"><div class="cb">
-      <div class="cv"><canvas id="cScen" role="img" aria-label="연도별 태양광 설비와 연평균 SMP: 2022~2025 실적과 2026~2030 시나리오"></canvas></div>
-      <div class="cnote"><b>참고:</b> 올해 순부하 50GW 이하 구간 SMP <b>93~102원</b>(석탄·열병합 가격대) · 잉여 태양광은 출력제어</div>
+      <div class="cv" style="flex:0 0 78px"><canvas id="cTot" role="img" aria-label="연평균 총수요 시나리오"></canvas></div>
+      <div class="cv" style="flex:0 0 78px"><canvas id="cNl" role="img" aria-label="연평균 순부하 시나리오"></canvas></div>
+      <div class="cv"><canvas id="cScen" role="img" aria-label="연평균 SMP: 2022~2025 실적과 2026~2030 시나리오"></canvas></div>
     </div></div>
-    <div class="note">※ 연평균 · 2026년: 1.1~11.26 실적 · SMP 2022~2025년: 한전 결산 · 총수요 = 계통수요 + 시장 외 태양광 · 순부하 = 계통수요 − 시장 태양광·풍력(출력제어 후)</div>
+    <div class="bx" style="padding:6px 14px"><b>참고:</b> 올해 순부하 50GW 이하 구간 SMP <b>93~102원</b>(석탄·열병합 가격대) · 잉여 태양광은 출력제어</div>
+    <div class="note">※ 연평균 · 2026년 = 1.1~11.26 실적 · SMP 2022~2025년 한전 결산 · 총수요 = 계통수요 + 시장 외 태양광 · 순부하 = 계통수요 − 시장 태양광·풍력(출력제어 후)</div>
   </div>
   <div class="ft"><span class="pg"></span></div>
 </section>
@@ -644,33 +646,36 @@ const CN={lin:['Base',C.ci],cg:['Upside',C.slateD]}, DN2={t:'추세',p:'전기�
 const sgn=v=>(v>0?'+':v<0?'▼':'')+Math.abs(v);
 const rg=(a,fmt)=>{const v=[...new Set(a.map(fmt))];return v.length>1?v[0]+'~'+v[v.length-1]:v[0]};
 const tScen=()=>{};
-const ds=[];
-ds.push({key:'act',type:'line',label:'SMP 실적',data:capY.map(y=>SC.smpy[y]??(y===Y0?P.lin_t[Y0].all:null)),borderColor:C.ink,backgroundColor:C.ink,borderWidth:3,pointRadius:5,yAxisID:'ySmp',order:0,spanGaps:true,lbl:true});
+const YW=118,PADR=130,L3=capY.map(String);
+const st=(c,d)=>({borderColor:CN[c][1],backgroundColor:d==='p'?'#fff':CN[c][1],borderDash:d==='p'?[6,4]:[],borderWidth:2.5,pointRadius:4,spanGaps:true});
 const fromY0=(k,f)=>capY.map(y=>y>=Y0&&P[k][y]?P[k][y][f]:null);
-['lin','cg'].forEach(c=>['t','p'].forEach(d=>{const k=c+'_'+d,st={borderColor:CN[c][1],backgroundColor:d==='p'?'#fff':CN[c][1],borderDash:d==='p'?[6,4]:[],borderWidth:2.5,pointRadius:4,order:1,spanGaps:true};
-  ds.push({key:k,...st,type:'line',label:`${CN[c][0]}·${DN2[d]} ${f1(P[k][TG].all)}`,data:fromY0(k,'all'),yAxisID:'ySmp'});
-  ds.push({key:k,...st,type:'line',label:`순부하 ${k}`,data:fromY0(k,'nlGW'),yAxisID:'yNl',nlEnd:true})}));
-/* 총수요는 수요 시나리오에만 좌우(설비와 무관) */
-[['t',[]],['p',[6,4]]].forEach(([d,dash])=>ds.push({key:'dem_'+d,dk:d,type:'line',label:`총수요 ${DN2[d]}`,data:fromY0('lin_'+d,'totGW'),borderColor:C.ink,backgroundColor:dash.length?'#fff':C.ink,borderDash:dash,borderWidth:2.5,pointRadius:4,yAxisID:'yTot',order:1,spanGaps:true,end:true}));
+/* 끝값 라벨 */
+Chart.register({id:'endLbl',afterDatasetsDraw(ch,_,o){if(!o||!o.on)return;const x=ch.ctx;x.save();x.font=F20;x.textBaseline='middle';x.textAlign='left';
+  const seen=[];ch.data.datasets.forEach((d,i)=>{if(!ch.isDatasetVisible(i)||!d.tag)return;const m=ch.getDatasetMeta(i).data,j=d.data.length-1,el=m[j];if(!el||d.data[j]==null)return;
+   let y=el.y;seen.forEach(s=>{if(Math.abs(s-y)<20)y=s+(y>=s?20:-20)});seen.push(y);x.fillStyle=d.tagColor||d.borderColor;x.fillText(d.tag(d.data[j]),el.x+12,y)});
+  ch.data.datasets.forEach((d,i)=>{if(!ch.isDatasetVisible(i)||!d.lbl)return;x.textAlign='center';x.textBaseline='bottom';x.fillStyle=C.ink;ch.getDatasetMeta(i).data.forEach((e,k)=>{const v=d.data[k];if(v!=null)x.fillText(f1(v),e.x,e.y-10)})});x.restore()}});
+const yAx=(title,min,max,extra={})=>({min,max,afterFit:a=>{a.width=YW},grid,border:{display:false},ticks:{font:{size:20},maxTicksLimit:3,...(extra.ticks||{})},title:{display:true,text:title,font:{size:20}}});
+const mini=(id,dsets,title,min,max)=>mkS(id,{type:'line',data:{labels:L3,datasets:dsets},options:{layout:{padding:{right:PADR,top:6}},
+  plugins:{legend:{display:false},endLbl:{on:true},tooltip:{titleFont:{size:20},bodyFont:{size:20},filter:c=>c.raw!=null,callbacks:{label:c=>`${c.dataset.label}: ${f1(c.raw)}GW`}}},
+  scales:{x:{display:false},y:yAx(title,min,max)}}});
+const rng=f=>{const v=Object.values(P).flatMap(o=>Object.values(o).map(x=>x[f]));return [Math.floor(Math.min(...v)-1),Math.ceil(Math.max(...v)+1)]};
+const [tMin,tMax]=rng('totGW'),[nMin,nMax]=rng('nlGW');
+/* ① 총수요(수요 시나리오에만 좌우) */
+const dsT=[['t',[]],['p',[6,4]]].map(([d,dash])=>({key:'dem_'+d,dk:d,label:`총수요 ${DN2[d]}`,data:fromY0('lin_'+d,'totGW'),borderColor:C.ink,backgroundColor:dash.length?'#fff':C.ink,borderDash:dash,borderWidth:2.5,pointRadius:4,spanGaps:true,tag:v=>`${DN2[d]} ${f1(v)}`}));
+const cTot=mini('cTot',dsT,'총수요 GW',tMin,tMax);
+/* ② 순부하(출력제어 후) */
+const dsN=[];['lin','cg'].forEach(c=>['t','p'].forEach(d=>{const k=c+'_'+d;dsN.push({key:k,label:`순부하 ${CN[c][0]}·${DN2[d]}`,data:fromY0(k,'nlGW'),...st(c,d),tag:v=>f1(v)})}));
+const cNl=mini('cNl',dsN,'순부하 GW',nMin,nMax);
+/* ③ SMP */
+const ds=[{key:'act',type:'line',label:'SMP 실적',data:capY.map(y=>SC.smpy[y]??(y===Y0?P.lin_t[Y0].all:null)),borderColor:C.ink,backgroundColor:C.ink,borderWidth:3,pointRadius:5,spanGaps:true,lbl:true}];
+['lin','cg'].forEach(c=>['t','p'].forEach(d=>{const k=c+'_'+d;ds.push({key:k,label:`${CN[c][0]}·${DN2[d]}`,data:fromY0(k,'all'),...st(c,d),tag:v=>f1(v)})}));
 const smpAll=Object.values(P).flatMap(o=>Object.values(o).map(x=>x.all)).concat(Object.values(SC.smpy));
 const sMin=Math.floor((Math.min(...smpAll)-2)/20)*20,sMax=Math.ceil((Math.max(...smpAll)+2)/20)*20;
-const rng=f=>{const v=Object.values(P).flatMap(o=>Object.values(o).map(x=>x[f]));return [Math.floor(Math.min(...v)-2),Math.ceil(Math.max(...v)+2)]};
-const [tMin,tMax]=rng('totGW'),[nMin,nMax]=rng('nlGW');
-/* SMP 실적 값 · 2030년 끝값 라벨(총수요·순부하) */
-Chart.register({id:'actLbl',afterDatasetsDraw(ch){const x=ch.ctx;x.save();x.font=F20;x.textBaseline='bottom';
-  ch.data.datasets.forEach((d,i)=>{if(!ch.isDatasetVisible(i))return;const m=ch.getDatasetMeta(i).data,j=d.data.length-1,el=m[j];
-    if(d.lbl){x.textAlign='center';x.fillStyle=C.ink;m.forEach((e,k)=>{const v=d.data[k];if(v!=null)x.fillText(f1(v),e.x,e.y-10)})}
-    if(d.end&&el&&d.data[j]!=null){x.textAlign='left';x.fillStyle=C.ink;x.fillText(`${DN2[d.dk]} ${f1(d.data[j])}`,el.x+10,el.y+10)}
-    if(d.nlEnd&&el&&d.data[j]!=null){x.textAlign='left';x.fillStyle=d.borderColor;x.fillText(f1(d.data[j]),el.x+10,el.y+10)}});x.restore()}});
-const cScen=mkS('cScen',{type:'line',data:{labels:capY.map(String),datasets:ds},
- options:{layout:{padding:{top:24,right:120}},
-  plugins:{legend:{position:'bottom',labels:{font:{size:20},boxWidth:22,filter:i=>!/^(순부하|총수요) /.test(i.text)}},
-   tooltip:{titleFont:{size:20},bodyFont:{size:20},filter:c=>c.raw!=null,callbacks:{label:c=>{const a=c.dataset.yAxisID;return `${a==='ySmp'?'SMP '+c.dataset.label.split(' ')[0]:c.dataset.label.split(' ').slice(0,2).join(' ')}: ${f1(c.raw)}${a==='ySmp'?'원/kWh':'GW'}`}}}},
-  scales:{x:{grid:noGrid,ticks:{color:C.ink,font:{size:20}}},
-   ySmp:{type:'linear',position:'left',stack:'sc',stackWeight:1.6,min:sMin,max:sMax,grid,border:{display:false},ticks:{font:{size:20},stepSize:20},title:{display:true,text:'SMP 원',font:{size:20}}},
-   yNl:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:nMin,max:nMax,grid,border:{display:false},ticks:{font:{size:20},maxTicksLimit:3},title:{display:true,text:'순부하 GW',font:{size:20}}},
-   yTot:{type:'linear',position:'left',stack:'sc',stackWeight:1,offset:true,min:tMin,max:tMax,grid,border:{display:false},ticks:{font:{size:20},maxTicksLimit:3},title:{display:true,text:'총수요 GW',font:{size:20}}}}}});
-const applyScen=()=>{const s=picked(),dd=pick('d');if(cScen){cScen.data.datasets.forEach((d,i)=>cScen.setDatasetVisibility(i,d.key==='act'||(d.dk?dd.includes(d.dk):s.includes(d.key))));cScen.update()}tScen()};
+const cScen=mkS('cScen',{type:'line',data:{labels:L3,datasets:ds},options:{layout:{padding:{right:PADR,top:22}},
+  plugins:{legend:{position:'bottom',labels:{font:{size:20},boxWidth:22}},endLbl:{on:true},
+   tooltip:{titleFont:{size:20},bodyFont:{size:20},filter:c=>c.raw!=null,callbacks:{label:c=>`SMP ${c.dataset.label}: ${f1(c.raw)}원/kWh`}}},
+  scales:{x:{grid:noGrid,ticks:{color:C.ink,font:{size:20}}},y:yAx('SMP 원',sMin,sMax,{ticks:{stepSize:40,maxTicksLimit:5}})}}});
+const applyScen=()=>{const s=picked(),dd=pick('d');[cTot,cNl,cScen].forEach(ch=>{if(!ch)return;ch.data.datasets.forEach((d,i)=>ch.setDatasetVisibility(i,d.key==='act'||(d.dk?dd.includes(d.dk):s.includes(d.key))));ch.update()});tScen()};
 $('scOpt').addEventListener('change',applyScen);applyScen();
 }
 

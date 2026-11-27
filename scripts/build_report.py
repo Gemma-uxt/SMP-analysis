@@ -783,7 +783,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
     T["sc2_note"] = (f"※ KPX 실시간 수급현황 · 범위 = 순부하 최저 {li['n']}시간(주말·공휴일 {li['hol']}시간, {li['h0']}~{li['h1']}시 · {tops} 등) · "
                      "석탄: 경부하기에도 비수도권 필수운전 약 13대 운전(산업부 2025 가을 대책)")
     T["s8_tbl"] = "".join(f'<tr><td class="rh">{k}</td><td>{v}</td></tr>' for k, v in rows)
-    T["s9_note"] = (f"※ 연평균 · {y0}년: 1.1~{per.split('~')[1]} 실적 · SMP 2022~2025년: 한전 결산 · 총수요 = 계통수요 + 시장 외 태양광 · 순부하 = 계통수요 − 시장 태양광·풍력(출력제어 후)")
+    T["s9_note"] = (f"※ 연평균 · {y0}년 = 1.1~{per.split('~')[1]} 실적 · SMP 2022~2025년 한전 결산 · 총수요 = 계통수요 + 시장 외 태양광 · 순부하 = 계통수요 − 시장 태양광·풍력(출력제어 후)")
     # 6 종합
     T["s7_msg"] = note.get("s7_msg") or T["s1_msg"]
     rows = list(note.get("s7_rows_before", []))
