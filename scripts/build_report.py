@@ -713,8 +713,7 @@ def text(m, lab, per, state, final, cut, cur, prv, lyr, N, Pm, mom, mx, mn, at, 
            ("2", "", f"SMP 바닥 <b>{fl_lo}~{fl_hi}원</b>"),
            ("3", " r", f"출력제어 <b>연 {cu[0]}~{cu[1]}시간</b>")]
     T["s9_imp"] = "".join(f'<div class="imp"><span class="num{c}">{n}</span><div class="tx">{x}</div></div>' for n, c, x in imp)
-    T["s9_why"] = (f"<b>참고: 순부하와 SMP</b><br>올해 순부하 50GW 이하 구간의 SMP는 <b>{fl_lo}~{fl_hi}원</b> 수준"
-                   f"(석탄·열병합 가격대) · 잉여 태양광은 출력제어로 처리")
+    T["s9_why"] = f"<b>참고:</b> 올해 순부하 50GW 이하 구간 SMP <b>{fl_lo}~{fl_hi}원</b>(석탄·열병합 가격대) · 잉여 태양광은 출력제어"
     T["s8_msg"] = f"순부하가 50GW 아래로 내려가도 SMP는 <span class=\"em\">{fl_lo}~{fl_hi}원</span>에서 멈춤"
     T["s8b_msg"] = (f"최근 3년 태양광 증가 속도(연 +{f1(sc['add'])}GW, {f1(sc['cagr'])}%)가 {tg}년까지 이어지고, 나머지는 올해와 같다고 가정")
     caps = " → ".join(f"{f1(sc['end'][str(y)])}" for y in sc["ys"])
