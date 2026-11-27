@@ -162,6 +162,11 @@ select.opt{font:inherit;font-size:15px;font-weight:500;color:var(--ink2);border:
 .sc1 .tx{font-size:17px} .sc1 .big{font-size:30px;font-weight:800;color:var(--navy);line-height:1.15} .sc1 .big small{font-size:16px;font-weight:700;margin-left:3px}
 .imp{display:flex;gap:10px;align-items:flex-start} .imp .tx{font-size:17px}
 .nav select{min-width:300px}
+.months{margin-left:auto;display:flex;gap:8px;align-items:center}
+.months label{display:flex;align-items:center;gap:7px;border:1.5px solid var(--line);padding:4px 12px;cursor:pointer;font-weight:700;font-size:15px;color:var(--ink3)}
+.months input{width:17px;height:17px;accent-color:var(--navy);margin:0}
+.months label:has(input:checked){border-color:var(--navy);color:var(--navy);background:var(--tint)}
+.hd .lk[aria-pressed=true]{background:var(--navy);color:#fff}
 #hSum{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
 #hSum .kpi{padding:4px 14px} #hSum .kpi .k1{font-size:15px} #hSum .kpi .k2{font-size:26px;display:inline-block;margin-right:8px} #hSum .kpi .k3{display:inline} #hSum .ref{background:var(--tint);border-top-color:var(--navy)}
 .strip{position:relative;height:40px;flex:none} .strip canvas{position:absolute;inset:0}
@@ -293,7 +298,8 @@ section[data-sc] #scK .kpi .k2{font-size:32px} section[data-sc] #scK .kpi{paddin
 
 <!-- ===================== 2-1. 시간별 SMP와 가격결정 연료 ===================== -->
 <section class="slide">
-  <div class="hd"><span class="pno">2-1</span><span class="pt">시간별 SMP와 가격결정 연료<small id="hPer"></small><small>평일 · 추정</small></span></div>
+  <div class="hd"><span class="pno">2-1</span><span class="pt">시간별 SMP와 가격결정 연료<small id="hPer"></small><small>평일 · 추정</small></span>
+    <div class="months" id="hMonths" role="group" aria-label="표시할 달"></div></div>
   <div class="msg" id="hMsg">자료를 불러오는 중…</div>
   <div class="bd">
     <div id="hSum"></div>
@@ -573,30 +579,45 @@ if(MS&&MS.cur&&MS.prev){
       +`<tr class="hl"><td colspan="4">합계 ${mv.length}기</td><td class="r">${mv.reduce((s,r)=>s+r[4],0).toLocaleString()}</td></tr>`:'<tr><td colspan="5">해당 발전기 없음</td></tr>')+'</tbody>';
 } else {$('tMov').innerHTML='<tbody><tr><td>발전가격 순위표 요약이 없어 표시할 수 없음</td></tr></tbody>'}
 
-/* 2-1. 시간별 SMP와 가격결정 연료 (이 달만) */
+/* 2-1. 시간별 SMP와 가격결정 연료 (달 선택: 기본은 이 달) */
 {const HM='{{month}}',CAT={coal:['석탄','#8F99A6'],ind:['개별·직도입 LNG','#3399FF'],avg:['평균연료비 LNG','#9B30B0'],etc:['기타','#F0B400']},ORDER=['coal','ind','avg','etc'],DOW='일월화수목금토';
  $('hLg').innerHTML=ORDER.map(k=>`<span><i style="background:${CAT[k][1]}"></i>${CAT[k][0]}</span>`).join('');
  const mean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null,YW=60;
- fetch('data/hourly_est.json?'+Date.now()).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(D=>{
-  const out=[];Object.keys(D.days).sort().forEach(d=>{if(!d.startsWith(HM))return;const r=D.days[d];if(!r.wd)return;for(let h=0;h<24;h++)out.push({d,h,smp:r.smp[h],u:r.u[h],lb:r.lb[h],c:r.c[h],a:r.a})});
-  if(!out.length){$('hMsg').textContent='이 달의 추정 자료가 아직 없습니다';return}
+ let D=null,out=[],labels=[],chL=null,chS=null,step=1;
+ const ttl=p=>{const dt=new Date(p.d+'T00:00:00');return `${+p.d.slice(5,7)}/${+p.d.slice(8)}(${DOW[dt.getDay()]}) ${p.h+1}시`};
+ const bdy=p=>{const o=[`SMP ${f1(p.smp)}원/kWh`,'',`추정 가격결정 발전기: ${p.u}`,`연료: ${p.lb}`];const a=Object.entries(p.a||{});if(a.length)o.push('',`그날 공식 연료별 결정(24시간): ${a.map(([k,v])=>k+' '+v).join(' · ')}`);return o};
+ const tip={displayColors:false,callbacks:{title:c=>ttl(out[c[0].dataIndex]),label:c=>bdy(out[c.dataIndex])}};
+ const tick={autoSkip:false,maxRotation:0,callback:(v,i)=>{const p=out[i];if(!p||p.h!==0)return null;return Math.floor(i/24)%step===0?labels[i]:null}};
+ function render(){
+  const ms=[...document.querySelectorAll('#hMonths input:checked')].map(x=>x.value);
+  out=[];Object.keys(D.days).sort().forEach(d=>{if(!ms.includes(d.slice(0,7)))return;const r=D.days[d];if(!r.wd)return;for(let h=0;h<24;h++)out.push({d,h,smp:r.smp[h],u:r.u[h],lb:r.lb[h],c:r.c[h],a:r.a})});
+  if(!out.length){$('hMsg').textContent='표시할 달을 하나 이상 고르세요';$('hSum').innerHTML='';$('hPer').textContent='';if(chL){chL.data.labels=[];chL.data.datasets[0].data=[];chS.data.labels=[];chS.data.datasets[0].data=[];chL.update();chS.update()}return}
   const fs=out[0].d,ls=out[out.length-1].d;$('hPer').textContent=`${+fs.slice(5,7)}.${+fs.slice(8)}~${+ls.slice(5,7)}.${+ls.slice(8)}`;
   const cnt={coal:0,ind:0,avg:0,etc:0},sm={coal:[],ind:[],avg:[],etc:[]};out.forEach(p=>{cnt[p.c]++;sm[p.c].push(p.smp)});const n=out.length;
   let ag=0,tot=0;[...new Set(out.map(p=>p.d))].forEach(d=>{const r=D.days[d];if(r.tot){ag+=r.ag;tot+=r.tot}});
   $('hSum').innerHTML=ORDER.map(k=>`<div class="card kpi" style="border-top-color:${CAT[k][1]}"><div class="k1">${CAT[k][0]}</div><div class="k2">${(cnt[k]/n*100).toFixed(1)}<small>%</small></div><div class="k3">${cnt[k]}시간 · 평균 ${f1(mean(sm[k]))}원</div></div>`).join('')+
    `<div class="card kpi ref"><div class="k1">참고 · 연료 일치율</div><div class="k2 b">${tot?(ag/tot*100).toFixed(1):'-'}<small>%</small></div><div class="k3">공식 일별 집계 대비</div></div>`;
   const top=ORDER.slice().sort((a,b)=>cnt[b]-cnt[a])[0];
-  $('hMsg').innerHTML=`평일 ${n}시간 중 <span style="color:${CAT[top][1]}">${CAT[top][0]}</span>이 ${(cnt[top]/n*100).toFixed(0)}% 가격 결정 · 평균연료비 LNG 결정 시간 평균 SMP <span class="em">${f1(mean(sm.avg))}원</span>`;
-  $('hNote').textContent=`※ 선·띠에 마우스를 올리면 추정 가격결정 발전기·연료 표시 · 발전기·연료는 사업기획팀 발전가격 순위표로 추정 후 날짜별 석탄·LNG 시간 수를 전력거래소 연료별 SMP 결정 횟수에 맞춤(발전기는 추정치) · 연료 일치율 = 보정 전 추정이 공식 일별 집계와 겹치는 비율 · 전체 기간: 시간별 SMP 페이지`;
-  const YMAX=Math.max(200,Math.ceil(Math.max(...out.map(p=>p.smp))/20)*20),labels=out.map(p=>p.h===0?`${+p.d.slice(5,7)}/${+p.d.slice(8)}`:'');
-  const nd=n/24,step=nd>18?2:1,tick={autoSkip:false,maxRotation:0,callback:(v,i)=>{const p=out[i];if(!p||p.h!==0)return null;return Math.floor(i/24)%step===0?labels[i]:null}};
-  const ttl=p=>{const dt=new Date(p.d+'T00:00:00');return `${+p.d.slice(5,7)}/${+p.d.slice(8)}(${DOW[dt.getDay()]}) ${p.h+1}시`};
-  const bdy=p=>{const o=[`SMP ${f1(p.smp)}원/kWh`,'',`추정 가격결정 발전기: ${p.u}`,`연료: ${p.lb}`];const a=Object.entries(p.a||{});if(a.length)o.push('',`그날 공식 연료별 결정(24시간): ${a.map(([k,v])=>k+' '+v).join(' · ')}`);return o};
-  const tip={displayColors:false,callbacks:{title:c=>ttl(out[c[0].dataIndex]),label:c=>bdy(out[c.dataIndex])}};
-  mkS('hL',{type:'line',data:{labels,datasets:[{data:out.map(p=>p.smp),borderColor:C.navy,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:out.map(p=>CAT[p.c][1]),tension:0}]},
+  $('hMsg').innerHTML=`평일 ${n.toLocaleString()}시간 중 <span style="color:${CAT[top][1]}">${CAT[top][0]}</span>이 ${(cnt[top]/n*100).toFixed(0)}% 가격 결정 · 평균연료비 LNG 결정 시간 평균 SMP <span class="em">${f1(mean(sm.avg))}원</span>`;
+  labels=out.map(p=>p.h===0?`${+p.d.slice(5,7)}/${+p.d.slice(8)}`:'');const nd=n/24;step=nd>40?5:nd>18?2:1;
+  if(!chL)return;
+  chL.data.labels=labels;chL.data.datasets[0].data=out.map(p=>p.smp);chL.data.datasets[0].pointHoverBackgroundColor=out.map(p=>CAT[p.c][1]);
+  chS.data.labels=labels;chS.data.datasets[0].data=out.map(()=>1);chS.data.datasets[0].backgroundColor=out.map(p=>CAT[p.c][1]);
+  chL.update();chS.update()}
+ fetch('data/hourly_est.json?'+Date.now()).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{D=j;
+  const MS=[...new Set(Object.keys(D.days).map(d=>d.slice(0,7)))].sort(),dm=MS.includes(HM)?HM:MS[MS.length-1];
+  $('hMonths').innerHTML=MS.map(m=>{const ds=Object.keys(D.days).filter(d=>d.startsWith(m)).sort(),e=+ds[ds.length-1].slice(8),full=new Date(+m.slice(0,4),+m.slice(5),0).getDate();
+    return `<label><input type="checkbox" value="${m}" ${m===dm?'checked':''}>${+m.slice(5)}월${e<full?` (~${e}일)`:''}</label>`}).join('')+'<button type="button" class="lk" id="hAll" aria-pressed="false">한번에 보기</button>';
+  const boxes=[...document.querySelectorAll('#hMonths input')];
+  $('hMonths').addEventListener('change',e=>{if(e.target.type!=='checkbox')return;boxes.forEach(b=>b.checked=b===e.target);$('hAll').setAttribute('aria-pressed','false');render()});
+  $('hAll').onclick=()=>{boxes.forEach(b=>b.checked=true);$('hAll').setAttribute('aria-pressed','true');render()};
+  $('hNote').textContent=`※ 선·띠에 마우스를 올리면 추정 가격결정 발전기·연료 표시 · 발전기·연료는 사업기획팀 발전가격 순위표로 추정 후 날짜별 석탄·LNG 시간 수를 전력거래소 연료별 SMP 결정 횟수에 맞춤(발전기는 추정치) · 연료 일치율 = 보정 전 추정이 공식 일별 집계와 겹치는 비율 · 자료 ${D.from}~${D.to}`;
+  const YMAX=Math.max(200,Math.ceil(Math.max(...Object.values(D.days).flatMap(r=>r.smp))/20)*20); /* 세로축은 달 선택과 무관하게 고정 */
+  render();
+  chL=mkS('hL',{type:'line',data:{labels,datasets:[{data:out.map(p=>p.smp),borderColor:C.navy,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:out.map(p=>CAT[p.c][1]),tension:0}]},
    options:{animation:false,plugins:{legend:{display:false},tooltip:tip},scales:{x:{grid:{color:c=>out[c.index]&&out[c.index].h===0?'#E3E8EE':'transparent'},ticks:tick},
     y:{min:0,max:YMAX,afterFit:a=>{a.width=YW},grid:{color:'#EEF1F5'},ticks:{stepSize:40},border:{display:false}}}}});
-  mkS('hS',{type:'bar',data:{labels,datasets:[{data:out.map(()=>1),backgroundColor:out.map(p=>CAT[p.c][1]),barPercentage:1,categoryPercentage:1,borderWidth:0}]},
+  chS=mkS('hS',{type:'bar',data:{labels,datasets:[{data:out.map(()=>1),backgroundColor:out.map(p=>CAT[p.c][1]),barPercentage:1,categoryPercentage:1,borderWidth:0}]},
    options:{animation:false,plugins:{legend:{display:false},tooltip:tip},scales:{x:{display:false},y:{min:0,max:1,afterFit:a=>{a.width=YW},ticks:{display:false},grid:{display:false},border:{display:false}}}}});
   const s=document.getElementById('hL').closest('.slide');if(s.classList.contains('active'))go(cur);
  }).catch(e=>{$('hMsg').textContent='자료를 불러오지 못했습니다: '+e.message})}
